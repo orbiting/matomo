@@ -1,0 +1,15 @@
+{
+    "MarketingCampaignsReporting": {
+        "Title": "Campanyes",
+        "Name": "Nom",
+        "Keyword": "Paraula clau",
+        "Medium": "Mig",
+        "Content": "Contingut",
+        "CombinedSourceMedium": "Font - Mig",
+        "CampaignId": "Id de Campanya",
+        "CombinedKeywordContent": "Paraula clau - Contingut",
+        "Keywords": "Paraules clau de campanya",
+        "Contents": "Continguts de campanya",
+        "CombinedSourcesMediums": "Font de campanya - Mig"
+    }
+}
