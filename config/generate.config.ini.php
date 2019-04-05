@@ -9,6 +9,11 @@ $dbname = trim($db['path'], '/');
 
 $salt = getenv('SALT');
 $trusted_hosts = getenv('TRUSTED_HOST');
+if (strpos($trusted_hosts, 'localhost') === false) {
+  $assume_secure_protocol = '1';
+} else {
+  $assume_secure_protocol = '0';
+}
 
 $contents = <<<EOD
 [database]
@@ -22,7 +27,7 @@ tables_prefix = "piwik_"
 [General]
 enable_processing_unique_visitors_year = 1
 enable_processing_unique_visitors_range = 1
-assume_secure_protocol = 1
+assume_secure_protocol = $assume_secure_protocol
 salt = "$salt"
 trusted_hosts[] = "$trusted_hosts"
 
