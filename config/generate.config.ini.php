@@ -30,6 +30,7 @@ enable_processing_unique_visitors_range = 1
 assume_secure_protocol = $assume_secure_protocol
 salt = "$salt"
 trusted_hosts[] = "$trusted_hosts"
+multi_server_environment = 1
 
 [Plugins]
 Plugins[] = "CorePluginsAdmin"
