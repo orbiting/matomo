@@ -3281,6 +3281,7 @@
     "prefer-lowest": false,
     "platform": {
         "ext-mbstring": "*",
+        "ext-redis": "*",
         "php": ">=5.5.9"
     },
     "platform-dev": [],

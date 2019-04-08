@@ -7,14 +7,24 @@ $pass = $db['pass'];
 $port = $db['port'];
 $dbname = trim($db['path'], '/');
 
+$redis = parse_url(getenv('REDIS_URL'));
+$redis_host = $redis['host'];
+$redis_port = $redis['port'];
+$redis_pass = $redis['pass'];
+
 $salt = getenv('SALT');
 $trusted_hosts = getenv('TRUSTED_HOST');
 if (strpos($trusted_hosts, 'localhost') === false) {
   $secure_protocol = '1';
-  exec("curl -f https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem -o ".__DIR__."/rds-combined-ca-bundle.pem");
-  $ssl_ca = "ssl_ca = ".__DIR__."/rds-combined-ca-bundle.pem";
 } else {
   $secure_protocol = '0';
+}
+if (strpos($host, 'localhost') === false) {
+  exec("curl -f https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem -o ".__DIR__."/rds-combined-ca-bundle.pem");
+  $enable_ssl = '1';
+  $ssl_ca = "ssl_ca = ".__DIR__."/rds-combined-ca-bundle.pem";
+} else {
+  $enable_ssl = '0';
   $ssl_ca = '';
 }
 
@@ -26,8 +36,19 @@ password = "$pass"
 dbname = "$dbname"
 port = $port
 tables_prefix = "piwik_"
-enable_ssl = $secure_protocol
+enable_ssl = $enable_ssl
 $ssl_ca
+
+[ChainedCache]
+backends[] = array
+backends[] = redis
+
+[RedisCache]
+host = "$redis_host"
+port = $redis_port
+timeout = 0.0
+password = "$redis_pass"
+database = 14
 
 [General]
 enable_processing_unique_visitors_year = 1
