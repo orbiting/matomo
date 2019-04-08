@@ -11,8 +11,11 @@ $salt = getenv('SALT');
 $trusted_hosts = getenv('TRUSTED_HOST');
 if (strpos($trusted_hosts, 'localhost') === false) {
   $secure_protocol = '1';
+  exec("curl -f https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem -o ".__DIR__."/rds-combined-ca-bundle.pem");
+  $ssl_ca = "ssl_ca = ".__DIR__."/rds-combined-ca-bundle.pem";
 } else {
   $secure_protocol = '0';
+  $ssl_ca = '';
 }
 
 $contents = <<<EOD
@@ -23,6 +26,8 @@ password = "$pass"
 dbname = "$dbname"
 port = $port
 tables_prefix = "piwik_"
+enable_ssl = $secure_protocol
+$ssl_ca
 
 [General]
 enable_processing_unique_visitors_year = 1
