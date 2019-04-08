@@ -28,6 +28,8 @@ if (strpos($host, 'localhost') === false) {
   $ssl_ca = '';
 }
 
+exec("if [ -d .heroku ]; then cp .geoip/share/GeoLite2-City.mmdb .geoip/share/GeoLite2-Country.mmdb vendor/piwik/piwik/misc/; fi");
+
 $contents = <<<EOD
 [database]
 host = "$host"
