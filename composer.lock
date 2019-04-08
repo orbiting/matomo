@@ -3280,6 +3280,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
+        "ext-mbstring": "*",
         "php": ">=5.5.9"
     },
     "platform-dev": [],

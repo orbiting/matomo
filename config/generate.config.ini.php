@@ -10,9 +10,9 @@ $dbname = trim($db['path'], '/');
 $salt = getenv('SALT');
 $trusted_hosts = getenv('TRUSTED_HOST');
 if (strpos($trusted_hosts, 'localhost') === false) {
-  $assume_secure_protocol = '1';
+  $secure_protocol = '1';
 } else {
-  $assume_secure_protocol = '0';
+  $secure_protocol = '0';
 }
 
 $contents = <<<EOD
@@ -26,8 +26,8 @@ tables_prefix = "piwik_"
 
 [General]
 enable_processing_unique_visitors_year = 1
-enable_processing_unique_visitors_range = 1
-assume_secure_protocol = $assume_secure_protocol
+secure_protocol = $secure_protocol
+force_ssl = $secure_protocol
 salt = "$salt"
 trusted_hosts[] = "$trusted_hosts"
 multi_server_environment = 1
@@ -100,6 +100,7 @@ Plugins[] = "CustomDimensions"
 Plugins[] = "CustomOptOut"
 Plugins[] = "InvalidateReports"
 Plugins[] = "MarketingCampaignsReporting"
+Plugins[] = "GeoIp2"
 
 [PluginsInstalled]
 PluginsInstalled[] = "Diagnostics"
@@ -169,6 +170,7 @@ PluginsInstalled[] = "AjaxOptOut"
 PluginsInstalled[] = "MarketingCampaignsReporting"
 PluginsInstalled[] = "IntranetMeasurable"
 PluginsInstalled[] = "TwoFactorAuth"
+PluginsInstalled[] = "GeoIp2"
 EOD;
 
 
