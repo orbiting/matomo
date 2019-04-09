@@ -34,6 +34,24 @@ php ./generate.config.ini.php
 php -S 0.0.0.0:8000 -t matomo/
 ```
 
+## Archiving
+
+Rebuild all reports:
+
+```bash
+# scale up web app since archiver access them
+heroku ps:scale web=2:performance-m
+# run detached to avoid timeout
+heroku run:detached --size=performance-l "php ./generate.config.ini.php && php -d memory_limit=-1 ./console core:archive --url=https://my-matomo.herokuapp.com/ --force-all-websites"
+heroku ps # get run number, e.g. 1
+# follow logs
+heroku logs --dyno run.1 -t
+# stop if needed
+heroku ps:stop run.1
+# scale down
+heroku ps:scale web=1:standard-2x
+```
+
 ## GeoIP
 
 This setup is configured to use the GeoIp2 plugin included in the core Matomo package. The GeoLite databases are downloaded using a custom buildpack https://github.com/danstiner/heroku-buildpack-geoip-geolite2 defined in `.buildpacks`.
