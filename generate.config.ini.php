@@ -19,7 +19,7 @@ if (strpos($trusted_hosts, 'localhost') === false) {
 } else {
   $secure_protocol = '0';
 }
-if (strpos($host, 'localhost') === false) {
+if (strpos($host, 'rds.amazonaws.com') !== false) {
   exec("curl -f https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem -o ".__DIR__."/rds-combined-ca-bundle.pem");
   $enable_ssl = '1';
   $ssl_ca = "ssl_ca = ".__DIR__."/rds-combined-ca-bundle.pem";
@@ -27,8 +27,6 @@ if (strpos($host, 'localhost') === false) {
   $enable_ssl = '0';
   $ssl_ca = '';
 }
-
-exec("if [ -d .heroku ]; then cp .geoip/share/GeoLite2-City.mmdb .geoip/share/GeoLite2-Country.mmdb vendor/piwik/piwik/misc/; fi");
 
 $contents = <<<EOD
 [database]
@@ -59,7 +57,7 @@ secure_protocol = $secure_protocol
 force_ssl = $secure_protocol
 salt = "$salt"
 trusted_hosts[] = "$trusted_hosts"
-multi_server_environment = 1
+multi_server_environment = $secure_protocol
 
 [Plugins]
 Plugins[] = "CorePluginsAdmin"
@@ -203,6 +201,6 @@ PluginsInstalled[] = "GeoIp2"
 EOD;
 
 
-file_put_contents(__DIR__.'/config.ini.php', $contents);
+file_put_contents(__DIR__.'/matomo/config/config.ini.php', $contents);
 
 ?>
