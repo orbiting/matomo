@@ -3,7 +3,8 @@
     "type": "application",
     "require": {
         "ext-mbstring": "*",
-        "ext-redis": "*"
+        "ext-redis": "*",
+        "ext-gd": "*"
     },
     "scripts": {
         "post-install-cmd": "if [ -d .heroku ]; then cp .geoip/share/GeoLite2-City.mmdb .geoip/share/GeoLite2-Country.mmdb matomo/misc/; fi"
