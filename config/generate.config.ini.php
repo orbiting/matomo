@@ -53,6 +53,7 @@ password = "$redis_pass"
 database = 14
 
 [General]
+browser_archiving_disabled_enforce = 1
 enable_processing_unique_visitors_year = 1
 secure_protocol = $secure_protocol
 force_ssl = $secure_protocol
