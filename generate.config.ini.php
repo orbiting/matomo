@@ -58,6 +58,7 @@ force_ssl = $secure_protocol
 salt = "$salt"
 trusted_hosts[] = "$trusted_hosts"
 multi_server_environment = $secure_protocol
+proxy_client_headers[] = HTTP_X_FORWARDED_FOR
 
 [Plugins]
 Plugins[] = "CorePluginsAdmin"
