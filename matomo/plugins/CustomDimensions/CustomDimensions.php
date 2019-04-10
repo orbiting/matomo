@@ -8,6 +8,7 @@
  */
 namespace Piwik\Plugins\CustomDimensions;
 
+use Piwik\API\Request;
 use Piwik\Category\Subcategory;
 use Piwik\Common;
 use Piwik\Plugins\CustomDimensions\Dao\Configuration;
@@ -48,7 +49,7 @@ class CustomDimensions extends Plugin
             return;
         }
 
-        $dimensions = $this->configuration->getCustomDimensionsForSite($idSite);
+        $dimensions = $this->getCustomDimensions($idSite);
 
         foreach ($dimensions as $dimension) {
             if (!$dimension['active']) {
@@ -90,6 +91,7 @@ class CustomDimensions extends Plugin
             'Category.addSubcategories' => 'addSubcategories',
             'Goals.getReportsWithGoalMetrics'  => 'getReportsWithGoalMetrics',
             'Dimension.addDimensions' => 'addDimensions',
+            'Report.addReports' => 'addReports',
             'Actions.getCustomActionDimensionFieldsAndJoins' => 'provideActionDimensionFields'
         );
     }
@@ -97,7 +99,7 @@ class CustomDimensions extends Plugin
     public function addDimensions(&$instances)
     {
         $idSite = Common::getRequestVar('idSite', 0, 'int');
-        $dimensions = $this->configuration->getCustomDimensionsForSite($idSite);
+        $dimensions = $this->getCustomDimensions($idSite);
         foreach ($dimensions as $dimension) {
             if (!$dimension['active']) {
                 continue;
@@ -106,6 +108,21 @@ class CustomDimensions extends Plugin
             $custom = new CustomDimension();
             $custom->initCustomDimension($dimension);
             $instances[] = $custom;
+        }
+    }
+
+    public function addReports(&$instances)
+    {
+        $idSite = Common::getRequestVar('idSite', 0, 'int');
+        $dimensions = $this->getCustomDimensions($idSite);
+        foreach ($dimensions as $dimension) {
+            if (!$dimension['active']) {
+                continue;
+            }
+
+            $report = new GetCustomDimension();
+            $report->initThisReportFromDimension($dimension);
+            $instances[] = $report;
         }
     }
 
@@ -122,7 +139,7 @@ class CustomDimensions extends Plugin
             }
         }
 
-        $dimensions = $this->configuration->getCustomDimensionsForSite($idSite);
+        $dimensions = $this->getCustomDimensions($idSite);
         $order = 70;
 
         foreach ($dimensions as $dimension) {
@@ -193,6 +210,22 @@ class CustomDimensions extends Plugin
     public function isTrackerPlugin()
     {
         return true;
+    }
+
+    private function getCustomDimensions($idSite)
+    {
+        $cache = \Piwik\Cache::getTransientCache();
+        $key = 'ConfiguredCustomDimensions_' . (int) $idSite;
+        if ($cache->contains($key)) {
+            $dimensions = $cache->fetch($key);
+        } else if ($idSite) {
+            $dimensions = Request::processRequest('CustomDimensions.getConfiguredCustomDimensions', ['idSite' => $idSite], []);
+            $cache->save($key, $dimensions);
+        } else {
+            $dimensions = array();
+        }
+
+        return $dimensions;
     }
 
     public function addCustomDimensionsAttributes(&$content, $idSite)

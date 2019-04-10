@@ -66,12 +66,12 @@ class API extends \Piwik\Plugin\API
             foreach ($parentTable->getRows() as $row) {
                 if ($row->getIdSubDataTable() == $idSubtable) {
                     $parentValue = $row->getColumn('label');
-                    $dataTable->queueFilter('Piwik\Plugins\CustomDimensions\DataTable\Filter\AddSubtableSegmentMetadata', array($idDimension, $parentValue));
+                    $dataTable->filter('Piwik\Plugins\CustomDimensions\DataTable\Filter\AddSubtableSegmentMetadata', array($idDimension, $parentValue));
                     break;
                 }
             }
         } else {
-            $dataTable->queueFilter('Piwik\Plugins\CustomDimensions\DataTable\Filter\AddSegmentMetadata', array($idDimension));
+            $dataTable->filter('Piwik\Plugins\CustomDimensions\DataTable\Filter\AddSegmentMetadata', array($idDimension));
         }
 
         $dataTable->filter('Piwik\Plugins\CustomDimensions\DataTable\Filter\RemoveUserIfNeeded', array($idSite, $period, $date));
@@ -102,7 +102,7 @@ class API extends \Piwik\Plugin\API
      */
     public function configureNewCustomDimension($idSite, $name, $scope, $active, $extractions = array(), $caseSensitive = true)
     {
-        Piwik::checkUserHasAdminAccess($idSite);
+        Piwik::checkUserHasWriteAccess($idSite);
 
         $this->checkCustomDimensionConfig($name, $active, $extractions, $caseSensitive);
 
@@ -156,7 +156,7 @@ class API extends \Piwik\Plugin\API
      */
     public function configureExistingCustomDimension($idDimension, $idSite, $name, $active, $extractions = array(), $caseSensitive = null)
     {
-        Piwik::checkUserHasAdminAccess($idSite);
+        Piwik::checkUserHasWriteAccess($idSite);
 
         $dimension = new Dimension($idDimension, $idSite);
         $dimension->checkExists();
@@ -191,7 +191,7 @@ class API extends \Piwik\Plugin\API
      */
     public function getConfiguredCustomDimensions($idSite)
     {
-        Piwik::checkUserHasAdminAccess($idSite);
+        Piwik::checkUserHasViewAccess($idSite);
 
         $configs = $this->getConfiguration()->getCustomDimensionsForSite($idSite);
 
@@ -228,7 +228,7 @@ class API extends \Piwik\Plugin\API
      */
     public function getAvailableScopes($idSite)
     {
-        Piwik::checkUserHasAdminAccess($idSite);
+        Piwik::checkUserHasViewAccess($idSite);
 
         $scopes = array();
         foreach (CustomDimensions::getPublicScopes() as $scope) {
@@ -257,7 +257,7 @@ class API extends \Piwik\Plugin\API
      */
     public function getAvailableExtractionDimensions()
     {
-        Piwik::checkUserHasSomeAdminAccess();
+        Piwik::checkUserHasSomeWriteAccess();
 
         $supported = Extraction::getSupportedDimensions();
 

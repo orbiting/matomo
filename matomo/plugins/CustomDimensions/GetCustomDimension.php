@@ -6,8 +6,9 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
-namespace Piwik\Plugins\CustomDimensions\Reports;
+namespace Piwik\Plugins\CustomDimensions;
 
+use Piwik\API\Request;
 use Piwik\Common;
 use Piwik\DataTable;
 use Piwik\Metrics;
@@ -24,12 +25,7 @@ use Piwik\Plugins\CoreVisualizations\Visualizations\HtmlTable;
 use Piwik\Plugins\CustomDimensions\Columns\Metrics\AverageTimeOnDimension;
 use Piwik\Plugins\CustomDimensions\Dimension\CustomActionDimension;
 use Piwik\Plugins\CustomDimensions\Dimension\CustomVisitDimension;
-use Piwik\Plugins\CustomDimensions\CustomDimensions;
-use Piwik\Plugins\CustomDimensions\Dao\Configuration;
 use Piwik\Plugins\CustomDimensions\Tracker\CustomDimensionsRequestProcessor;
-use Piwik\Report\ReportWidgetFactory;
-use Piwik\View;
-use Piwik\Widget\WidgetsList;
 
 /**
  * This class defines a new report.
@@ -46,13 +42,15 @@ class GetCustomDimension extends Report
     {
         parent::init();
 
+        $this->module = 'CustomDimensions';
+        $this->action = 'getCustomDimension';
         $this->categoryId = 'CustomDimensions_CustomDimensions';
         $this->name  = Piwik::translate($this->categoryId);
         $this->order = 100;
         $this->actionToLoadSubTables = $this->action;
 
+        $idSite = Common::getRequestVar('idSite', 0, 'int');
         $idDimension = Common::getRequestVar('idDimension', 0, 'int');
-        $idSite      = Common::getRequestVar('idSite', 0, 'int');
 
         if ($idDimension > 0 && $idSite > 0) {
             $dimensions = $this->getActiveDimensionsForSite($idSite);
@@ -165,38 +163,6 @@ class GetCustomDimension extends Report
         return $metrics;
     }
 
-    public function configureWidgets(WidgetsList $widgetsList, ReportWidgetFactory $factory)
-    {
-        $idSite = Common::getRequestVar('idSite', 0, 'int');
-
-        if ($idSite < 1) {
-            return;
-        }
-
-        $dimensions = $this->getActiveDimensionsForSite($idSite);
-
-        foreach ($dimensions as $dimension) {
-            if (!$dimension['active']) {
-                continue;
-            }
-
-            if ($dimension['scope'] === CustomDimensions::SCOPE_ACTION) {
-                $this->categoryId = 'General_Actions';
-                $this->subcategoryId = 'customdimension' . $dimension['idcustomdimension'];
-            } elseif ($dimension['scope'] === CustomDimensions::SCOPE_VISIT) {
-                $this->categoryId = 'General_Visitors';
-                $this->subcategoryId = 'customdimension' . $dimension['idcustomdimension'];
-            } else {
-                continue;
-            }
-
-            $widget = $factory->createWidget()->setName($dimension['name']);
-            $widget->setParameters(array('idDimension' => $dimension['idcustomdimension']));
-
-            $widgetsList->addWidgetConfig($widget);
-        }
-    }
-
     public function configureReportMetadata(&$availableReports, $infos)
     {
         if (!$this->isEnabled()) {
@@ -206,7 +172,7 @@ class GetCustomDimension extends Report
         $idSite = $this->getIdSiteFromInfos($infos);
 
         if (isset($idSite)) {
-            $this->addReportMetadataForEachDimension($availableReports, $idSite);
+            $availableReports[] = $this->buildReportMetadata();
         }
     }
 
@@ -215,8 +181,7 @@ class GetCustomDimension extends Report
         if (empty($this->dimensionCache[$idSite])) {
             $this->dimensionCache[$idSite] = array();
 
-            $configuration = new Configuration();
-            $dimensions    = $configuration->getCustomDimensionsForSite($idSite);
+            $dimensions = Request::processRequest('CustomDimensions.getConfiguredCustomDimensions', ['idSite' => $idSite], []);
 
             foreach ($dimensions as $index => $dimension) {
                 if ($dimension['active']) {
@@ -228,18 +193,7 @@ class GetCustomDimension extends Report
         return $this->dimensionCache[$idSite];
     }
 
-    protected function addReportMetadataForEachDimension(&$availableReports, $idSite)
-    {
-        $dimensions = $this->getActiveDimensionsForSite($idSite);
-
-        foreach ($dimensions as $dimension) {
-            if ($this->initThisReportFromDimension($dimension)) {
-                $availableReports[] = $this->buildReportMetadata();
-            }
-        }
-    }
-
-    private function initThisReportFromDimension($dimension)
+    public function initThisReportFromDimension($dimension)
     {
         $this->name = $dimension['name'];
         $this->menuTitle = $this->name;
@@ -250,7 +204,7 @@ class GetCustomDimension extends Report
 
         if ($this->scopeOfDimension === CustomDimensions::SCOPE_ACTION) {
             $this->categoryId = 'General_Actions';
-            $this->dimension = new CustomActionDimension($dimensionField, $this->name);
+            $this->dimension = new CustomActionDimension($dimensionField, $this->name, $dimension['idcustomdimension']);
             $this->metrics = array('nb_hits', 'nb_visits');
             $this->processedMetrics = array(
                 new AverageTimeOnDimension(),
@@ -260,7 +214,7 @@ class GetCustomDimension extends Report
             );
         } elseif ($this->scopeOfDimension === CustomDimensions::SCOPE_VISIT) {
             $this->categoryId = 'General_Visitors';
-            $this->dimension = new CustomVisitDimension($dimensionField, $this->name);
+            $this->dimension = new CustomVisitDimension($dimensionField, $this->name, $dimension['idcustomdimension']);
             $this->metrics = array('nb_visits', 'nb_actions');
             $this->processedMetrics = array(
                 new AverageTimeOnSite(),
