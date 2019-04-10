@@ -129,6 +129,7 @@ Plugins[] = "CustomOptOut"
 Plugins[] = "InvalidateReports"
 Plugins[] = "MarketingCampaignsReporting"
 Plugins[] = "GeoIp2"
+Plugins[] = "QueuedTracking"
 
 [PluginsInstalled]
 PluginsInstalled[] = "Diagnostics"
@@ -199,6 +200,7 @@ PluginsInstalled[] = "MarketingCampaignsReporting"
 PluginsInstalled[] = "IntranetMeasurable"
 PluginsInstalled[] = "TwoFactorAuth"
 PluginsInstalled[] = "GeoIp2"
+PluginsInstalled[] = "QueuedTracking"
 EOD;
 
 
