@@ -39,27 +39,29 @@ php -S 0.0.0.0:8000 -t matomo/
 Rebuild all reports:
 
 ```bash
-# scale up web app since archiver access them
-heroku ps:scale web=2:performance-m
 # run detached to avoid timeout
-heroku run:detached --size=performance-l "php ./generate.config.ini.php && php -d memory_limit=-1 ./matomo/console core:archive --url=https://my-matomo.herokuapp.com/ --force-all-websites --concurrent-requests-per-website 8"
+heroku run:detached --size=performance-l "php ./generate.config.ini.php && php -d memory_limit=14G ./matomo/console core:archive --force-all-websites --force-all-periods=315576000 --force-date-last-n=1000 --php-cli-options=\"-d memory_limit=14G\" --concurrent-requests-per-website=8 --concurrent-archivers=4"
 heroku ps # get run number, e.g. 1
 # follow logs
 heroku logs --dyno run.1 -t
 # stop if needed
 heroku ps:stop run.1
-# scale down
-heroku ps:scale web=1:standard-2x
 ```
 
 See [matomo docs](https://matomo.org/docs/setup-auto-archiving/) for more options.
 
 ### Scheduler
 
-Add the «Heroku Scheduler» addon and setup a job to run the following command every hour at 10 past with an performance-l dyno:
+Add the «Heroku Scheduler» addon and setup a job to run the following command every hour with an performance-l dyno:
 
+```bash
+php ./generate.config.ini.php && php -d memory_limit=14G ./matomo/console core:archive --force-periods="day,week" --force-date-last-n=1 --php-cli-options="-d memory_limit=14G"
 ```
-php ./generate.config.ini.php && php -d memory_limit=-1 ./matomo/console core:archive --url=https://my-matomo.herokuapp.com/
+
+And following command every night at e.g. 00:30 UTC with an performance-l dyno:
+
+```bash
+php ./generate.config.ini.php && php -d memory_limit=14G ./matomo/console core:archive --php-cli-options="-d memory_limit=14G"
 ```
 
 ## Plugins
