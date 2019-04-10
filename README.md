@@ -1,10 +1,12 @@
 # Matomo on Heroku with AWS RDS
 
-Optimised for multiple workers and auto archiving. Inspired by [creativecoder/piwik-heroku](https://github.com/creativecoder/piwik-heroku).
+Optimised for multiple workers and auto archiving.
+
+Inspired by [creativecoder/piwik-heroku](https://github.com/creativecoder/piwik-heroku). We check in the whole Matomo code base since the composer package is broken—[at least for 3.8.1 to 3.9.1](https://github.com/creativecoder/piwik-heroku/issues/6).
 
 ## Setup a Deploy
 
-[Install the heroku cli](https://devcenter.heroku.com/articles/heroku-cli).
+Prerequisite: [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
 
 1. `heroku apps:create my-matomo --region eu`
   - `heroku buildpacks:add --index 1 https://github.com/danstiner/heroku-buildpack-geoip-geolite2`
@@ -16,9 +18,13 @@ Optimised for multiple workers and auto archiving. Inspired by [creativecoder/pi
 
 ## Config
 
-`generate.config.ini.php` is run before starting the app.
+`generate.config.ini.php` is always run before starting the app on Heroku. Ensuring the environment changes are always reflected.
+
+## Running Locally
 
 ### Local Config
+
+Run `generate.config.ini.php` with inline envs:
 
 ```bash
 REDIS_URL=redis://127.0.0.1:6379 \
@@ -28,7 +34,7 @@ SALT=XXXXXXX \
 php ./generate.config.ini.php
 ```
 
-### Running Locally
+### Start a Server
 
 ```bash
 php -S 0.0.0.0:8000 -t matomo/
@@ -36,7 +42,7 @@ php -S 0.0.0.0:8000 -t matomo/
 
 ## Archiving
 
-Rebuild all reports:
+### Rebuild all reports
 
 ```bash
 # run detached to avoid timeout
@@ -68,7 +74,7 @@ php ./generate.config.ini.php && php -d memory_limit=14G ./matomo/console core:a
 
 Run it locally and install via the interface.
 
-Afterwards synch the newly added or removed plugins manually to `Plugins[]` and `PluginsInstalled[]` in `generate.config.ini.php`.
+Afterwards synch the newly added or removed plugins manually to `Plugins[]` and `PluginsInstalled[]` in `generate.config.ini.php`. Commit the file system changes and deploy.
 
 ## GeoIP
 
