@@ -46,9 +46,15 @@ backends[] = redis
 [RedisCache]
 host = "$redis_host"
 port = $redis_port
-timeout = 0.0
 password = "$redis_pass"
 database = 14
+timeout = 0.0
+
+[QueuedTracking]
+redisHost = "$redis_host"
+redisPort = $redis_port
+redisPassword = "$redis_pass"
+redisDatabase = 0
 
 [General]
 browser_archiving_disabled_enforce = 1

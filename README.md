@@ -61,7 +61,7 @@ See [matomo docs](https://matomo.org/docs/setup-auto-archiving/) for more option
 Add the «Heroku Scheduler» addon and setup a job to run the following command every hour with an performance-l dyno:
 
 ```bash
-php ./generate.config.ini.php && php -d memory_limit=14G ./matomo/console core:archive --force-periods="day,week" --force-date-last-n=1 --php-cli-options="-d memory_limit=14G"
+php ./generate.config.ini.php && php -d memory_limit=14G ./matomo/console core:archive --force-periods="day,week" --force-date-last-n=2 --php-cli-options="-d memory_limit=14G"
 ```
 
 And following command every night at e.g. 00:30 UTC with an performance-l dyno:
