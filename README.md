@@ -22,6 +22,13 @@ Prerequisite: [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
 
 ## Running Locally
 
+Prerequisite: PHP, phpredis
+
+```
+brew install php
+pecl install redis
+```
+
 ### Local Config
 
 Run `generate.config.ini.php` with inline envs:
