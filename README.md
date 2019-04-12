@@ -88,6 +88,6 @@ Afterwards synch the newly added or removed plugins manually to `Plugins[]` and 
 
 ## GeoIP
 
-This setup is configured to use the GeoIp2 plugin included in the core Matomo package. The GeoLite databases are downloaded using a custom buildpack https://github.com/danstiner/heroku-buildpack-geoip-geolite2 defined in `.buildpacks`.
+This setup is configured to use the GeoIp2 plugin included in the core Matomo package. The GeoLite databases are downloaded on every deploy using [danstiner/heroku-buildpack-geoip-geolite2](https://github.com/danstiner/heroku-buildpack-geoip-geolite2).
 
-You can turn on this geolocation method on in Settings > System > Geolocation. Rebuilding the app will get a fresh copy of the GeoLite databases. You can also configure the plugin to download an updated database periodically.
+You can turn on this geolocation method on in Settings > System > Geolocation.
