@@ -1,0 +1,19 @@
+{
+    "MarketingCampaignsReporting": {
+        "Title": "Kampagnen",
+        "Name": "Name",
+        "Keyword": "Schlüsselwort",
+        "Source": "Herkunftsseite",
+        "Medium": "Medium",
+        "Content": "Inhalt",
+        "CombinedSourceMedium": "Herkunftsseite - Medium",
+        "CampaignId": "Kampagnen-Id",
+        "CombinedKeywordContent": "Suchbegriff - Inhalt",
+        "Names": "Kampagnennamen",
+        "Keywords": "Kampagnensuchbegriffe",
+        "Sources": "Kampagnen Herkunftsseiten",
+        "Mediums": "Kampagne Medien",
+        "Contents": "Kampagneninhalte",
+        "CombinedSourcesMediums": "Kampagne Herkunftsseite - Medium"
+    }
+}

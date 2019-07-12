@@ -1,0 +1,28 @@
+{
+    "name": "CustomDimensions",
+    "version": "3.1.6",
+    "description": "Extend Matomo to your needs by defining and tracking Custom Dimensions in scope Action or Visit",
+    "theme": false,
+    "keywords": [
+        "custom dimensions",
+        "track"
+    ],
+    "license": "GPL v3+",
+    "homepage": "https:\/\/matomo.org",
+    "require": {
+        "piwik": ">=3.6.0-b5,<4.0.0-b1"
+    },
+    "support": {
+        "issues": "https://github.com/matomo-org/plugin-CustomDimensions/issues",
+        "forum": "https://forum.matomo.org",
+        "source": "https://github.com/matomo-org/plugin-CustomDimensions",
+        "wiki": "https://github.com/matomo-org/plugin-CustomDimensions/wiki"
+    },
+    "authors": [
+        {
+            "name": "Matomo",
+            "email": "hello@matomo.org",
+            "homepage": "https:\/\/matomo.org"
+        }
+    ]
+}

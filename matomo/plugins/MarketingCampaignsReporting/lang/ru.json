@@ -1,0 +1,19 @@
+{
+    "MarketingCampaignsReporting": {
+        "Title": "Кампании",
+        "Name": "Имя",
+        "Keyword": "Ключевое слово",
+        "Source": "Источник",
+        "Medium": "Носитель",
+        "Content": "Контент",
+        "CombinedSourceMedium": "Источник - Носитель",
+        "CampaignId": "Id кампании",
+        "CombinedKeywordContent": "Ключевое слово - Контент",
+        "Names": "Имена кампаний",
+        "Keywords": "Ключевые слова кампании",
+        "Sources": "Источники кампании",
+        "Mediums": "Носители кампании",
+        "Contents": "Контенты кампании",
+        "CombinedSourcesMediums": "Источник кампании - Носитель"
+    }
+}
