@@ -9,6 +9,7 @@
 
 namespace Piwik\Plugins\CustomDimensions\Dao;
 
+use Piwik\API\Request;
 use Piwik\Common;
 use Piwik\Db;
 use Piwik\DbHelper;
@@ -83,12 +84,6 @@ class Configuration
         return $dimension;
     }
 
-    public function getCustomDimensionsHavingScope($idSite, $scope)
-    {
-        $query= "SELECT * FROM " . $this->tableNamePrefixed . " WHERE idsite = ? and scope = ?";
-        return $this->fetchAllDimensionsEnriched($query, array($idSite, $scope));
-    }
-
     public function getCustomDimensionsHavingIndex($scope, $index)
     {
         $query= "SELECT * FROM " . $this->tableNamePrefixed . " WHERE `index` = ? and scope = ?";
@@ -100,9 +95,9 @@ class Configuration
         $this->getDb()->query("DELETE FROM " . $this->tableNamePrefixed . " WHERE idsite = ?", $idSite);
     }
 
-    public function deleteConfigurationsForIndex($index)
+    public function deleteConfigurationsForIndex($index, $scope)
     {
-        $this->getDb()->query("DELETE FROM " . $this->tableNamePrefixed . " WHERE `index` = ?", $index);
+        $this->getDb()->query("DELETE FROM " . $this->tableNamePrefixed . " WHERE `index` = ? and `scope` = ?", array($index, $scope));
     }
 
     private function fetchAllDimensionsEnriched($sql, $bind)
@@ -167,7 +162,7 @@ class Configuration
                   `active` TINYINT UNSIGNED NOT NULL DEFAULT 0,
                   `extractions` TEXT NOT NULL DEFAULT '',
                   `case_sensitive` TINYINT UNSIGNED NOT NULL DEFAULT 1,
-                  UNIQUE KEY idcustomdimension_idsite (`idcustomdimension`, `idsite`),
+                  PRIMARY KEY (`idcustomdimension`, `idsite`),
                   UNIQUE KEY uniq_hash(idsite, `scope`, `index`)";
 
         DbHelper::createTable($this->tableName, $table);

@@ -1,6 +1,6 @@
 {
     "name": "CustomDimensions",
-    "version": "3.1.6",
+    "version": "3.1.9",
     "description": "Extend Matomo to your needs by defining and tracking Custom Dimensions in scope Action or Visit",
     "theme": false,
     "keywords": [
@@ -10,7 +10,7 @@
     "license": "GPL v3+",
     "homepage": "https:\/\/matomo.org",
     "require": {
-        "piwik": ">=3.6.0-b5,<4.0.0-b1"
+        "piwik": ">=3.10.0,<4.0.0-b1"
     },
     "support": {
         "issues": "https://github.com/matomo-org/plugin-CustomDimensions/issues",

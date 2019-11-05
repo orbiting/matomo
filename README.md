@@ -91,3 +91,19 @@ Afterwards synch the newly added or removed plugins manually to `Plugins[]` and 
 This setup is configured to use the GeoIp2 plugin included in the core Matomo package. The GeoLite databases are downloaded on every deploy using [danstiner/heroku-buildpack-geoip-geolite2](https://github.com/danstiner/heroku-buildpack-geoip-geolite2).
 
 You can turn on this geolocation method on in Settings > System > Geolocation.
+
+## Updating
+
+Download zip from matomo and merge extract it:
+
+```bash
+wget https://builds.matomo.org/matomo.zip
+unzip -o matomo.zip
+rm matomo.zip
+```
+
+For plugins you can merge with e.g. `ditto`:
+
+```bash
+ditto ~/Downloads/CustomDimensions ~/Code/matomo/matomo/plugins/CustomDimensions
+```

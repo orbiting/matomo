@@ -1,5 +1,13 @@
 ## Changelog
 
+* 3.1.9
+  * Remove custom dimension configs for the correct scope 
+  * Improve speed of auto suggest for custom dimension for high traffic sites
+  * Compability with [Google Analytics Importer](https://matomo.org/docs/google-analytics-importer/)
+* 3.1.8
+  * Trim and truncate raw values from tracker
+* 3.1.7
+  * Add primary key for better replication
 * 3.1.6
   * Fix custom dimensions in scheduled reports may be repeated
 * 3.1.5
