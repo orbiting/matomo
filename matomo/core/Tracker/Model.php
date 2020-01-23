@@ -119,7 +119,7 @@ class Model
 
     public function createEcommerceItems($ecommerceItems)
     {
-        $sql = "INSERT INTO " . Common::prefixTable('log_conversion_item');
+        $sql = "INSERT IGNORE INTO " . Common::prefixTable('log_conversion_item');
         $i    = 0;
         $bind = array();
 
@@ -366,7 +366,7 @@ class Model
         return $wasInserted;
     }
 
-    public function findVisitor($idSite, $configId, $idVisitor, $fieldsToRead, $shouldMatchOneFieldOnly, $isVisitorIdToLookup, $timeLookBack, $timeLookAhead)
+    public function findVisitor($idSite, $configId, $idVisitor, $userId, $fieldsToRead, $shouldMatchOneFieldOnly, $isVisitorIdToLookup, $timeLookBack, $timeLookAhead)
     {
         $selectCustomVariables = '';
 
@@ -398,10 +398,17 @@ class Model
         } elseif ($shouldMatchOneFieldOnly) {
             $visitRow = $this->findVisitorByConfigId($configId, $select, $from, $configIdWhere, $configIdbindSql);
         } else {
-            $visitRow = $this->findVisitorByVisitorId($idVisitor, $select, $from, $visitorIdWhere, $visitorIdbindSql);
+            if (!empty($idVisitor)) {
+                $visitRow = $this->findVisitorByVisitorId($idVisitor, $select, $from, $visitorIdWhere, $visitorIdbindSql);
+            } else {
+                $visitRow = false;
+            }
 
             if (empty($visitRow)) {
-                $configIdWhere .= ' AND user_id IS NULL ';
+                if (!empty($userId)) {
+                    $configIdWhere .= ' AND ( user_id IS NULL OR user_id = ? )';
+                    $configIdbindSql[] = $userId;
+                }
                 $visitRow = $this->findVisitorByConfigId($configId, $select, $from, $configIdWhere, $configIdbindSql);
             }
         }

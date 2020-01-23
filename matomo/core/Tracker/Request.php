@@ -686,7 +686,7 @@ class Request
         $cookie = $this->makeThirdPartyCookieUID();
         $idVisitor = bin2hex($idVisitor);
         $cookie->set(0, $idVisitor);
-        $cookie->save();
+        $cookie->save('None');
 
         Common::printDebug(sprintf("We set the visitor ID to %s in the 3rd party cookie...", $idVisitor));
     }
@@ -740,15 +740,6 @@ class Request
     public function getVisitorId()
     {
         $found = false;
-        
-        // If User ID is set it takes precedence
-        $userId = $this->getForcedUserId();
-        if ($userId) {
-            $userIdHashed = $this->getUserIdHashed($userId);
-            $idVisitor = $this->truncateIdAsVisitorId($userIdHashed);
-            Common::printDebug("Request will be recorded for this user_id = " . $userId . " (idvisitor = $idVisitor)");
-            $found = true;
-        }
 
         // Was a Visitor ID "forced" (@see Tracking API setVisitorId()) for this request?
         if (!$found) {

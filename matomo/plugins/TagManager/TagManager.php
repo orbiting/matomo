@@ -32,6 +32,7 @@ use Piwik\Plugins\TagManager\Model\Container\ContainerIdGenerator;
 use Piwik\Plugins\TagManager\Model\Salt;
 use Piwik\Site;
 use Piwik\View;
+use Piwik\Context;
 
 class TagManager extends \Piwik\Plugin
 {
@@ -44,7 +45,6 @@ class TagManager extends \Piwik\Plugin
             'AssetManager.getJavaScriptFiles' => 'getJsFiles',
             'Translate.getClientSideTranslationKeys' => 'getClientSideTranslationKeys',
             'CoreUpdater.update.end' => 'regenerateReleasedContainers',
-            'CronArchive.end' => 'regenerateReleasedContainers',
             'PluginManager.pluginActivated' => 'onPluginActivateOrInstall',
             'PluginManager.pluginInstalled' => 'onPluginActivateOrInstall',
             'PluginManager.pluginDeactivated' => 'onPluginActivateOrInstall',
@@ -250,7 +250,9 @@ class TagManager extends \Piwik\Plugin
                 $containers = $containerModel->getActiveContainersInfo();
                 foreach ($containers as $container) {
                     try {
-                        $containerModel->generateContainer($container['idsite'], $container['idcontainer']);
+                        Context::changeIdSite($container['idsite'], function () use ($containerModel, $container) {
+                            $containerModel->generateContainer($container['idsite'], $container['idcontainer']);
+                        });
                     } catch (UnexpectedWebsiteFoundException $e) {
                         // website was removed, ignore
                     }

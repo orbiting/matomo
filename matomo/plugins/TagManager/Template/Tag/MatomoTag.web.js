@@ -19,13 +19,19 @@
         window.piwikPluginAsyncInit = [];
     }
 
-    window.piwikPluginAsyncInit.push(function () {
-        libAvailable = true;
+    function executeCallbacks() {
 
         var i;
         for (i = 0; i < callbacks.callbacks.length; i++) {
             callbacks.callbacks[i]();
         }
+
+        callbacks.callbacks = [];
+    }
+
+    window.piwikPluginAsyncInit.push(function () {
+        libAvailable = true;
+        executeCallbacks();
     });
 
     function checkLoadedAlready()
@@ -33,6 +39,7 @@
         if (libAvailable || typeof window.Piwik === 'object') {
             libAvailable = true;
             libLoaded = true; // eg loaded by tests or manually by user
+            executeCallbacks();
             return true;
         }
         return false;
@@ -103,7 +110,11 @@
                     // but even two or more different configs for the same Matomo URL & idSite
                     lastMatomoUrl = getMatomoUrlFromConfig(matomoConfig);
                     var trackerUrl = lastMatomoUrl + matomoConfig.trackingEndpoint;
-                    tracker = Piwik.addTracker(trackerUrl);
+                    if (matomoConfig.registerAsDefaultTracker) {
+                        tracker = Piwik.addTracker(trackerUrl);
+                    } else {
+                        tracker = Piwik.getTracker(trackerUrl);
+                    }
                     configuredTrackers[variableName] = tracker;
 
                     if (matomoConfig.disableCookies) {
@@ -129,7 +140,19 @@
                     if (matomoConfig.domains
                         && TagManager.utils.isArray(matomoConfig.domains)
                         && matomoConfig.domains.length) {
-                            tracker.setDomains(matomoConfig.domains);
+                        var domains = [];
+                        var k, domainType;
+
+                        for (k = 0; k < matomoConfig.domains.length; k++) {
+                            var domainType = typeof matomoConfig.domains[k];
+                            if (domainType === 'string') {
+                                domains.push(matomoConfig.domains[k]);
+                            } else if (domainType === 'object' && matomoConfig.domains[k].domain) {
+                                domains.push(matomoConfig.domains[k].domain);
+                            }
+                        }
+
+                        tracker.setDomains(domains);
                     }
 
                     tracker.setSiteId(matomoConfig.idSite);
