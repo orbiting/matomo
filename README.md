@@ -15,8 +15,10 @@ Prerequisite: [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
     - `heroku buildpacks:add --index 2 heroku/php`
 2. Add a `MYSQL_URL`, e.g. AWS RDS
 3. Add a `REDIS_URL`, e.g. `heroku addons:create heroku-redis:premium-1`
-4. `heroku config:set SALT=XXXXXXX TRUSTED_HOST=my-matomo.herokuapp.com`
+4. `heroku config:set SALT=XXXXXXX TRUSTED_HOST=my-matomo.herokuapp.com MAXMIND_LICENSE_KEY=XXXXXXX`
 5. `git push heroku`
+
+You'll need to [obtain a free MaxMind key](https://www.maxmind.com/en/accounts/current/license-key) for GeoIP.
 
 ## Config
 
