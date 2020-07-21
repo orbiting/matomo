@@ -4,13 +4,14 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
+class ComposerStaticInitb8c133f23744c86a2d7f71c1355d2394
 {
     public static $files = array (
         '04c6c5c2f7095ccf6c481d3e53e1776f' => __DIR__ . '/..' . '/mustangostang/spyc/Spyc.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         'bbf73f3db644d3dced353b837903e74c' => __DIR__ . '/..' . '/php-di/php-di/src/DI/functions.php',
         '6dcc7fc6910472564e7b11f0b5d852b5' => __DIR__ . '/..' . '/szymach/c-pchart/src/Resources/data/constants.php',
+        'aa3ddbfac31d504181d81bbbeb5838b9' => __DIR__ . '/../..' . '/LegacyAutoloader.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -88,19 +89,19 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         ),
         'Piwik\\Network\\' => 
         array (
-            0 => __DIR__ . '/..' . '/piwik/network/src',
+            0 => __DIR__ . '/..' . '/matomo/network/src',
         ),
         'Piwik\\Ini\\' => 
         array (
-            0 => __DIR__ . '/..' . '/piwik/ini/src',
+            0 => __DIR__ . '/..' . '/matomo/ini/src',
         ),
         'Piwik\\Decompress\\' => 
         array (
-            0 => __DIR__ . '/..' . '/piwik/decompress/src',
+            0 => __DIR__ . '/..' . '/matomo/decompress/src',
         ),
         'Piwik\\Cache\\' => 
         array (
-            0 => __DIR__ . '/..' . '/piwik/cache/src',
+            0 => __DIR__ . '/..' . '/matomo/cache/src',
         ),
         'Piwik\\' => 
         array (
@@ -203,10 +204,6 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
             'PEAR_' => 
             array (
                 0 => __DIR__ . '/../..' . '/libs',
-            ),
-            'PEAR' => 
-            array (
-                0 => __DIR__ . '/..' . '/pear/pear_exception',
             ),
         ),
         'J' => 
@@ -641,13 +638,12 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         'PEAR_Error' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/PEAR.php',
         'PEAR_ErrorStack' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/PEAR/ErrorStack.php',
         'PEAR_Exception' => __DIR__ . '/..' . '/pear/pear_exception/PEAR/Exception.php',
-        'PEAR_ExceptionTest' => __DIR__ . '/..' . '/pear/pear_exception/tests/PEAR/ExceptionTest.php',
-        'PclZip' => __DIR__ . '/..' . '/piwik/decompress/libs/PclZip/pclzip.lib.php',
+        'PclZip' => __DIR__ . '/..' . '/matomo/decompress/libs/PclZip/pclzip.lib.php',
         'PhpDocReader\\AnnotationException' => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader/AnnotationException.php',
         'PhpDocReader\\PhpDocReader' => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader/PhpDocReader.php',
         'PhpDocReader\\PhpParser\\TokenParser' => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader/PhpParser/TokenParser.php',
         'PhpDocReader\\PhpParser\\UseStatementParser' => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader/PhpParser/UseStatementParser.php',
-        'PiwikTracker' => __DIR__ . '/..' . '/piwik/piwik-php-tracker/PiwikTracker.php',
+        'PiwikTracker' => __DIR__ . '/..' . '/matomo/matomo-php-tracker/PiwikTracker.php',
         'Piwik\\API\\ApiRenderer' => __DIR__ . '/../..' . '/core/API/ApiRenderer.php',
         'Piwik\\API\\CORSHandler' => __DIR__ . '/../..' . '/core/API/CORSHandler.php',
         'Piwik\\API\\DataTableGenericFilter' => __DIR__ . '/../..' . '/core/API/DataTableGenericFilter.php',
@@ -714,18 +710,18 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         'Piwik\\BaseFactory' => __DIR__ . '/../..' . '/core/BaseFactory.php',
         'Piwik\\Cache' => __DIR__ . '/../..' . '/core/Cache.php',
         'Piwik\\CacheId' => __DIR__ . '/../..' . '/core/CacheId.php',
-        'Piwik\\Cache\\Backend' => __DIR__ . '/..' . '/piwik/cache/src/Backend.php',
-        'Piwik\\Cache\\Backend\\ArrayCache' => __DIR__ . '/..' . '/piwik/cache/src/Backend/ArrayCache.php',
-        'Piwik\\Cache\\Backend\\Chained' => __DIR__ . '/..' . '/piwik/cache/src/Backend/Chained.php',
-        'Piwik\\Cache\\Backend\\Factory' => __DIR__ . '/..' . '/piwik/cache/src/Backend/Factory.php',
-        'Piwik\\Cache\\Backend\\Factory\\BackendNotFoundException' => __DIR__ . '/..' . '/piwik/cache/src/Backend/Factory/BackendNotFoundException.php',
-        'Piwik\\Cache\\Backend\\File' => __DIR__ . '/..' . '/piwik/cache/src/Backend/File.php',
-        'Piwik\\Cache\\Backend\\NullCache' => __DIR__ . '/..' . '/piwik/cache/src/Backend/NullCache.php',
-        'Piwik\\Cache\\Backend\\Redis' => __DIR__ . '/..' . '/piwik/cache/src/Backend/Redis.php',
-        'Piwik\\Cache\\Cache' => __DIR__ . '/..' . '/piwik/cache/src/Cache.php',
-        'Piwik\\Cache\\Eager' => __DIR__ . '/..' . '/piwik/cache/src/Eager.php',
-        'Piwik\\Cache\\Lazy' => __DIR__ . '/..' . '/piwik/cache/src/Lazy.php',
-        'Piwik\\Cache\\Transient' => __DIR__ . '/..' . '/piwik/cache/src/Transient.php',
+        'Piwik\\Cache\\Backend' => __DIR__ . '/..' . '/matomo/cache/src/Backend.php',
+        'Piwik\\Cache\\Backend\\ArrayCache' => __DIR__ . '/..' . '/matomo/cache/src/Backend/ArrayCache.php',
+        'Piwik\\Cache\\Backend\\Chained' => __DIR__ . '/..' . '/matomo/cache/src/Backend/Chained.php',
+        'Piwik\\Cache\\Backend\\Factory' => __DIR__ . '/..' . '/matomo/cache/src/Backend/Factory.php',
+        'Piwik\\Cache\\Backend\\Factory\\BackendNotFoundException' => __DIR__ . '/..' . '/matomo/cache/src/Backend/Factory/BackendNotFoundException.php',
+        'Piwik\\Cache\\Backend\\File' => __DIR__ . '/..' . '/matomo/cache/src/Backend/File.php',
+        'Piwik\\Cache\\Backend\\NullCache' => __DIR__ . '/..' . '/matomo/cache/src/Backend/NullCache.php',
+        'Piwik\\Cache\\Backend\\Redis' => __DIR__ . '/..' . '/matomo/cache/src/Backend/Redis.php',
+        'Piwik\\Cache\\Cache' => __DIR__ . '/..' . '/matomo/cache/src/Cache.php',
+        'Piwik\\Cache\\Eager' => __DIR__ . '/..' . '/matomo/cache/src/Eager.php',
+        'Piwik\\Cache\\Lazy' => __DIR__ . '/..' . '/matomo/cache/src/Lazy.php',
+        'Piwik\\Cache\\Transient' => __DIR__ . '/..' . '/matomo/cache/src/Transient.php',
         'Piwik\\Category\\Category' => __DIR__ . '/../..' . '/core/Category/Category.php',
         'Piwik\\Category\\CategoryList' => __DIR__ . '/../..' . '/core/Category/CategoryList.php',
         'Piwik\\Category\\Subcategory' => __DIR__ . '/../..' . '/core/Category/Subcategory.php',
@@ -854,11 +850,11 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         'Piwik\\Db\\Schema\\Mysql' => __DIR__ . '/../..' . '/core/Db/Schema/Mysql.php',
         'Piwik\\Db\\Settings' => __DIR__ . '/../..' . '/core/Db/Settings.php',
         'Piwik\\Db\\TransactionLevel' => __DIR__ . '/../..' . '/core/Db/TransactionLevel.php',
-        'Piwik\\Decompress\\DecompressInterface' => __DIR__ . '/..' . '/piwik/decompress/src/DecompressInterface.php',
-        'Piwik\\Decompress\\Gzip' => __DIR__ . '/..' . '/piwik/decompress/src/Gzip.php',
-        'Piwik\\Decompress\\PclZip' => __DIR__ . '/..' . '/piwik/decompress/src/PclZip.php',
-        'Piwik\\Decompress\\Tar' => __DIR__ . '/..' . '/piwik/decompress/src/Tar.php',
-        'Piwik\\Decompress\\ZipArchive' => __DIR__ . '/..' . '/piwik/decompress/src/ZipArchive.php',
+        'Piwik\\Decompress\\DecompressInterface' => __DIR__ . '/..' . '/matomo/decompress/src/DecompressInterface.php',
+        'Piwik\\Decompress\\Gzip' => __DIR__ . '/..' . '/matomo/decompress/src/Gzip.php',
+        'Piwik\\Decompress\\PclZip' => __DIR__ . '/..' . '/matomo/decompress/src/PclZip.php',
+        'Piwik\\Decompress\\Tar' => __DIR__ . '/..' . '/matomo/decompress/src/Tar.php',
+        'Piwik\\Decompress\\ZipArchive' => __DIR__ . '/..' . '/matomo/decompress/src/ZipArchive.php',
         'Piwik\\Development' => __DIR__ . '/../..' . '/core/Development.php',
         'Piwik\\DeviceDetectorFactory' => __DIR__ . '/../..' . '/core/DeviceDetectorFactory.php',
         'Piwik\\DeviceDetector\\DeviceDetectorCache' => __DIR__ . '/../..' . '/core/DeviceDetector/DeviceDetectorCache.php',
@@ -891,10 +887,10 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         'Piwik\\Http\\HttpCodeException' => __DIR__ . '/../..' . '/core/Http/HttpCodeException.php',
         'Piwik\\Http\\Router' => __DIR__ . '/../..' . '/core/Http/Router.php',
         'Piwik\\IP' => __DIR__ . '/../..' . '/core/IP.php',
-        'Piwik\\Ini\\IniReader' => __DIR__ . '/..' . '/piwik/ini/src/IniReader.php',
-        'Piwik\\Ini\\IniReadingException' => __DIR__ . '/..' . '/piwik/ini/src/IniReadingException.php',
-        'Piwik\\Ini\\IniWriter' => __DIR__ . '/..' . '/piwik/ini/src/IniWriter.php',
-        'Piwik\\Ini\\IniWritingException' => __DIR__ . '/..' . '/piwik/ini/src/IniWritingException.php',
+        'Piwik\\Ini\\IniReader' => __DIR__ . '/..' . '/matomo/ini/src/IniReader.php',
+        'Piwik\\Ini\\IniReadingException' => __DIR__ . '/..' . '/matomo/ini/src/IniReadingException.php',
+        'Piwik\\Ini\\IniWriter' => __DIR__ . '/..' . '/matomo/ini/src/IniWriter.php',
+        'Piwik\\Ini\\IniWritingException' => __DIR__ . '/..' . '/matomo/ini/src/IniWritingException.php',
         'Piwik\\Intl\\Data\\Provider\\CurrencyDataProvider' => __DIR__ . '/../..' . '/core/Intl/Data/Provider/CurrencyDataProvider.php',
         'Piwik\\Intl\\Data\\Provider\\DateTimeFormatProvider' => __DIR__ . '/../..' . '/core/Intl/Data/Provider/DateTimeFormatProvider.php',
         'Piwik\\Intl\\Data\\Provider\\LanguageDataProvider' => __DIR__ . '/../..' . '/core/Intl/Data/Provider/LanguageDataProvider.php',
@@ -917,10 +913,10 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         'Piwik\\Metrics\\Formatter\\Html' => __DIR__ . '/../..' . '/core/Metrics/Formatter/Html.php',
         'Piwik\\Metrics\\Sorter' => __DIR__ . '/../..' . '/core/Metrics/Sorter.php',
         'Piwik\\Metrics\\Sorter\\Config' => __DIR__ . '/../..' . '/core/Metrics/Sorter/Config.php',
-        'Piwik\\Network\\IP' => __DIR__ . '/..' . '/piwik/network/src/IP.php',
-        'Piwik\\Network\\IPUtils' => __DIR__ . '/..' . '/piwik/network/src/IPUtils.php',
-        'Piwik\\Network\\IPv4' => __DIR__ . '/..' . '/piwik/network/src/IPv4.php',
-        'Piwik\\Network\\IPv6' => __DIR__ . '/..' . '/piwik/network/src/IPv6.php',
+        'Piwik\\Network\\IP' => __DIR__ . '/..' . '/matomo/network/src/IP.php',
+        'Piwik\\Network\\IPUtils' => __DIR__ . '/..' . '/matomo/network/src/IPUtils.php',
+        'Piwik\\Network\\IPv4' => __DIR__ . '/..' . '/matomo/network/src/IPv4.php',
+        'Piwik\\Network\\IPv6' => __DIR__ . '/..' . '/matomo/network/src/IPv6.php',
         'Piwik\\NoAccessException' => __DIR__ . '/../..' . '/core/Access.php',
         'Piwik\\Nonce' => __DIR__ . '/../..' . '/core/Nonce.php',
         'Piwik\\Notification' => __DIR__ . '/../..' . '/core/Notification.php',
@@ -1249,6 +1245,7 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         'Piwik\\Plugins\\CoreHome\\Widgets\\GetSystemSummary' => __DIR__ . '/../..' . '/plugins/CoreHome/Widgets/GetSystemSummary.php',
         'Piwik\\Plugins\\CoreHome\\Widgets\\QuickLinks' => __DIR__ . '/../..' . '/plugins/CoreHome/Widgets/QuickLinks.php',
         'Piwik\\Plugins\\CoreHome\\tests\\Integration\\Column\\UserIdTest' => __DIR__ . '/../..' . '/plugins/CoreHome/tests/Integration/Column/UserIdTest.php',
+        'Piwik\\Plugins\\CoreHome\\tests\\Integration\\Column\\VisitLastActionTimeTest' => __DIR__ . '/../..' . '/plugins/CoreHome/tests/Integration/Column/VisitLastActionTimeTest.php',
         'Piwik\\Plugins\\CoreHome\\tests\\Integration\\CoreHomeTest' => __DIR__ . '/../..' . '/plugins/CoreHome/tests/Integration/CoreHomeTest.php',
         'Piwik\\Plugins\\CoreHome\\tests\\Integration\\CustomLoginWhitelist' => __DIR__ . '/../..' . '/plugins/CoreHome/tests/Integration/LoginWhitelistTest.php',
         'Piwik\\Plugins\\CoreHome\\tests\\Integration\\LoginWhitelistTest' => __DIR__ . '/../..' . '/plugins/CoreHome/tests/Integration/LoginWhitelistTest.php',
@@ -1717,6 +1714,7 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         'Piwik\\Plugins\\Installation\\FormSuperUser' => __DIR__ . '/../..' . '/plugins/Installation/FormSuperUser.php',
         'Piwik\\Plugins\\Installation\\Installation' => __DIR__ . '/../..' . '/plugins/Installation/Installation.php',
         'Piwik\\Plugins\\Installation\\Menu' => __DIR__ . '/../..' . '/plugins/Installation/Menu.php',
+        'Piwik\\Plugins\\Installation\\Onboarding' => __DIR__ . '/../..' . '/plugins/Installation/Onboarding.php',
         'Piwik\\Plugins\\Installation\\Rule_checkUserPrivileges' => __DIR__ . '/../..' . '/plugins/Installation/FormDatabaseSetup.php',
         'Piwik\\Plugins\\Installation\\Rule_isValidEmailString' => __DIR__ . '/../..' . '/plugins/Installation/FormSuperUser.php',
         'Piwik\\Plugins\\Installation\\Rule_isValidLoginString' => __DIR__ . '/../..' . '/plugins/Installation/FormSuperUser.php',
@@ -2034,6 +2032,7 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         'Piwik\\Plugins\\Referrers\\tests\\Integration\\Columns\\ReferrerKeywordTest' => __DIR__ . '/../..' . '/plugins/Referrers/tests/Integration/Columns/ReferrerKeywordTest.php',
         'Piwik\\Plugins\\Referrers\\tests\\Integration\\Columns\\ReferrerNameTest' => __DIR__ . '/../..' . '/plugins/Referrers/tests/Integration/Columns/ReferrerNameTest.php',
         'Piwik\\Plugins\\Referrers\\tests\\Integration\\Columns\\ReferrerTypeTest' => __DIR__ . '/../..' . '/plugins/Referrers/tests/Integration/Columns/ReferrerTypeTest.php',
+        'Piwik\\Plugins\\Referrers\\tests\\Integration\\Columns\\ReferrerUrlTest' => __DIR__ . '/../..' . '/plugins/Referrers/tests/Integration/Columns/ReferrerUrlTest.php',
         'Piwik\\Plugins\\Referrers\\tests\\ReferrersTest' => __DIR__ . '/../..' . '/plugins/Referrers/tests/Unit/ReferrersTest.php',
         'Piwik\\Plugins\\Referrers\\tests\\SearchEngineTest' => __DIR__ . '/../..' . '/plugins/Referrers/tests/Unit/SearchEngineTest.php',
         'Piwik\\Plugins\\Referrers\\tests\\SocialTest' => __DIR__ . '/../..' . '/plugins/Referrers/tests/Unit/SocialTest.php',
@@ -2660,6 +2659,7 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         'Piwik\\Tracker\\Db\\Pdo\\Mysql' => __DIR__ . '/../..' . '/core/Tracker/Db/Pdo/Mysql.php',
         'Piwik\\Tracker\\Db\\Pdo\\Pgsql' => __DIR__ . '/../..' . '/core/Tracker/Db/Pdo/Pgsql.php',
         'Piwik\\Tracker\\Failures' => __DIR__ . '/../..' . '/core/Tracker/Failures.php',
+        'Piwik\\Tracker\\FingerprintSalt' => __DIR__ . '/../..' . '/core/Tracker/FingerprintSalt.php',
         'Piwik\\Tracker\\GoalManager' => __DIR__ . '/../..' . '/core/Tracker/GoalManager.php',
         'Piwik\\Tracker\\Handler' => __DIR__ . '/../..' . '/core/Tracker/Handler.php',
         'Piwik\\Tracker\\Handler\\Factory' => __DIR__ . '/../..' . '/core/Tracker/Handler/Factory.php',
@@ -2904,7 +2904,7 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
         'Psr\\Log\\LoggerInterface' => __DIR__ . '/..' . '/psr/log/Psr/Log/LoggerInterface.php',
         'Psr\\Log\\LoggerTrait' => __DIR__ . '/..' . '/psr/log/Psr/Log/LoggerTrait.php',
         'Psr\\Log\\NullLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/NullLogger.php',
-        'Psr\\Log\\Test\\DummyTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/LoggerInterfaceTest.php',
+        'Psr\\Log\\Test\\DummyTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/DummyTest.php',
         'Psr\\Log\\Test\\LoggerInterfaceTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/LoggerInterfaceTest.php',
         'Psr\\Log\\Test\\TestLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/TestLogger.php',
         'QRcode' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/barcodes/qrcode.php',
@@ -3606,11 +3606,11 @@ class ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitf7069ed3fec7ce19fedaa6119cee76f4::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitb8c133f23744c86a2d7f71c1355d2394::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitb8c133f23744c86a2d7f71c1355d2394::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitb8c133f23744c86a2d7f71c1355d2394::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitb8c133f23744c86a2d7f71c1355d2394::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitb8c133f23744c86a2d7f71c1355d2394::$classMap;
 
         }, null, ClassLoader::class);
     }

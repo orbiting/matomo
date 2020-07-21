@@ -101,7 +101,7 @@ Download zip from matomo and merge extract it:
 ```bash
 wget https://builds.matomo.org/matomo.zip
 unzip -o matomo.zip
-rm matomo.zip
+rm matomo.zip "How to install Matomo.html"
 ```
 
 For plugins you can merge with e.g. `ditto`:
@@ -109,3 +109,12 @@ For plugins you can merge with e.g. `ditto`:
 ```bash
 ditto ~/Downloads/CustomDimensions ~/Code/matomo/matomo/plugins/CustomDimensions
 ```
+
+Run locally after update and do a system check:
+
+```bash
+php -S 0.0.0.0:8000 -t matomo/
+open http://localhost:8000/index.php?module=Installation&action=systemCheckPage
+```
+
+It will often report files that can be removed after an update. PHP config issues and archiving completion can be ignored locally.

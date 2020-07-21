@@ -1234,8 +1234,13 @@ class CronArchive
     public function logError($m)
     {
         if (!defined('PIWIK_ARCHIVE_NO_TRUNCATE')) {
-            $m = substr($m, 0, self::TRUNCATE_ERROR_MESSAGE_SUMMARY);
             $m = str_replace(array("\n", "\t"), " ", $m);
+            if (Common::mb_strlen($m) > self::TRUNCATE_ERROR_MESSAGE_SUMMARY) {
+                $numCharactersKeepFromEnd = 100;
+                $m = Common::mb_substr($m, 0, self::TRUNCATE_ERROR_MESSAGE_SUMMARY - $numCharactersKeepFromEnd)
+                     . ' ... ' .
+                    Common::mb_substr($m, -1 * $numCharactersKeepFromEnd);
+            }
         }
         $this->errors[] = $m;
         $this->logger->error($m);
@@ -2114,6 +2119,12 @@ class CronArchive
 
     public function isAlreadyArchivingUrl($url, $idSite, $period, $date)
     {
+        if (!empty($this->segmentsToForce)) {
+            // we ignore checking for any running command in the background so a user can launch multiple cronjob entries
+            // at the same time where each of them forces a differet segment
+            return false;
+        }
+
         $periodInProgress = $this->isAlreadyArchivingAnyLowerOrThisPeriod($idSite, $period);
         if ($periodInProgress) {
             $this->logger->info("- skipping archiving for period '{period}' because processing the period '{periodcheck}' is already in progress.", array('period' => $period, 'periodcheck' => $periodInProgress));
