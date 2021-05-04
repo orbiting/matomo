@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -224,7 +224,7 @@ class ThemeStyles
         $result = '';
         foreach (get_object_vars($this) as $name => $value) {
             $varName = isset(self::$propertyNamesToLessVariableNames[$name]) ? self::$propertyNamesToLessVariableNames[$name] : $this->getGenericThemeVarName($name);
-            $result .= "@$varName = $value;\n";
+            $result .= "@$varName: $value;\n";
         }
         return $result;
     }

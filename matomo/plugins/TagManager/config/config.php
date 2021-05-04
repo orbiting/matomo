@@ -14,6 +14,7 @@ return array(
         // the prefix for any container file
         return 'container_';
     },
+    'TagManagerJSMinificationEnabled' => true,
     'fileintegrity.ignore' => DI\add(array(
         DI\get('fileintegrityIgnoreTagManager')
     )),
@@ -24,6 +25,6 @@ return array(
     'diagnostics.required' => DI\add(array(
         DI\get('Piwik\Plugins\TagManager\Diagnostic\ContainerWriteAccess'),
     )),
-    'Piwik\Plugins\TagManager\Model\Container\ContainerIdGenerator' => DI\object('Piwik\Plugins\TagManager\Model\Container\RandomContainerIdGenerator'),
-    'Piwik\Plugins\TagManager\Context\Storage\StorageInterface' => DI\object('Piwik\Plugins\TagManager\Context\Storage\Filesystem'),
+    'Piwik\Plugins\TagManager\Model\Container\ContainerIdGenerator' => DI\autowire('Piwik\Plugins\TagManager\Model\Container\RandomContainerIdGenerator'),
+    'Piwik\Plugins\TagManager\Context\Storage\StorageInterface' => DI\create('Piwik\Plugins\TagManager\Context\Storage\Filesystem'),
 );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -27,9 +27,9 @@ class Get extends \Piwik\Plugin\Report
     protected function init()
     {
         parent::init();
-        $this->categoryId      = 'General_Actions';
+        $this->categoryId    = 'General_Actions';
         $this->name          = Piwik::translate('VisitFrequency_ColumnReturningVisits');
-        $this->documentation = ''; // TODO
+        $this->documentation = Piwik::translate('VisitFrequency_VisitFrequencyReportDocumentation');
         $this->processedMetrics = array(
             new ReturningMetric(new AverageTimeOnSite(), API::RETURNING_COLUMN_SUFFIX),
             new ReturningMetric(new ActionsPerVisit(), API::RETURNING_COLUMN_SUFFIX),

@@ -1,27 +1,34 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link    http://piwik.org
+ * @link    https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\Provider;
 
 use Piwik\Piwik;
 use Piwik\Plugins\Live\VisitorDetailsAbstract;
 use Piwik\View;
+use Piwik\Plugin;
 
 /**
  * @see plugins/Provider/functions.php
  */
-require_once PIWIK_INCLUDE_PATH . '/plugins/Provider/functions.php';
 
 class VisitorDetails extends VisitorDetailsAbstract
 {
+    public function __construct()
+    {
+        $dir = Plugin\Manager::getPluginDirectory('Provider');
+        require_once $dir . '/functions.php';
+    }
+
     public function extendVisitorDetails(&$visitor)
     {
-        $visitor['provider'] = $this->details['location_provider'];
+        $visitor['provider']     = $this->details['location_provider'];
         $visitor['providerName'] = $this->getProviderName();
         $visitor['providerUrl']  = $this->getProviderUrl();
     }
@@ -34,7 +41,7 @@ class VisitorDetails extends VisitorDetailsAbstract
 
         $view            = new View('@Provider/_visitorDetails.twig');
         $view->visitInfo = $visitorDetails;
-        return [[ 20, $view->render() ]];
+        return [[20, $view->render()]];
     }
 
     protected function getProvider()

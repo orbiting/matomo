@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -77,7 +77,7 @@ class Sparklines extends ViewDataTable
             }
         }
 
-        $view->allMetricsDocumentation = Metrics::getDefaultMetricsDocumentation();
+        $view->allMetricsDocumentation = array_merge(Metrics::getDefaultMetricsDocumentation(), $this->config->metrics_documentation);
 
         $this->requestConfig->request_parameters_to_modify['columns'] = $columnsList;
         $this->requestConfig->request_parameters_to_modify['format_metrics'] = '1';
@@ -132,7 +132,7 @@ class Sparklines extends ViewDataTable
             foreach ($comparisons->getRows() as $comparisonRow) {
                 $segment = $comparisonRow->getMetadata('compareSegment');
                 if ($segment === false) {
-                    $segment = Request::getRawSegmentFromRequest() ?: '';;
+                    $segment = Request::getRawSegmentFromRequest() ?: '';
                 }
 
                 $date = $comparisonRow->getMetadata('compareDate');

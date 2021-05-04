@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -11,7 +11,6 @@ namespace Piwik\Tracker;
 use Piwik\Common;
 use Piwik\EventDispatcher;
 use Piwik\Plugin\Dimension\VisitDimension;
-use Piwik\Plugins\CustomVariables\CustomVariables;
 use Piwik\Tracker\Visit\VisitProperties;
 
 /**
@@ -105,13 +104,22 @@ class VisitorRecognizer
         $shouldMatchOneFieldOnly  = $this->shouldLookupOneVisitorFieldOnly($isVisitorIdToLookup, $request);
         list($timeLookBack, $timeLookAhead) = $this->getWindowLookupThisVisit($request);
 
+        $maxActions = TrackerConfig::getConfigValue('create_new_visit_after_x_actions');
+
         $visitRow = $this->model->findVisitor($idSite, $configId, $idVisitor, $userId, $persistedVisitAttributes, $shouldMatchOneFieldOnly, $isVisitorIdToLookup, $timeLookBack, $timeLookAhead);
+
+        if (!empty($maxActions) && $maxActions > 0
+            && !empty($visitRow['visit_total_actions'])
+            && $maxActions <= $visitRow['visit_total_actions']) {
+            $this->visitRow = false;
+            return false;
+        }
+
         $this->visitRow = $visitRow;
 
         if ($visitRow
             && count($visitRow) > 0
         ) {
-            $visitProperties->setProperty(self::KEY_ORIGINAL_VISIT_ROW, $visitRow);
             $visitProperties->setProperty('idvisitor', $visitRow['idvisitor']);
             $visitProperties->setProperty('user_id', $visitRow['user_id']);
 
@@ -128,14 +136,13 @@ class VisitorRecognizer
         }
     }
 
-    public function removeUnchangedValues(VisitProperties $visitProperties, $visit)
+    public function removeUnchangedValues($visit, VisitProperties $originalVisit = null)
     {
-        $originalRow = $visitProperties->getProperty(self::KEY_ORIGINAL_VISIT_ROW);
-
-        if (empty($originalRow)) {
+        if (empty($originalVisit)) {
             return $visit;
         }
 
+        $originalRow = $originalVisit->getProperties();
         if (!empty($originalRow['idvisitor'])
             && !empty($visit['idvisitor'])
             && bin2hex($originalRow['idvisitor']) === bin2hex($visit['idvisitor'])) {
@@ -240,8 +247,8 @@ class VisitorRecognizer
                 'visit_exit_idaction_url',
                 'visit_exit_idaction_name',
                 'visitor_returning',
-                'visitor_days_since_first',
-                'visitor_days_since_order',
+                'visitor_seconds_since_first',
+                'visitor_seconds_since_order',
                 'visitor_count_visits',
                 'visit_goal_buyer',
 
@@ -283,11 +290,6 @@ class VisitorRecognizer
 
             array_unshift($fields, 'visit_first_action_time');
             array_unshift($fields, 'visit_last_action_time');
-
-            for ($index = 1; $index <= CustomVariables::getNumUsableCustomVariables(); $index++) {
-                $fields[] = 'custom_var_k' . $index;
-                $fields[] = 'custom_var_v' . $index;
-            }
 
             $this->visitFieldsToSelect = array_unique($fields);
         }

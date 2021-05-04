@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -13,10 +13,11 @@ use Piwik\Common;
 use Piwik\Container\StaticContainer;
 use Piwik\DeviceDetector\DeviceDetectorFactory;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
-use Piwik\Network\IP;
+use Matomo\Network\IP;
 use Piwik\Piwik;
 use Piwik\Plugins\SitesManager\SiteUrls;
 use Piwik\Tracker\Visit\ReferrerSpamFilter;
+use Piwik\Config;
 
 /**
  * This class contains the logic to exclude some visitors from being tracked as per user settings
@@ -100,6 +101,14 @@ class VisitExcluded
          * These are of higher priority and should not be overwritten by plugins.
          */
 
+        // Checking if in config some requests are excluded
+        if (!$excluded) {
+            $excluded = $this->request->isRequestExcluded();
+            if ($excluded) {
+                Common::printDebug("Request is excluded.");
+            }
+        }
+
         // Checking if the Piwik ignore cookie is set
         if (!$excluded) {
             $excluded = $this->isIgnoreCookieFound();
@@ -125,11 +134,16 @@ class VisitExcluded
         }
 
         // Check if Referrer URL is a known spam
-        if (!$excluded) {
-            $excluded = $this->isReferrerSpamExcluded();
-            if ($excluded) {
-                Common::printDebug("Referrer URL is blacklisted as spam.");
+        $generalConfig = Config::getInstance()->Tracker;
+        if ($generalConfig['enable_spam_filter']) {
+            if (!$excluded) {
+                $excluded = $this->isReferrerSpamExcluded();
+                if ($excluded) {
+                    Common::printDebug("Referrer URL is listed as spam.");
+                }
             }
+        } else {
+            Common::printDebug("Spam list is disabled.");
         }
 
         // Check if request URL is excluded
@@ -204,7 +218,7 @@ class VisitExcluded
         return $isInRanges;
     }
 
-    private function isChromeDataSaverUsed(IP $ip)
+    public function isChromeDataSaverUsed(IP $ip)
     {
         // see https://github.com/piwik/piwik/issues/7733
         return !empty($_SERVER['HTTP_VIA'])
@@ -335,12 +349,13 @@ class VisitExcluded
      * Returns true if the specified user agent should be excluded for the current site or not.
      *
      * Visits whose user agent string contains one of the excluded_user_agents strings for the
-     * site being tracked (or one of the global strings) will be excluded.
+     * site being tracked (or one of the global strings) will be excluded. Regular expressions
+     * are also supported.
      *
      * @internal param string $this ->userAgent The user agent string.
      * @return bool
      */
-    protected function isUserAgentExcluded()
+    protected function isUserAgentExcluded(): bool
     {
         $excludedAgents = $this->getAttributes('excluded_user_agents', 'global_excluded_user_agents');
 
@@ -349,6 +364,10 @@ class VisitExcluded
                 // if the excluded user agent string part is in this visit's user agent, this visit should be excluded
                 if (stripos($this->userAgent, $excludedUserAgent) !== false) {
                     return true;
+                }
+                // if the string is a valid regex, and the user agent matches, this visit should be excluded
+                if (@preg_match($excludedUserAgent, null) !== false) {
+                    return preg_match($excludedUserAgent, $this->userAgent) ? true : false;
                 }
             }
         }

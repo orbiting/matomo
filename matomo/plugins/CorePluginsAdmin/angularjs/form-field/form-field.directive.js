@@ -1,7 +1,7 @@
 /*!
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -16,22 +16,9 @@
 
     function piwikFormField(piwik, $timeout){
 
-        function initMaterialSelect($select, placeholder) {
-            $select.material_select();
-
-            // to prevent overlapping selects, when a select is opened, we set the z-index to a high value on focus & remove z-index for all others
-            // NOTE: we can't remove it directly blur since the blur causes the select to overlap, aborting the select click. (a timeout is used
-            // to make sure the z-index is removed however, in case a non-select dropdown is displayed over it)
-            $select.closest('.select-wrapper').find('input.select-dropdown')
-                .focus(function () {
-                    $('.select-wrapper').css('z-index', '');
-                    $(this).closest('.select-wrapper').css('z-index', 999);
-                }).blur(function () {
-                    var self = this;
-                    setTimeout(function () {
-                        $(self).closest('.select-wrapper').css('z-index', '');
-                    }, 250);
-                });
+        function initMaterialSelect($select, placeholder, uiControlOptions) {
+            uiControlOptions = uiControlOptions || {};
+            $select.material_select(uiControlOptions);
 
             // add placeholder to input
             if (placeholder) {
@@ -97,12 +84,12 @@
 
                 if (isSelectControl(field)) {
                     var $select = element.find('select');
-                    initMaterialSelect($select, field.uiControlAttributes.placeholder);
+                    initMaterialSelect($select, field.uiControlAttributes.placeholder, field.uiControlOptions);
 
                     scope.$watch('formField.value', function (val, oldVal) {
                         if (val !== oldVal) {
                             $timeout(function () {
-                                initMaterialSelect($select, field.uiControlAttributes.placeholder);
+                                initMaterialSelect($select, field.uiControlAttributes.placeholder, field.uiControlOptions);
                             });
                         }
                     });
@@ -110,17 +97,17 @@
                     scope.$watch('formField.uiControlAttributes.disabled', function (val, oldVal) {
                         if (val !== oldVal) {
                             $timeout(function () {
-                                initMaterialSelect($select, field.uiControlAttributes.placeholder);
+                                initMaterialSelect($select, field.uiControlAttributes.placeholder, field.uiControlOptions);
                             });
                         }
                     });
 
                 } else if (hasUiControl(field, 'textarea')) {
-                    element.find('textarea').trigger('autoresize');
+                    Materialize.textareaAutoResize(element.find('textarea'));
                     scope.$watch('formField.value', function (val, oldVal) {
                         if (val !== oldVal) {
                             $timeout(function () {
-                                element.find('textarea').trigger('autoresize');
+                                Materialize.textareaAutoResize(element.find('textarea'));
                             });
                         }
                     });
@@ -427,7 +414,7 @@
 
                             if (isSelectControl(scope.formField)) {
                                 $timeout(function () {
-                                    initMaterialSelect(element.find('select'), field.uiControlAttributes.placeholder);
+                                    initMaterialSelect(element.find('select'), field.uiControlAttributes.placeholder, field.uiControlOptions);
                                 });
                             }
                         }

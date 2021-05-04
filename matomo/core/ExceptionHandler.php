@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -8,14 +8,15 @@
  */
 namespace Piwik;
 
+use DI\DependencyException;
 use Exception;
-use Interop\Container\Exception\ContainerException;
 use Piwik\API\Request;
 use Piwik\API\ResponseBuilder;
 use Piwik\Container\ContainerDoesNotExistException;
 use Piwik\Http\HttpCodeException;
 use Piwik\Container\StaticContainer;
 use Piwik\Plugins\CoreAdminHome\CustomLogo;
+use Piwik\Plugins\Monolog\Processor\ExceptionToTextProcessor;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -54,11 +55,10 @@ class ExceptionHandler
         }
 
         $message = sprintf(
-            "Uncaught exception: %s\nin %s line %d\n%s\n",
-            $message,
+            "Uncaught exception in %s line %d:\n%s\n",
             $exception->getFile(),
             $exception->getLine(),
-            $exception->getTraceAsString()
+            ExceptionToTextProcessor::getMessageAndWholeBacktrace($exception)
         );
 
         echo $message;
@@ -75,6 +75,8 @@ class ExceptionHandler
             && $exception->getCode() > 0
         ) {
             http_response_code($exception->getCode());
+        } else {
+            http_response_code(500);
         }
 
         self::logException($exception);
@@ -159,7 +161,7 @@ class ExceptionHandler
                 'exception' => $exception,
                 'ignoreInScreenWriter' => true,
             ]);
-        } catch (ContainerException $ex) {
+        } catch (DependencyException $ex) {
             // ignore (occurs if exception is thrown when resolving DI entries)
         } catch (ContainerDoesNotExistException $ex) {
             // ignore

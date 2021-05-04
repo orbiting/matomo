@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -274,8 +274,13 @@ class ReportsPurger
     {
         $maxIdArchive = Db::fetchOne("SELECT MAX(idarchive) FROM $table");
 
+        $blobTableWhere = $this->getBlobTableWhereExpr($oldNumericTables, $table);
+        if (empty($blobTableWhere)) {
+            return 0;
+        }
+
         $sql = "SELECT COUNT(*) FROM $table
-                 WHERE " . $this->getBlobTableWhereExpr($oldNumericTables, $table) . "
+                 WHERE " . $blobTableWhere . "
                    AND idarchive >= ?
                    AND idarchive < ?";
 

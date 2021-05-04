@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -20,7 +20,7 @@ class GetResolution extends Base
         parent::init();
         $this->dimension     = new Resolution();
         $this->name          = Piwik::translate('Resolution_WidgetResolutions');
-        $this->documentation = ''; // TODO
+        $this->documentation = Piwik::translate('Resolution_WidgetResolutionsDocumentation');
         $this->order = 8;
 
         $this->subcategoryId = 'DevicesDetection_Devices';

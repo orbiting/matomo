@@ -111,14 +111,22 @@
                     lastMatomoUrl = getMatomoUrlFromConfig(matomoConfig);
                     var trackerUrl = lastMatomoUrl + matomoConfig.trackingEndpoint;
                     if (matomoConfig.registerAsDefaultTracker) {
-                        tracker = Piwik.addTracker(trackerUrl);
+                        tracker = Piwik.addTracker(trackerUrl, matomoConfig.idSite);
                     } else {
-                        tracker = Piwik.getTracker(trackerUrl);
+                        tracker = Piwik.getTracker(trackerUrl, matomoConfig.idSite);
                     }
                     configuredTrackers[variableName] = tracker;
 
                     if (matomoConfig.disableCookies) {
                         tracker.disableCookies();
+                    }
+
+                    if (matomoConfig.requireCookieConsent) {
+                        tracker.requireCookieConsent();
+                    }
+
+                    if (matomoConfig.requireConsent) {
+                        tracker.requireConsent();
                     }
 
                     if (matomoConfig.enableCrossDomainLinking) {
@@ -127,6 +135,10 @@
 
                     if (matomoConfig.setSecureCookie) {
                         tracker.setSecureCookie(true);
+                    }
+
+                    if (matomoConfig.cookieSameSite) {
+                        tracker.setCookieSameSite(matomoConfig.cookieSameSite);
                     }
 
                     if (matomoConfig.cookieDomain) {
@@ -155,8 +167,6 @@
                         tracker.setDomains(domains);
                     }
 
-                    tracker.setSiteId(matomoConfig.idSite);
-                    
                     if (matomoConfig.alwaysUseSendBeacon) {
                         tracker.alwaysUseSendBeacon();
                     }

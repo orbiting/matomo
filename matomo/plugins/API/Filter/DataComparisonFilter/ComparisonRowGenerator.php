@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -199,10 +199,10 @@ class ComparisonRowGenerator
 
         // recurse on subtable if there
         $subtable = $row->getSubtable();
-        if ($subtable
-            && $compareRow
-        ) {
-            $this->compareTable($compareMetadata, $subtable, $rootTable, $compareRow->getSubtable());
+        $compareSubTable = $compareRow ? $compareRow->getSubtable() : null;
+
+        if ($subtable && $compareSubTable) {
+            $this->compareTable($compareMetadata, $subtable, $rootTable, $compareSubTable);
         }
     }
 

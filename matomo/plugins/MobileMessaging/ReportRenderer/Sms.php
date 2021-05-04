@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -88,15 +88,13 @@ class Sms extends ReportRenderer
         // evolution metrics formatting :
         //  - remove monetary, percentage and white spaces to shorten SMS content
         //    (this is also needed to be able to test $value != 0 and see if there is an evolution at all in SMSReport.twig)
-        //  - adds a plus sign
         $reportData->filter(
             'ColumnCallbackReplace',
             array(
                  $evolutionMetrics,
                  function ($value) use ($floatRegex) {
                      $matched = preg_match($floatRegex, $value, $matches);
-                     $formatted = $matched ? sprintf("%+d", $matches[0]) : $value;
-                     return \Piwik\NumberFormatter::getInstance()->formatPercentEvolution($formatted);
+                     return $matched ? (float) $matches[0] : $value;
                  }
             )
         );

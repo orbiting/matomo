@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -108,6 +108,16 @@ class DefaultProvider extends LocationProvider
             . Piwik::translate('UserCountry_HowToInstallGeoIPDatabases')
             . '</a></p>';
         return array('id' => self::ID, 'title' => self::TITLE, 'description' => $desc, 'order' => 1);
+    }
+
+    public function getUsageWarning(): ?string
+    {
+        $comment = Piwik::translate('UserCountry_DefaultLocationProviderDesc1') . ' ';
+        $comment .= Piwik::translate('UserCountry_DefaultLocationProviderDesc2', array(
+            '<a href="https://matomo.org/docs/geo-locate/" rel="noreferrer noopener" target="_blank">', '', '', '</a>'
+        ));
+
+        return $comment;
     }
 }
 

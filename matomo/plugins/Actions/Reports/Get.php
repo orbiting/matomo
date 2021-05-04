@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -18,7 +18,7 @@ class Get extends Base
         parent::init();
 
         $this->name          = Piwik::translate('General_Actions') . ' - ' . Piwik::translate('General_MainMetrics');
-        $this->documentation = ''; // TODO
+        $this->documentation = Piwik::translate('Actions_MainMetricsReportDocumentation');
         $this->order = 1;
         $this->processedMetrics = array(
             new AveragePageGenerationTime()

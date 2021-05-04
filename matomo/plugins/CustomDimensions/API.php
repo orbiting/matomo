@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -13,6 +13,7 @@ use Piwik\DataTable\Row;
 
 use Piwik\Archive;
 use Piwik\DataTable;
+use Piwik\Filesystem;
 use Piwik\Metrics;
 use Piwik\Piwik;
 use Piwik\Plugins\CustomDimensions\Dao\Configuration;
@@ -120,6 +121,7 @@ class API extends \Piwik\Plugin\API
 
         Cache::deleteCacheWebsiteAttributes($idSite);
         Cache::clearCacheGeneral();
+        Filesystem::deleteAllCacheOnUpdate();
 
         return $idDimension;
     }

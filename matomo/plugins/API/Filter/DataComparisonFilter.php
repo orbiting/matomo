@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -521,12 +521,7 @@ class DataComparisonFilter
         $valueToCompare = $fromRow ? $fromRow->getColumn($columnName) : 0;
         $valueToCompare = $valueToCompare ?: 0;
 
-        $change = DataTable\Filter\CalculateEvolutionFilter::calculate($value, $valueToCompare, $precision = 1, $appendPercent = false);
-
-        if ($change >= 0) {
-            $change = '+' . $change;
-        }
-        $change .= '%';
+        $change = DataTable\Filter\CalculateEvolutionFilter::calculate($value, $valueToCompare, $precision = 1, true, true);
 
         return $change;
     }

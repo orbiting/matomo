@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -15,13 +15,10 @@ use Piwik\DataTable;
 use Piwik\Date;
 use Piwik\Metrics as PiwikMetrics;
 use Piwik\Piwik;
-use Piwik\Plugin\Report;
 use Piwik\Plugins\Actions\Columns\Metrics\AveragePageGenerationTime;
 use Piwik\Plugins\Actions\Columns\Metrics\AverageTimeOnPage;
 use Piwik\Plugins\Actions\Columns\Metrics\BounceRate;
 use Piwik\Plugins\Actions\Columns\Metrics\ExitRate;
-use Piwik\Plugins\CustomVariables\API as APICustomVariables;
-use Piwik\Plugins\Actions\Actions\ActionSiteSearch;
 use Piwik\Plugin\ReportsProvider;
 use Piwik\Tracker\Action;
 use Piwik\Tracker\PageUrl;
@@ -352,42 +349,14 @@ class API extends \Piwik\Plugin\API
     {
         Piwik::checkUserHasViewAccess($idSite);
 
-        Actions::checkCustomVariablesPluginEnabled();
-        $customVariables = APICustomVariables::getInstance()->getCustomVariables($idSite, $period, $date, $segment, $expanded = false, $_leavePiwikCoreVariables = true);
+        $dataTable = Archive::createDataTableFromArchive('Actions_SiteSearchCategories', $idSite, $period, $date, $segment);
 
-        $customVarNameToLookFor = ActionSiteSearch::CVAR_KEY_SEARCH_CATEGORY;
-
-        $dataTable = new DataTable();
-        // Handle case where date=last30&period=day
-        // FIXMEA: this logic should really be refactored somewhere, this is ugly!
-        if ($customVariables instanceof DataTable\Map) {
-            $dataTable = $customVariables->getEmptyClone();
-
-            $customVariableDatatables = $customVariables->getDataTables();
-            foreach ($customVariableDatatables as $key => $customVariableTableForDate) {
-                // we do not enter the IF, in the case idSite=1,3 AND period=day&date=datefrom,dateto,
-                if ($customVariableTableForDate instanceof DataTable
-                    && $customVariableTableForDate->getMetadata(Archive\DataTableFactory::TABLE_METADATA_PERIOD_INDEX)
-                ) {
-                    $row = $customVariableTableForDate->getRowFromLabel($customVarNameToLookFor);
-                    if ($row) {
-                        $dateRewrite = $customVariableTableForDate->getMetadata(Archive\DataTableFactory::TABLE_METADATA_PERIOD_INDEX)->getDateStart()->toString();
-                        $idSubtable = $row->getIdSubDataTable();
-                        $categories = APICustomVariables::getInstance()->getCustomVariablesValuesFromNameId($idSite, $period, $dateRewrite, $idSubtable, $segment);
-                        $dataTable->addTable($categories, $key);
-                    }
-                }
-            }
-        } elseif ($customVariables instanceof DataTable) {
-            $row = $customVariables->getRowFromLabel($customVarNameToLookFor);
-            if ($row) {
-                $idSubtable = $row->getIdSubDataTable();
-                $dataTable = APICustomVariables::getInstance()->getCustomVariablesValuesFromNameId($idSite, $period, $date, $idSubtable, $segment);
-            }
-        }
+        $dataTable->queueFilter('ColumnDelete', 'nb_uniq_visitors');
         $this->filterActionsDataTable($dataTable, $isPageTitleType = false);
         $dataTable->filter('ReplaceColumnNames');
+        $dataTable->filter('AddSegmentValue');
         $this->addPagesPerSearchColumn($dataTable, $columnToRead = 'nb_actions');
+
         return $dataTable;
     }
 
@@ -395,43 +364,38 @@ class API extends \Piwik\Plugin\API
      * Will search in the DataTable for a Label matching the searched string
      * and return only the matching row, or an empty datatable
      */
-    protected function getFilterPageDatatableSearch($callBackParameters, $search, $actionType, $table = false,
-                                                    $searchTree = false)
+    protected function getFilterPageDatatableSearch($callBackParameters, $search, $actionType)
     {
-        if ($searchTree === false) {
-            // build the query parts that are searched inside the tree
-            if ($actionType == Action::TYPE_PAGE_TITLE) {
-                $searchedString = Common::unsanitizeInputValue($search);
-            } else {
-                $idSite = $callBackParameters[1];
-                try {
-                    $searchedString = PageUrl::excludeQueryParametersFromUrl($search, $idSite);
-                } catch (Exception $e) {
-                    $searchedString = $search;
-                }
+        // build the query parts that are searched inside the tree
+        if ($actionType == Action::TYPE_PAGE_TITLE) {
+            $searchedString = Common::unsanitizeInputValue($search);
+        } else {
+            $idSite = $callBackParameters[1];
+            try {
+                $searchedString = PageUrl::excludeQueryParametersFromUrl($search, $idSite);
+            } catch (Exception $e) {
+                $searchedString = $search;
             }
-            ArchivingHelper::reloadConfig();
-            $searchTree = ArchivingHelper::getActionExplodedNames($searchedString, $actionType);
         }
+        ArchivingHelper::reloadConfig();
+        $searchTree = ArchivingHelper::getActionExplodedNames($searchedString, $actionType);
 
-        if ($table === false) {
-            // fetch the data table
-            $table = call_user_func_array('\Piwik\Archive::createDataTableFromArchive', $callBackParameters);
+        // fetch the data table
+        $table = call_user_func_array('\Piwik\Archive::createDataTableFromArchive', $callBackParameters);
 
-            if ($table instanceof DataTable\Map) {
-                // search an array of tables, e.g. when using date=last30
-                // note that if the root is an array, we filter all children
-                // if an array occurs inside the nested table, we only look for the first match (see below)
-                $dataTableMap = $table->getEmptyClone();
+        if ($table instanceof DataTable\Map) {
+            // search an array of tables, e.g. when using date=last30
+            // note that if the root is an array, we filter all children
+            // if an array occurs inside the nested table, we only look for the first match (see below)
+            $dataTableMap = $table->getEmptyClone();
 
-                foreach ($table->getDataTables() as $label => $subTable) {
-                    $newSubTable = $this->doFilterPageDatatableSearch($callBackParameters, $subTable, $searchTree);
+            foreach ($table->getDataTables() as $label => $subTable) {
+                $newSubTable = $this->doFilterPageDatatableSearch($callBackParameters, $subTable, $searchTree);
 
-                    $dataTableMap->addTable($newSubTable, $label);
-                }
-
-                return $dataTableMap;
+                $dataTableMap->addTable($newSubTable, $label);
             }
+
+            return $dataTableMap;
         }
 
         return $this->doFilterPageDatatableSearch($callBackParameters, $table, $searchTree);
@@ -454,7 +418,14 @@ class API extends \Piwik\Plugin\API
             }
 
             // nothing found in all sub tables
-            return new DataTable;
+            $result = new DataTable;
+            $subTables = $table->getDataTables();
+            if (count($subTables) > 0) {
+                // use the first subtable's metadata to ensure basic metadata like `period` is available in response
+                $subTable = reset($subTables);
+                $result->setAllTableMetadata($subTable->getAllTableMetadata());
+            }
+            return $result;
         }
 
         // filter regular data table
@@ -551,6 +522,7 @@ class API extends \Piwik\Plugin\API
             $extraProcessedMetrics[] = new BounceRate();
             $extraProcessedMetrics[] = new ExitRate();
             $extraProcessedMetrics[] = new AveragePageGenerationTime();
+
             $table->setMetadata(DataTable::EXTRA_PROCESSED_METRICS_METADATA_NAME, $extraProcessedMetrics);
         });
     }

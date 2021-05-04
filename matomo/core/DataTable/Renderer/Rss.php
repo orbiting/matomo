@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -108,7 +108,7 @@ class Rss extends Renderer
      */
     protected function getRssHeader()
     {
-        $generationDate = date('r');
+        $generationDate = date('r', Date::getNowTimestamp());
         $header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <rss version=\"2.0\">
   <channel>
@@ -118,7 +118,7 @@ class Rss extends Renderer
     <pubDate>$generationDate</pubDate>
     <generator>matomo</generator>
     <language>en</language>
-    <lastBuildDate>$generationDate</lastBuildDate>";
+    <lastBuildDate>$generationDate</lastBuildDate>\n";
         return $header;
     }
 

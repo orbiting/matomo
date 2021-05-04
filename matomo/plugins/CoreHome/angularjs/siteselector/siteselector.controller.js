@@ -1,7 +1,7 @@
 /*!
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 (function () {
@@ -12,6 +12,8 @@
     function SiteSelectorController($scope, siteSelectorModel, piwik, AUTOCOMPLETE_MIN_SITES){
 
         $scope.model = siteSelectorModel;
+
+        $scope.model.loadInitialSites();
 
         $scope.autocompleteMinSites = AUTOCOMPLETE_MIN_SITES;
         $scope.activeSiteId = piwik.idSite;

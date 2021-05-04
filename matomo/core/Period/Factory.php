@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -74,7 +74,7 @@ abstract class Factory
         self::checkPeriodIsEnabled($period);
 
         if (is_string($date)) {
-            list($period, $date) = self::convertRangeToDateIfNeeded($period, $date);
+            [$period, $date] = self::convertRangeToDateIfNeeded($period, $date);
             if (Period::isMultiplePeriod($date, $period)
                 || $period == 'range'
             ) {
@@ -109,7 +109,7 @@ abstract class Factory
             }
         }
 
-        throw new \Exception("Don't know how to create a '$period' period!");
+        throw new \Exception("Don't know how to create a '$period' period! (date = $date)");
     }
 
     public static function checkPeriodIsEnabled($period)
@@ -160,17 +160,15 @@ abstract class Factory
             $timezone = 'UTC';
         }
 
-        list($period, $date) = self::convertRangeToDateIfNeeded($period, $date);
+        [$period, $date] = self::convertRangeToDateIfNeeded($period, $date);
 
         if ($period == 'range') {
             self::checkPeriodIsEnabled('range');
             $oPeriod = new Range('range', $date, $timezone, Date::factory('today', $timezone));
         } else {
             if (!($date instanceof Date)) {
-                if ($date == 'now' || $date == 'today') {
-                    $date = date('Y-m-d', Date::factory('now', $timezone)->getTimestamp());
-                } elseif ($date == 'yesterday' || $date == 'yesterdaySameTime') {
-                    $date = date('Y-m-d', Date::factory('now', $timezone)->subDay(1)->getTimestamp());
+                if (preg_match('/^(now|today|yesterday|yesterdaySameTime|last[ -]?(?:week|month|year))$/i', $date)) {
+                    $date = Date::factoryInTimezone($date, $timezone);
                 }
                 $date = Date::factory($date);
             }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -89,7 +89,7 @@ class PasswordResetter
     /**
      * The name to use in the From: part of the confirm password reset email.
      *
-     * Defaults to the `[General] login_password_recovery_email_name` INI config option.
+     * Defaults to the `[General] noreply_email_name` INI config option.
      *
      * @var string
      */
@@ -98,7 +98,7 @@ class PasswordResetter
     /**
      * The from email to use in the confirm password reset email.
      *
-     * Deafults to the `[General] login_password_recovery_email_address` INI config option.
+     * Defaults to the `[General] noreply_email_address` INI config option.
      *
      * @var
      */
@@ -130,14 +130,7 @@ class PasswordResetter
             $this->confirmPasswordAction = $confirmPasswordAction;
         }
 
-        if (empty($emailFromName)) {
-            $emailFromName = Config::getInstance()->General['login_password_recovery_email_name'];
-        }
         $this->emailFromName = $emailFromName;
-
-        if (empty($emailFromAddress)) {
-            $emailFromAddress = Config::getInstance()->General['login_password_recovery_email_address'];
-        }
         $this->emailFromAddress = $emailFromAddress;
 
         if (empty($passwordHelper)) {
@@ -234,7 +227,12 @@ class PasswordResetter
     {
         Access::doAsSuperUser(function () use ($login, $passwordHash) {
             $userUpdater = new UserUpdater();
-            $userUpdater->updateUserWithoutCurrentPassword($login, $passwordHash, $email = false, $alias = false, $isPasswordHashed = true);
+            $userUpdater->updateUserWithoutCurrentPassword(
+                $login,
+                $passwordHash,
+                $email = false,
+                $isPasswordHashed = true
+            );
         });
     }
 
@@ -452,11 +450,15 @@ class PasswordResetter
             ) . "</p>";
         $mail->setWrappedHtmlBody($bodyText);
 
-        $mail->setFrom($this->emailFromAddress, $this->emailFromName);
+        if ($this->emailFromAddress || $this->emailFromName) {
+            $mail->setFrom($this->emailFromAddress, $this->emailFromName);
+        } else {
+            $mail->setDefaultFromPiwik();
+        }
 
         $replytoEmailName = Config::getInstance()->General['login_password_recovery_replyto_email_name'];
         $replytoEmailAddress = Config::getInstance()->General['login_password_recovery_replyto_email_address'];
-        $mail->setReplyTo($replytoEmailAddress, $replytoEmailName);
+        $mail->addReplyTo($replytoEmailAddress, $replytoEmailName);
 
         @$mail->send();
     }

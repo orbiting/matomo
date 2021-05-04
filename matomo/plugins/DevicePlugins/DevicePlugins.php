@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -10,6 +10,7 @@ namespace Piwik\Plugins\DevicePlugins;
 
 use Piwik\Cache;
 use Piwik\CacheId;
+use Piwik\Columns\Dimension;
 use Piwik\Piwik;
 use Piwik\Plugin;
 
@@ -48,14 +49,17 @@ class DevicePlugins extends \Piwik\Plugin
     {
         $cacheId = CacheId::pluginAware('DevicePluginColumns');
         $cache   = Cache::getTransientCache();
+        $removedDimensions = Dimension::getRemovedDimensions();
 
         if (!$cache->contains($cacheId)) {
             $instances = [];
 
             foreach (self::getAllDevicePluginsColumnClasses() as $className) {
-                $instance = new $className();
-                $instances[] = $instance;
+                if (!in_array($className, $removedDimensions)) {
+                    $instances[] = new $className();
+                }
             }
+
             $cache->save($cacheId, $instances);
         }
 

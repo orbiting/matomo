@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -19,7 +19,7 @@ class GetModel extends Base
         parent::init();
         $this->dimension     = new DeviceModel();
         $this->name          = Piwik::translate('DevicesDetection_DeviceModel');
-        $this->documentation = ''; // TODO
+        $this->documentation = Piwik::translate('DevicesDetection_DeviceModelReportDocumentation');
         $this->order = 2;
         $this->hasGoalMetrics = true;
         $this->subcategoryId = 'DevicesDetection_Devices';

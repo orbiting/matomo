@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -27,7 +27,7 @@ class GetUsers extends Base
 
         $this->name            = Piwik::translate('UserId_UserReportTitle');
         $this->subcategoryId   = 'UserId_UserReportTitle';
-        $this->documentation   = '';
+        $this->documentation   = Piwik::translate('UserId_UserReportDocumentation');
         $this->dimension       = new UserId();
         $this->metrics         = array('label', 'nb_visits', 'nb_actions', 'nb_visits_converted');
         $this->supportsFlatten = false;

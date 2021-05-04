@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -188,7 +188,9 @@ abstract class SMSProvider
         $maxCharsAllowed = self::maxCharsAllowed($maximumNumberOfConcatenatedSMS, $smsContentContainsUCS2Chars);
         $sizeOfSMSContent = self::sizeOfSMSContent($string, $smsContentContainsUCS2Chars);
 
-        if ($sizeOfSMSContent <= $maxCharsAllowed) return $string;
+        if ($sizeOfSMSContent <= $maxCharsAllowed) {
+            return $string;
+        }
 
         $smsContentContainsUCS2Chars = $smsContentContainsUCS2Chars || self::containsUCS2Characters($appendedString);
         $maxCharsAllowed = self::maxCharsAllowed($maximumNumberOfConcatenatedSMS, $smsContentContainsUCS2Chars);
@@ -214,7 +216,9 @@ abstract class SMSProvider
 
     private static function sizeOfSMSContent($smsContent, $containsUCS2Chars)
     {
-        if ($containsUCS2Chars) return Common::mb_strlen($smsContent);
+        if ($containsUCS2Chars) {
+            return Common::mb_strlen($smsContent);
+        }
 
         $sizeOfSMSContent = 0;
         foreach (self::mb_str_split($smsContent) as $char) {

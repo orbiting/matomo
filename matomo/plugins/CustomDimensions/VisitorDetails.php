@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link    http://piwik.org
+ * @link    https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -82,6 +82,7 @@ class VisitorDetails extends VisitorDetailsAbstract
         }
 
         $view                   = new View('@CustomDimensions/_visitorDetails');
+        $view->sendHeadersWhenRendering = false;
         $view->visitInfo        = $visitorDetails;
         $view->customDimensions = $this->getCustomDimensionsFromVisit($visitorDetails);
         return [[ 40, $view->render() ]];
@@ -118,6 +119,7 @@ class VisitorDetails extends VisitorDetailsAbstract
         $action['customDimensions'] = $customDimensions;
 
         $view         = new View('@CustomDimensions/_actionTooltip');
+        $view->sendHeadersWhenRendering = false;
         $view->action = $action;
         return [[ 30, $view->render() ]];
     }

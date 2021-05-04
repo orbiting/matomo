@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -18,6 +18,8 @@ use Psr\Log\LoggerInterface;
 class ErrorHandler
 {
     private static $fatalErrorStackTrace = [];
+
+    private static $lastError = '';
 
     /**
      * Fatal errors in PHP do not leave behind backtraces, which can make it impossible to determine
@@ -132,8 +134,10 @@ class ErrorHandler
 
     public static function errorHandler($errno, $errstr, $errfile, $errline)
     {
+        self::$lastError = self::createLogMessage($errno, $errstr, $errfile, $errline);
+
         // if the error has been suppressed by the @ we don't handle the error
-        if (error_reporting() == 0) {
+        if (!(error_reporting() & $errno)) {
             return;
         }
 
@@ -148,10 +152,9 @@ class ErrorHandler
                 Common::sendResponseCode(500);
                 // Convert the error to an exception with an HTML message
                 $e = new \Exception();
-                $message = self::getHtmlMessage($errno, $errstr, $errfile, $errline, $e->getTraceAsString());
+                $backtrace = \Piwik_ShouldPrintBackTraceWithMessage() ? $e->getTraceAsString() : '';
+                $message = self::getHtmlMessage($errno, $errstr, $errfile, $errline, $backtrace);
                 throw new ErrorException($message, 0, $errno, $errfile, $errline);
-                break;
-
             case E_WARNING:
             case E_NOTICE:
             case E_USER_WARNING:
@@ -173,6 +176,17 @@ class ErrorHandler
 
                 break;
         }
+    }
+
+    public static function getLastError()
+    {
+        $lastError = error_get_last();
+
+        if (!empty($lastError['message'])) {
+            return $lastError['message'];
+        }
+
+        return self::$lastError;
     }
 
     private static function createLogMessage($errno, $errstr, $errfile, $errline)

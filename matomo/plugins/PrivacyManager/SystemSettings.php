@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -8,8 +8,11 @@
  */
 namespace Piwik\Plugins\PrivacyManager;
 
+use Piwik\Container\StaticContainer;
+use Piwik\Log;
 use Piwik\Piwik;
-use Piwik\Settings\Setting;
+use Piwik\Plugin\Manager;
+use Piwik\Settings\Plugin\SystemSetting;
 use Piwik\Settings\FieldConfig;
 
 /**
@@ -17,23 +20,37 @@ use Piwik\Settings\FieldConfig;
  */
 class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 {
-    /** @var Setting */
+    /** @var SystemSetting */
+    public $imprintUrl;
+
+    /** @var SystemSetting */
     public $privacyPolicyUrl;
 
-    /** @var Setting */
+    /** @var SystemSetting */
     public $termsAndConditionUrl;
 
-    /** @var Setting */
+    /** @var SystemSetting */
     public $showInEmbeddedWidgets;
 
     protected function init()
     {
+        $this->imprintUrl = $this->createImprintUrlSetting();
         $this->privacyPolicyUrl = $this->createPrivacyPolicyUrlSetting();
         $this->termsAndConditionUrl = $this->createTermsAndConditionUrlSetting();
         $this->showInEmbeddedWidgets = $this->createShowInEmbeddedWidgetsSetting();
     }
 
-    private function createPrivacyPolicyUrlSetting()
+    private function createImprintUrlSetting(): SystemSetting
+    {
+        return $this->makeSetting('ImprintUrl', $default = '', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
+            $field->title = Piwik::translate('PrivacyManager_ImprintUrl');
+            $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
+            $field->description = Piwik::translate('PrivacyManager_ImprintUrlDescription') . ' ' .
+                Piwik::translate('PrivacyManager_PrivacyPolicyUrlDescriptionSuffix', ['anonymous']);
+        });
+    }
+
+    private function createPrivacyPolicyUrlSetting(): SystemSetting
     {
         return $this->makeSetting('privacyPolicyUrl', $default = '', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
             $field->title = Piwik::translate('PrivacyManager_PrivacyPolicyUrl');
@@ -43,7 +60,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         });
     }
 
-    private function createTermsAndConditionUrlSetting()
+    private function createTermsAndConditionUrlSetting(): SystemSetting
     {
         return $this->makeSetting('termsAndConditionUrl', $default = '', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
             $field->title = Piwik::translate('PrivacyManager_TermsAndConditionUrl');
@@ -53,7 +70,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         });
     }
 
-    private function createShowInEmbeddedWidgetsSetting()
+    private function createShowInEmbeddedWidgetsSetting(): SystemSetting
     {
         return $this->makeSetting('showInEmbeddedWidgets', $default = false, FieldConfig::TYPE_BOOL, function (FieldConfig $field) {
             $field->title = Piwik::translate('PrivacyManager_ShowInEmbeddedWidgets');

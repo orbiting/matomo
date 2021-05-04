@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -10,6 +10,7 @@ namespace Piwik\Plugins\SEO\Metric;
 
 use Piwik\Http;
 use Piwik\NumberFormatter;
+use Piwik\Piwik;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -35,7 +36,7 @@ class Bing implements MetricsProvider
 
         try {
             $response = str_replace('&nbsp;', ' ', Http::sendHttpRequest($url, $timeout = 10, @$_SERVER['HTTP_USER_AGENT']));
-            $response = str_replace('&#160;', '', $response); // number uses nbsp as thousand seperator
+            $response = str_replace('&#160;', '', $response); // number uses nbsp as thousand separator
 
             if (preg_match('#([0-9,\.]+) results#i', $response, $p)) {
                 $pageCount = NumberFormatter::getInstance()->formatNumber((int)str_replace(array(',', '.'), '', $p[1]));
@@ -43,8 +44,8 @@ class Bing implements MetricsProvider
                 $pageCount = 0;
             }
         } catch (\Exception $e) {
-            $this->logger->warning('Error while getting Bing SEO stats: {message}', array('message' => $e->getMessage()));
-            $pageCount = null;
+            $this->logger->info('Error while getting Bing SEO stats: {message}', array('message' => $e->getMessage()));
+            $pageCount = Piwik::translate('General_Error');
         }
 
         $logo = "plugins/Morpheus/icons/dist/SEO/bing.com.png";

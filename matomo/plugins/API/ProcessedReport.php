@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -134,7 +134,7 @@ class ProcessedReport
     }
 
     /**
-     * Translates the given metric in case the report exists and in case the metric acutally belongs to the report.
+     * Translates the given metric in case the report exists and in case the metric actually belongs to the report.
      *
      * @param string $metric     For example 'nb_visits'
      * @param int    $idSite
@@ -358,7 +358,9 @@ class ProcessedReport
                                                        'idSubtable' => $idSubtable,
                                                   ));
 
-        if (!empty($segment)) $parameters['segment'] = $segment;
+        if (!empty($segment)) {
+            $parameters['segment'] = $segment;
+        }
 
         if (!empty($reportMetadata['processedMetrics'])
             && !empty($reportMetadata['metrics']['nb_visits'])
