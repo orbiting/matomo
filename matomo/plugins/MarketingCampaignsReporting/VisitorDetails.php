@@ -1,11 +1,12 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link    http://piwik.org
+ * @link    https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\MarketingCampaignsReporting;
 
 use Piwik\Piwik;
@@ -23,16 +24,18 @@ class VisitorDetails extends VisitorDetailsAbstract
             'campaignMedium'  => 'campaign_medium',
             'campaignName'    => 'campaign_name',
             'campaignSource'  => 'campaign_source',
+            'campaignGroup'   => 'campaign_group',
+            'campaignPlacement'  => 'campaign_placement',
         );
 
         foreach ($fields as $name => $field) {
-            $visitor[$name] = $this->details[$field];
+            $visitor[$name] = empty($this->details[$field]) ? '' : $this->details[$field];
         }
     }
 
     public function renderVisitorDetails($visitorDetails)
     {
-        $campaignData = array();
+        $campaignData = [];
         $fields       = array(
             'campaignId'      => Piwik::translate('MarketingCampaignsReporting_CampaignId'),
             'campaignName'    => Piwik::translate('MarketingCampaignsReporting_Name'),
@@ -40,6 +43,8 @@ class VisitorDetails extends VisitorDetailsAbstract
             'campaignContent' => Piwik::translate('MarketingCampaignsReporting_Content'),
             'campaignKeyword' => Piwik::translate('MarketingCampaignsReporting_Keyword'),
             'campaignSource'  => Piwik::translate('MarketingCampaignsReporting_Source'),
+            'campaignGroup'  => Piwik::translate('MarketingCampaignsReporting_Group'),
+            'campaignPlacement'  => Piwik::translate('MarketingCampaignsReporting_Placement'),
         );
 
         foreach ($fields as $field => $name) {
@@ -48,8 +53,9 @@ class VisitorDetails extends VisitorDetailsAbstract
             }
         }
 
-        $view           = new View('@MarketingCampaignsReporting/visitorDetails');
-        $view->campaign = $campaignData;
-        return [[ 30, $view->render() ]];
+        $view                           = new View('@MarketingCampaignsReporting/visitorDetails');
+        $view->sendHeadersWhenRendering = false;
+        $view->campaign                 = $campaignData;
+        return [[30, $view->render()]];
     }
 }
