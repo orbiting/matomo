@@ -16,6 +16,10 @@
   .dropdown {
     min-width: 210px;
   }
+
+  .ui-widget.ui-widget-content {
+    border: none;
+  }
 }
 
 #content {
@@ -162,4 +166,20 @@
 .siteSelect a {
   white-space: normal;
   text-align: left;
+}
+
+.siteSelector.disabled {
+  a.title {
+    cursor: default !important;
+
+    .icon {
+      display: none !important;
+    }
+  }
+
+  &.borderedControl {
+    &:hover {
+      background-color: @theme-color-background-base!important;
+    }
+  }
 }

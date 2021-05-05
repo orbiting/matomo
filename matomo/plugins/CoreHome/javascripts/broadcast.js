@@ -1,7 +1,7 @@
 /*!
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -53,7 +53,7 @@ var broadcast = {
     /**
      * Initializes broadcast object
      *
-     * @deprecated in 3.2.2, will be removed in Piwik 4
+     * @deprecated in 3.2.2, will be removed in Matomo 5
      *
      * @return {void}
      */
@@ -81,7 +81,7 @@ var broadcast = {
      *
      * * Note: the method is manipulated in Overlay/javascripts/Piwik_Overlay.js - keep this in mind when making changes.
      *
-     * @deprecated since 3.2.2, will be removed in Piwik 4
+     * @deprecated since 3.2.2, will be removed in Matomo 5
      *
      * @param {string}  hash to load page with
      * @return {void}
@@ -181,6 +181,11 @@ var broadcast = {
         return broadcast.getValueFromUrl('module') == 'Widgetize' && broadcast.getValueFromUrl('moduleToWidgetize') == 'Dashboard';
     },
 
+    isWidgetizeRequestWithoutSession: function() {
+        // whenever a token_auth is set in the URL, we assume a widget or page is tried to be shown widgetized.
+        return broadcast.getValueFromUrl('token_auth') != '' && broadcast.getValueFromUrl('force_api_session') != '1';
+    },
+
     /**
      * Returns if the current page is the login page
      * @return {boolean}
@@ -199,7 +204,7 @@ var broadcast = {
      *
      * NOTE: this method will only make ajax call and replacing main content.
      *
-     * @deprecated in 3.2.2, will be removed in Piwik 4.
+     * @deprecated in 3.2.2, will be removed in Matomo 5.
      *
      * @param {string} ajaxUrl  querystring with parameters to be updated
      * @param {boolean} [disableHistory]  the hash change won't be available in the browser history
@@ -437,7 +442,7 @@ var broadcast = {
         var p_v = newParamValue.split("=");
 
         var paramName = p_v[0];
-        var valFromUrl = broadcast.getParamValue(paramName, urlStr);
+        var valFromUrl = broadcast.getParamValue(paramName, urlStr) || broadcast.getParamValue(encodeURIComponent(paramName), urlStr);
         // if set 'idGoal=' then we remove the parameter from the URL automatically (rather than passing an empty value)
         var paramValue = p_v[1];
         if (paramValue == '') {
@@ -453,7 +458,7 @@ var broadcast = {
             var regToBeReplace = new RegExp(paramName + '=' + valFromUrl, 'ig');
             if (newParamValue == '') {
                 // if new value is empty remove leading &, as well
-                regToBeReplace = new RegExp('[\&]?' + paramName + '=' + valFromUrl, 'ig');
+                regToBeReplace = new RegExp('[\&]?(' + paramName + '|' + encodeURIComponent(paramName) + ')=' + valFromUrl, 'ig');
             }
             urlStr = urlStr.replace(regToBeReplace, newParamValue);
         } else if (newParamValue != '') {
@@ -775,33 +780,38 @@ var broadcast = {
      */
     getParamValue: function (param, url) {
         var lookFor = param + '=';
-        var startStr = url.indexOf(lookFor);
 
-        if (startStr >= 0) {
-            return getSingleValue(startStr, url);
-        } else {
-            url = decodeURIComponent(url);
+        if (url.indexOf('?') >= 0) {
+            url = url.substr(url.indexOf('?')+1);
+        }
 
-            // try looking for multi value param
-            lookFor = param + '[]=';
-            startStr = url.indexOf(lookFor);
-            if (startStr >= 0) {
-                var result = [getSingleValue(startStr)];
-                while ((startStr = url.indexOf(lookFor, startStr + 1)) !== -1) {
-                    result.push(getSingleValue(startStr));
-                }
-                return result;
-            } else {
-                return '';
+        var urlPieces = url.split('&');
+
+        // look for the latest occurrence of the parameter if available
+        for (var i=urlPieces.length-1; i>=0; i--) {
+            if (urlPieces[i].indexOf(lookFor) === 0) {
+                return getSingleValue(urlPieces[i]);
             }
         }
 
-        function getSingleValue(startPos) {
-            var endStr = url.indexOf("&", startPos);
-            if (endStr === -1) {
-                endStr = url.length;
+        // gather parameter array if available
+        lookFor = param + '[]=';
+        var result = [];
+        for (var j=0; j<urlPieces.length; j++) {
+            if (urlPieces[j].indexOf(lookFor) === 0) {
+                result.push(getSingleValue(urlPieces[j]));
+            } else if (decodeURIComponent(urlPieces[j]).indexOf(lookFor) === 0) {
+                result.push(getSingleValue(decodeURIComponent(urlPieces[j])));
             }
-            var value = url.substring(startPos + lookFor.length, endStr);
+        }
+        return result.length ? result : '';
+
+        function getSingleValue(urlPart) {
+            var startPos = urlPart.indexOf("=");
+            if (startPos === -1) {
+                return '';
+            }
+            var value = urlPart.substring(startPos+1);
 
             // we sanitize values to add a protection layer against XSS
             // parameters 'segment', 'popover' and 'compareSegments' are not sanitized, since segments are designed to accept any user input

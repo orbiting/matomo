@@ -18,7 +18,10 @@
             this.campaignKeyword = '';
             this.campaignSource = '';
             this.campaignMedium = '';
+            this.campaignId = '';
             this.campaignContent = '';
+            this.campaignGroup = '';
+            this.campaignPlacement = '';
             this.generatedUrl = '';
         };
 
@@ -48,22 +51,34 @@
                 this.generatedUrl += '?';
             }
 
-            this.generatedUrl += 'pk_campaign='+campaignName;
+            this.generatedUrl += 'mtm_campaign='+campaignName;
 
             if (this.campaignKeyword) {
-                this.generatedUrl += '&pk_kwd='+encodeURIComponent(this.campaignKeyword.trim());
+                this.generatedUrl += '&mtm_kwd='+encodeURIComponent(this.campaignKeyword.trim());
             }
 
             if (this.campaignSource) {
-                this.generatedUrl += '&pk_source='+encodeURIComponent(this.campaignSource.trim());
+                this.generatedUrl += '&mtm_source='+encodeURIComponent(this.campaignSource.trim());
             }
 
             if (this.campaignMedium) {
-                this.generatedUrl += '&pk_medium='+encodeURIComponent(this.campaignMedium.trim());
+                this.generatedUrl += '&mtm_medium='+encodeURIComponent(this.campaignMedium.trim());
             }
 
             if (this.campaignContent) {
-                this.generatedUrl += '&pk_content='+encodeURIComponent(this.campaignContent.trim());
+                this.generatedUrl += '&mtm_content='+encodeURIComponent(this.campaignContent.trim());
+            }
+
+            if (this.campaignId) {
+                this.generatedUrl += '&mtm_cid='+encodeURIComponent(this.campaignId.trim());
+            }
+
+            if (this.campaignGroup) {
+                this.generatedUrl += '&mtm_group='+encodeURIComponent(this.campaignGroup.trim());
+            }
+
+            if (this.campaignPlacement) {
+                this.generatedUrl += '&mtm_placement='+encodeURIComponent(this.campaignPlacement.trim());
             }
 
             this.generatedUrl += urlHash;

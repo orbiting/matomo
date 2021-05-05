@@ -1,7 +1,7 @@
 /*!
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -37,6 +37,9 @@
                         if (!fileName || '.zip' != fileName.slice(-4)) {
                             event.preventDefault();
                             alert(_pk_translate('CorePluginsAdmin_NoZipFileSelected'));
+                        } else if ($zipFile.data('maxSize') > 0 && $zipFile[0].files[0].size > $zipFile.data('maxSize')*1048576) {
+                            event.preventDefault();
+                            alert(_pk_translate('CorePluginsAdmin_FileExceedsUploadLimit'));
                         }
                     });
                 };

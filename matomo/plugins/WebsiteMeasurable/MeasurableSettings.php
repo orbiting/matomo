@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -9,7 +9,7 @@
 namespace Piwik\Plugins\WebsiteMeasurable;
 use Piwik\IP;
 use Piwik\Measurable\Type\TypeManager;
-use Piwik\Network\IPUtils;
+use Matomo\Network\IPUtils;
 use Piwik\Piwik;
 use Piwik\Plugin;
 use Piwik\Plugins\WebsiteMeasurable\Settings\Urls;
@@ -235,7 +235,9 @@ class MeasurableSettings extends \Piwik\Settings\Measurable\MeasurableSettings
                 . '<br /><br />'
                 . Piwik::translate('SitesManager_GlobalListExcludedUserAgents_Desc')
                 . '<br />'
-                . Piwik::translate('SitesManager_GlobalExcludedUserAgentHelp2');
+                . Piwik::translate('SitesManager_GlobalExcludedUserAgentHelp2') . " "
+                . Piwik::translate('SitesManager_GlobalExcludedUserAgentHelp3', "/bot|spider|crawl|scanner/i")
+            ;
             $field->uiControl = FieldConfig::UI_CONTROL_TEXTAREA;
             $field->uiControlAttributes = array('cols' => '20', 'rows' => '4');
             $field->transform = function ($value) use ($self) {
@@ -322,8 +324,7 @@ class MeasurableSettings extends \Piwik\Settings\Measurable\MeasurableSettings
                 . '<br /><br />'
                 . Piwik::translate('SitesManager_SearchCategoryParametersDesc');
 
-            $hasCustomVars = (int) $pluginManager->isPluginActivated('CustomVariables');
-            $field->condition = $hasCustomVars . ' && sitesearch && !use_default_site_search_params';
+            $field->condition = 'sitesearch && !use_default_site_search_params';
         });
     }
 

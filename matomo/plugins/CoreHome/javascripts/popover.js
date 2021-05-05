@@ -1,7 +1,7 @@
 /*!
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -11,6 +11,7 @@ var Piwik_Popover = (function () {
     var isOpen = false;
     var closeCallback = false;
     var isProgrammaticClose = false;
+    var scrollTopPosition = 0;
 
     var createContainer = function () {
         if (container === false) {
@@ -26,7 +27,6 @@ var Piwik_Popover = (function () {
             title: title,
             modal: true,
             width: '1050px',
-            position: ['center', 'center'],
             resizable: false,
             autoOpen: true,
             open: function (event, ui) {
@@ -35,6 +35,8 @@ var Piwik_Popover = (function () {
                 }
 
                 $('.ui-widget-overlay').on('click.popover', function () {
+                    // if clicking outside of the dialog, close entire stack
+                    broadcast.resetPopoverStack();
                     container.dialog('close');
                 });
 
@@ -42,16 +44,22 @@ var Piwik_Popover = (function () {
                 // we scroll to it to make sure it's visible. this isn't a perfect workaround, since it
                 // doesn't center the modal.g
                 var self = this;
-                setTimeout(function () {
-                    piwikHelper.lazyScrollTo(self, 0);
-                }, 0);
+
+                scrollTopPosition = $(window).scrollTop();
+
+                $('#root').css({
+                    position: 'fixed',
+                    height: $(window).height + scrollTopPosition,
+                    width: '100%',
+                    top: -scrollTopPosition
+                });
+
+                window.scrollTo(0, 0);
+
+                centerPopover();
+
             },
             close: function (event, ui) {
-                // if clicking outside of the dialog, close entire stack
-                if (!event.currentTarget && !$(event.currentTarget).is('button')) {
-                    broadcast.resetPopoverStack();
-                }
-
                 container.find('div.jqplot-target').trigger('piwikDestroyPlot');
                 container[0].innerHTML = '';
                 container.dialog('destroy').remove();
@@ -70,9 +78,18 @@ var Piwik_Popover = (function () {
 
                 // if we were not called by Piwik_Popover.close(), then the user clicked the close button or clicked
                 // the overlay, in which case we want to handle the popover URL as well as the actual modal.
-                if (!isProgrammaticClose) {
+                if (!isProgrammaticClose || isEscapeKey(event)) {
                     broadcast.propagateNewPopoverParameter(false);
                 }
+
+                $('#root').css({
+                    position: '',
+                    height: '',
+                    width: '',
+                    top: ''
+                });
+
+                window.scrollTo(0, scrollTopPosition);
             }
         };
 
@@ -88,7 +105,9 @@ var Piwik_Popover = (function () {
 
     var centerPopover = function () {
         if (container !== false) {
-            container.dialog({position: ['center', 'center']});
+            $('.ui-dialog').css({margin: '0 0'});
+            container.dialog("option", "position", {my: 'center', at: 'center', of: '.ui-widget-overlay', collision: 'fit'});
+            $('.ui-dialog').css({margin: '15px 0'});
         }
     };
 
@@ -189,7 +208,8 @@ var Piwik_Popover = (function () {
             
             container.children().each(function (i, childNode) {
                 piwikHelper.compileAngularComponents(childNode);
-            })
+            });
+
             centerPopover();
         },
 
@@ -263,17 +283,8 @@ var Piwik_Popover = (function () {
          * @param {object} [ajaxRequest]      optional instance of ajaxHelper
          */
         createPopupAndLoadUrl: function (url, loadingName, dialogClass, ajaxRequest) {
-            // make sure the minimum top position of the popover is 15px
-            var ensureMinimumTop = function () {
-                var popoverContainer = $('#Piwik_Popover').parent();
-                if (popoverContainer.position().top < 106) {
-                    popoverContainer.css('top', '15px');
-                }
-            };
-
             // open the popover
             var box = Piwik_Popover.showLoading(loadingName, null, null, dialogClass);
-            ensureMinimumTop();
 
             var callback = function (html) {
                 function setPopoverTitleIfOneFoundInContainer() {
@@ -286,7 +297,6 @@ var Piwik_Popover = (function () {
 
                 Piwik_Popover.setContent(html);
                 setPopoverTitleIfOneFoundInContainer();
-                ensureMinimumTop();
             };
 
             if ('undefined' === typeof ajaxRequest) {

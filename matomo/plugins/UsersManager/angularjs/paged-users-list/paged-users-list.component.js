@@ -1,7 +1,7 @@
 /*!
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -30,9 +30,9 @@
         controller: PagedUsersListController
     });
 
-    PagedUsersListController.$inject = ['$element'];
+    PagedUsersListController.$inject = ['$element', '$timeout'];
 
-    function PagedUsersListController($element) {
+    function PagedUsersListController($element, $timeout) {
         var vm = this;
 
         // options for selects
@@ -142,7 +142,7 @@
         }
 
         function showAccessChangeConfirm() {
-            $element.find('.change-user-role-confirm-modal').openModal({ dismissible: false });
+            $element.find('.change-user-role-confirm-modal').modal({ dismissible: false }).modal('open');
         }
 
         function getAffectedUsersCount() {
@@ -154,9 +154,12 @@
         }
 
         function onRowSelected() {
-            var selectedRowKeyCount = getSelectedCount();
-            vm.isBulkActionsDisabled = selectedRowKeyCount === 0;
-            vm.isAllCheckboxSelected = selectedRowKeyCount === vm.users.length;
+            // use a timeout since the method is called after the model is updated
+            $timeout(function () {
+                var selectedRowKeyCount = getSelectedCount();
+                vm.isBulkActionsDisabled = selectedRowKeyCount === 0;
+                vm.isAllCheckboxSelected = selectedRowKeyCount === vm.users.length;
+            });
         }
 
         function getSelectedCount() {
@@ -190,7 +193,7 @@
         }
 
         function showDeleteConfirm() {
-            $element.find('.delete-user-confirm-modal').openModal({ dismissible: false });
+            $element.find('.delete-user-confirm-modal').modal({ dismissible: false }).modal('open');
         }
 
         function getRoleDisplay(role) {

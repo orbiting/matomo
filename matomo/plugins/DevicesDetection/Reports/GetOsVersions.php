@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -20,7 +20,7 @@ class GetOsVersions extends Base
         parent::init();
         $this->dimension     = new OsVersion();
         $this->name          = Piwik::translate('DevicesDetection_OperatingSystemVersions');
-        $this->documentation = ''; // TODO
+        $this->documentation = Piwik::translate('DevicesDetection_OperatingSystemVersionsReportDocumentation');
         $this->order = 2;
 
         $this->subcategoryId = 'DevicesDetection_Software';

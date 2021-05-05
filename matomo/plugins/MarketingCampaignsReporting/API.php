@@ -1,17 +1,18 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link    https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
- * Based on code from AdvancedCampaignReporting plugin by Piwik PRO released under GPL v3 or later: https://github.com/PiwikPRO/plugin-AdvancedCampaignReporting
+ * Based on code from AdvancedCampaignReporting plugin by Piwik PRO released under GPL v3 or later:
+ * https://github.com/PiwikPRO/plugin-AdvancedCampaignReporting
  */
+
 namespace Piwik\Plugins\MarketingCampaignsReporting;
 
 use Piwik\Archive;
 use Piwik\DataTable;
-use Piwik\DataTable\Row;
 use Piwik\Metrics;
 use Piwik\Piwik;
 use Piwik\Plugins\Referrers\API as ReferrersAPI;
@@ -32,6 +33,13 @@ class API extends \Piwik\Plugin\API
         return $dataTable;
     }
 
+    public function getId($idSite, $period, $date, $segment = false)
+    {
+        $dataTable = $this->getDataTable(Archiver::CAMPAIGN_ID_RECORD_NAME, $idSite, $period, $date, $segment);
+        $dataTable->filter('AddSegmentValue');
+        return $dataTable;
+    }
+
     public function getName($idSite, $period, $date, $segment = false, $expanded = false)
     {
         $dataTable = $this->getDataTable(Archiver::CAMPAIGN_NAME_RECORD_NAME, $idSite, $period, $date, $segment, $expanded);
@@ -39,7 +47,7 @@ class API extends \Piwik\Plugin\API
 
         if ($this->isTableEmpty($dataTable)) {
             $referrersDataTable = ReferrersAPI::getInstance()->getCampaigns($idSite, $period, $date, $segment, $expanded);
-            $dataTable = $this->mergeDataTableMaps($dataTable, $referrersDataTable);
+            $dataTable          = $this->mergeDataTableMaps($dataTable, $referrersDataTable);
         }
 
         return $dataTable;
@@ -49,9 +57,33 @@ class API extends \Piwik\Plugin\API
     {
         $dataTable = $this->getDataTable(Archiver::CAMPAIGN_NAME_RECORD_NAME, $idSite, $period, $date, $segment, $expanded = false, $idSubtable);
 
-        if ($this->isTableEmpty($dataTable)) {
+        if (!$this->isTableEmpty($dataTable)) {
+            return $dataTable;
+        }
+
+        // try to load sub table from referrers api. That might work, if the report leading to this subtable was loaded using the referrers api fallback
+        $referrersDataTable = ReferrersAPI::getInstance()->getKeywordsFromCampaignId($idSite, $period, $date, $idSubtable, $segment);
+
+        if (!$this->isTableEmpty($referrersDataTable)) {
+            return $this->mergeDataTableMaps($dataTable, $referrersDataTable);
+        }
+
+        // if we can't find a subtable report using the id, try fetching the label to search for a subtable
+        $campaignNames = $this->getDataTable(Archiver::CAMPAIGN_NAME_RECORD_NAME, $idSite, $period, $date, $segment, $expanded = false);
+        $row           = $campaignNames->getRowFromIdSubDataTable($idSubtable);
+
+        if (!$row) {
+            return $dataTable;
+        }
+
+        $campaignName = $row->getColumn('label');
+
+        $campaignsDataTable = ReferrersAPI::getInstance()->getCampaigns($idSite, $period, $date, $segment, false);
+        $campaignRow        = $campaignsDataTable->getRowFromLabel($campaignName);
+
+        if ($campaignRow && $idSubtable = $campaignRow->getIdSubDataTable()) {
             $referrersDataTable = ReferrersAPI::getInstance()->getKeywordsFromCampaignId($idSite, $period, $date, $idSubtable, $segment);
-            $dataTable = $this->mergeDataTableMaps($dataTable, $referrersDataTable);
+            return $this->mergeDataTableMaps($dataTable, $referrersDataTable);
         }
 
         return $dataTable;
@@ -90,6 +122,20 @@ class API extends \Piwik\Plugin\API
     public function getContent($idSite, $period, $date, $segment = false)
     {
         $dataTable = $this->getDataTable(Archiver::CAMPAIGN_CONTENT_RECORD_NAME, $idSite, $period, $date, $segment);
+        $dataTable->filter('AddSegmentValue');
+        return $dataTable;
+    }
+
+    public function getGroup($idSite, $period, $date, $segment = false)
+    {
+        $dataTable = $this->getDataTable(Archiver::CAMPAIGN_GROUP_RECORD_NAME, $idSite, $period, $date, $segment);
+        $dataTable->filter('AddSegmentValue');
+        return $dataTable;
+    }
+
+    public function getPlacement($idSite, $period, $date, $segment = false)
+    {
+        $dataTable = $this->getDataTable(Archiver::CAMPAIGN_PLACEMENT_RECORD_NAME, $idSite, $period, $date, $segment);
         $dataTable->filter('AddSegmentValue');
         return $dataTable;
     }

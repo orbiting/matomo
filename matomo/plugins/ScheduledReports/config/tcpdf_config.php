@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -53,13 +53,16 @@ if (!defined('K_TCPDF_EXTERNAL_CONFIG')) {
     if (!defined('K_PATH_URL')) {
         // Automatic calculation for the following K_PATH_URL constant
         $k_path_url = K_PATH_MAIN; // default value for console mode
-        if (isset($_SERVER['HTTP_HOST']) AND (!empty($_SERVER['HTTP_HOST']))) {
-            if (isset($_SERVER['HTTPS']) AND (!empty($_SERVER['HTTPS'])) AND strtolower($_SERVER['HTTPS']) != 'off') {
+
+        $host = \Piwik\Url::getHost(false);
+
+        if ($host) {
+            if (isset($_SERVER['HTTPS']) and (!empty($_SERVER['HTTPS'])) and strtolower($_SERVER['HTTPS']) != 'off') {
                 $k_path_url = 'https://';
             } else {
                 $k_path_url = 'http://';
             }
-            $k_path_url .= $_SERVER['HTTP_HOST'];
+            $k_path_url .= $host;
             $k_path_url .= str_replace('\\', '/', substr(K_PATH_MAIN, (strlen($_SERVER['DOCUMENT_ROOT']) - 1)));
         }
 
@@ -211,7 +214,7 @@ if (!defined('K_TCPDF_EXTERNAL_CONFIG')) {
     define('HEAD_MAGNIFICATION', 1.1);
 
     /**
-     * height of cell repect font height
+     * height of cell respect font height
      */
     define('K_CELL_HEIGHT_RATIO', 1.25);
 

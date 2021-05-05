@@ -10,6 +10,7 @@ namespace Piwik\Plugins\TagManager\Context;
 use Piwik\Common;
 use Piwik\Container\StaticContainer;
 use Piwik\Plugins\TagManager\Context\Storage\StorageInterface;
+use Piwik\Plugins\TagManager\Exception\EntityRecursionException;
 use Piwik\Plugins\TagManager\Model\Container;
 use Piwik\Plugins\TagManager\Model\Environment;
 use Piwik\Plugins\TagManager\Model\Salt;
@@ -59,6 +60,8 @@ abstract class BaseContext
 
     private $variables = array();
 
+    private $nestedVariableCals = [];
+
     public function __construct(VariablesProvider $variablesProvider, Variable $variableModel, Trigger $triggerModel, Tag $tagModel, Container $containerModel, StorageInterface $storage, Salt $salt)
     {
         $this->variablesProvider = $variablesProvider;
@@ -77,6 +80,8 @@ abstract class BaseContext
 
     protected function generatePublicContainer($container, $release)
     {
+        $this->nestedVariableCals = [];
+
         $idSite = $container['idsite'];
         $idContainer = $container['idcontainer'];
         $idContainerVersion = $release['idcontainerversion'];
@@ -156,6 +161,17 @@ abstract class BaseContext
 
     private function parametersToVariableJs($container, $entity)
     {
+        if (!empty($entity['name'])) {
+            $this->nestedVariableCals[] = $entity['name'];
+        }
+
+        if (count($this->nestedVariableCals) > 500) {
+            // eg MatomoConfiguration variable referencing itself in a variable like matomoUrl=https://matomo.org{{MatomoConfiguration}}
+            $entries = array_slice($this->nestedVariableCals, -3); // show last 3 entities in error message
+            $entries = array_unique($entries);
+            throw new EntityRecursionException('It seems an entity references itself or a recursion is caused in some other way. It may be related due to these entites: "'.implode(',', $entries). '". Please check if the entity references itself maybe or if a recursion might happen in another way.');
+        }
+
         $parameters = $entity['parameters'];
         $keyTemplateTypeSeparator = '____';
 
@@ -209,7 +225,28 @@ abstract class BaseContext
                 }
             }
         }
+
+        if (!empty($entity['name'])) {
+            array_pop($this->nestedVariableCals);
+        }
+
         return $vars;
+    }
+
+    private function mb_strpos($haystack, $needle, $offset) {
+        if (function_exists('mb_strpos')) {
+            return mb_strpos($haystack, $needle, $offset, 'UTF-8');
+        }
+
+        return strpos($haystack, $needle, $offset);
+    }
+
+    private function mb_strrpos($haystack, $needle, $offset) {
+        if (function_exists('mb_strpos')) {
+            return mb_strrpos($haystack, $needle, $offset, 'UTF-8');
+        }
+
+        return strrpos($haystack, $needle, $offset);
     }
 
     protected function parameterToVariableJs($value, $container)
@@ -220,18 +257,18 @@ abstract class BaseContext
             $pos = 0;
 
             do {
-                $start = strpos($value, '{{', $pos);
+                $start = $this->mb_strpos($value, '{{', $pos);
 
                 $end = false;
                 if ($start !== false) {
                     // only if string contains a {{ we need to look to see if we find a matching end string
-                    $end = strpos($value, '}}', $start);
+                    $end = $this->mb_strpos($value, '}}', $start);
                 }
 
                 if ($end !== false) {
                     // now this might seem random, but it is basically to detect if there are the brackets two times there
                     // like "foo{{notExisting{{PageUrl}}"  then we still detect "{{PageUrl}}"
-                    $start = strrpos(substr($value, 0, $end), '{{', $pos);
+                    $start = $this->mb_strrpos(Common::mb_substr($value, 0, $end), '{{', $pos);
                 }
 
                 if ($start === false || $end === false) {
@@ -255,7 +292,7 @@ abstract class BaseContext
 
                 $trimmedVariableName = trim($variableName);
                 if ($trimmedVariableName
-                    && substr($trimmedVariableName, 0, 1) !==  '{') {    // case when using {{{foobar}}
+                    && Common::mb_substr($trimmedVariableName, 0, 1) !==  '{') {    // case when using {{{foobar}}
                     $var = $this->variableToArray($container, $trimmedVariableName);
                     if ($var) {
                         $multiVars[] = $var;

@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -118,12 +118,13 @@ class Controller extends ControllerAdmin
             '' => '',
             'Plain' => 'Plain',
             'Login' => 'Login',
-            'Crammd5' => 'Crammd5',
+            'Cram-md5' => 'Cram-md5',
         );
         $view->mailEncryptions = array(
-            '' => '',
+            '' => 'auto',
             'ssl' => 'SSL',
-            'tls' => 'TLS'
+            'tls' => 'TLS',
+            'none' => 'none',
         );
         $mail = new Mail();
         $view->mailHost = $mail->getMailHost();
@@ -142,7 +143,7 @@ class Controller extends ControllerAdmin
             return '';
         }
 
-        $response = new ResponseBuilder('json2');
+        $response = new ResponseBuilder('json');
         try {
             $this->checkTokenInUrl();
 
@@ -218,7 +219,11 @@ class Controller extends ControllerAdmin
 
         $view->defaultReportSiteName = Site::getNameFor($view->idSite);
         $view->defaultSiteRevenue = Site::getCurrencySymbolFor($view->idSite);
-        $view->maxCustomVariables = CustomVariables::getNumUsableCustomVariables();
+        $view->maxCustomVariables = 0;
+
+        if (Plugin\Manager::getInstance()->isPluginActivated('CustomVariables')) {
+            $view->maxCustomVariables = CustomVariables::getNumUsableCustomVariables();
+        }
 
         $view->defaultSite = array('id' => $view->idSite, 'name' => $view->defaultReportSiteName);
 
@@ -276,6 +281,7 @@ class Controller extends ControllerAdmin
     {
         // Whether to display or not the general settings (cron, beta, smtp)
         $view->isGeneralSettingsAdminEnabled = self::isGeneralSettingsAdminEnabled();
+        $view->isMultiServerEnvironment = SettingsPiwik::isMultiServerEnvironment();
         $view->isPluginsAdminEnabled = CorePluginsAdmin::isPluginsAdminEnabled();
         if ($view->isGeneralSettingsAdminEnabled) {
             $this->displayWarningIfConfigFileNotWritable();

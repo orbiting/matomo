@@ -1,24 +1,23 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link https://matomo.org
+ * @link    https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\Provider\Columns;
 
+use Matomo\Network\IP;
 use Piwik\Common;
-use Piwik\Network\IP;
-use Piwik\Network\IPUtils;
-use Piwik\Plugin\Dimension\VisitDimension;
+use Piwik\Plugins\Provider\Provider as ProviderPlugin;
+use Piwik\Plugins\UserCountry\LocationProvider;
 use Piwik\Tracker\Action;
 use Piwik\Tracker\Request;
 use Piwik\Tracker\Visitor;
-use Piwik\Plugins\PrivacyManager\Config as PrivacyManagerConfig;
-use Piwik\Plugins\Provider\Provider as ProviderPlugin;
 
-class Provider extends VisitDimension
+class Provider extends \Piwik\Plugins\UserCountry\Columns\Base
 {
     protected $columnName = 'location_provider';
     protected $segmentName = 'provider';
@@ -29,8 +28,8 @@ class Provider extends VisitDimension
     protected $type = self::TYPE_TEXT;
 
     /**
-     * @param Request $request
-     * @param Visitor $visitor
+     * @param Request     $request
+     * @param Visitor     $visitor
      * @param Action|null $action
      * @return mixed
      */
@@ -49,14 +48,28 @@ class Provider extends VisitDimension
             return false;
         }
 
-        $ip = $visitor->getVisitorColumn('location_ip');
+        $userInfo = $this->getUserInfo($request, $visitor);
 
-        $privacyConfig = new PrivacyManagerConfig();
-        if (!$privacyConfig->useAnonymizedIpForVisitEnrichment) {
-            $ip = $request->getIp();
+        $isp = $this->getLocationDetail($userInfo, LocationProvider::ISP_KEY);
+        $org = $this->getLocationDetail($userInfo, LocationProvider::ORG_KEY);
+
+        // if the location has provider/organization info, set it
+        if (!empty($isp)) {
+            $providerValue = $isp;
+
+            // if the org is set and not the same as the isp, add it to the provider value
+            if (!empty($org) && $org != $providerValue) {
+                $providerValue .= ' - ' . $org;
+            }
+
+            return $providerValue;
         }
 
-        $ip = IPUtils::binaryToStringIP($ip);
+        if (!empty($org)) {
+            return $org;
+        }
+
+        $ip = $userInfo['ip'];
 
         // In case the IP was anonymized, we should not continue since the DNS reverse lookup will fail and this will slow down tracking
         if (substr($ip, -2, 2) == '.0') {
@@ -64,18 +77,20 @@ class Provider extends VisitDimension
             return false;
         }
 
-        $hostname = $this->getHost($ip);
+        if (defined('PIWIK_TEST_MODE')) {
+            return false; // skip reverse lookup while testing
+        }
+
+        $hostname          = $this->getHost($ip);
         $hostnameExtension = ProviderPlugin::getCleanHostname($hostname);
 
         // add the provider value in the table log_visit
-        $locationProvider = substr($hostnameExtension, 0, 100);
-
-        return $locationProvider;
+        return substr($hostnameExtension, 0, 200);
     }
 
     public function getRequiredVisitFields()
     {
-        return array('location_ip');
+        return ['location_ip'];
     }
 
     /**

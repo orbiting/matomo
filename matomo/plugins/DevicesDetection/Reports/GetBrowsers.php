@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -20,9 +20,10 @@ class GetBrowsers extends Base
         parent::init();
         $this->dimension     = new BrowserName();
         $this->name          = Piwik::translate('DevicesDetection_Browsers');
-        $this->documentation = Piwik::translate('DevicesDetection_WidgetBrowsersDocumentation', '<br />');
+        $this->documentation = Piwik::translate('DevicesDetection_WidgetBrowsersDocumentation');
         $this->order = 5;
         $this->subcategoryId = 'DevicesDetection_Software';
+        $this->hasGoalMetrics = true;
     }
 
     public function configureView(ViewDataTable $view)

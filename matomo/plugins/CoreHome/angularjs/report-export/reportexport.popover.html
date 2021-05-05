@@ -61,13 +61,13 @@
     </div>
 
     <div class="col l12" ng-show="showUrl">
-        <textarea piwik-select-on-focus readonly class="exportFullUrlFull" ng-show="showFullUrl">{{ getExportLink() }}</textarea>
-        <textarea readonly ng-show="!showFullUrl" title="{{ 'CoreHome_ClickToSeeFullInformation'|translate }}" class="exportFullUrlPartial" ng-click="showFullUrl=true">{{ getExportLink()|limitTo:50 }}...</textarea>
+        <textarea piwik-select-on-focus readonly class="exportFullUrl">{{ getExportLinkWithoutToken() }}</textarea>
+        <div class="tooltip" ng-bind-html="'CoreHome_ExportTooltipWithLink'|translate:'<a target=_blank href=\'?module=UsersManager&action=userSecurity\'>':'</a>':'ENTER_YOUR_TOKEN_AUTH_HERE'"></div>
     </div>
 
     <div class="col l12">
-        <a class="btn" ng-attr-href="{{ getExportLink() }}" target="_new">{{ 'General_Export'|translate }}</a>
-        <a href="javascript:;" ng-click="showUrl=!showUrl;showFullUrl=false;" class="toggle-export-url">
+        <a class="btn" ng-attr-href="{{ getExportLink() }}" target="_new" title="{{ 'CoreHome_ExportTooltip'|translate }}">{{ 'General_Export'|translate }}</a>
+        <a href="javascript:;" ng-click="showUrl=!showUrl" class="toggle-export-url">
             <span ng-show="!showUrl">{{ 'CoreHome_ShowExportUrl'|translate }}</span>
             <span ng-show="showUrl">{{ 'CoreHome_HideExportUrl'|translate }}</span>
         </a>

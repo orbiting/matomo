@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -40,6 +40,9 @@ class Sentinel extends Redis
                 $master = $configuredSentinel->getMasterAddressByName($this->masterName);
 
                 if (!empty($master)) {
+                    if (!class_exists('\Redis') && $this->timeout == 0) {
+                        $this->timeout === 0.05;
+                    }
 
                     $client = new \Credis_Client($master[0], $master[1], $this->timeout, $persistent = false, $this->database, $this->password);
                     $client->connect();

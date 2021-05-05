@@ -13,7 +13,10 @@ $redis_port = $redis['port'];
 $redis_pass = $redis['pass'];
 
 $salt = getenv('SALT');
-$trusted_hosts = getenv('TRUSTED_HOST');
+$trusted_hosts = getenv('TRUSTED_HOSTS');
+if (empty($trusted_hosts)) {
+  $trusted_hosts = getenv('TRUSTED_HOST');
+}
 if (strpos($trusted_hosts, 'localhost') === false) {
   $secure_protocol = '1';
 } else {
@@ -27,6 +30,10 @@ if (strpos($host, 'rds.amazonaws.com') !== false) {
   $enable_ssl = '0';
   $ssl_ca = '';
 }
+
+$trusted_hosts_lines = implode("\n", array_map(function($host) {
+  return 'trusted_hosts[] = "'.$host.'"';
+}, explode(',', $trusted_hosts)));
 
 $contents = <<<EOD
 [database]
@@ -62,7 +69,7 @@ enable_processing_unique_visitors_year = 1
 secure_protocol = $secure_protocol
 force_ssl = $secure_protocol
 salt = "$salt"
-trusted_hosts[] = "$trusted_hosts"
+$trusted_hosts_lines
 multi_server_environment = $secure_protocol
 proxy_client_headers[] = HTTP_X_FORWARDED_FOR
 

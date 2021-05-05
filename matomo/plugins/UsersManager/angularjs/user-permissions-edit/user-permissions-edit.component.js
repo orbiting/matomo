@@ -1,7 +1,7 @@
 /*!
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -23,9 +23,9 @@
         controller: UserPermissionsEditController
     });
 
-    UserPermissionsEditController.$inject = ['piwikApi', '$element', '$q'];
+    UserPermissionsEditController.$inject = ['piwikApi', '$element', '$q', '$timeout'];
 
-    function UserPermissionsEditController(piwikApi, $element, $q) {
+    function UserPermissionsEditController(piwikApi, $element, $q, $timeout) {
         var vm = this;
 
         // search/pagination state
@@ -94,7 +94,7 @@
         }
 
         function showChangeAccessAllSitesModal() {
-            $element.find('.confirm-give-access-all-sites').openModal({ dismissible: false });
+            $element.find('.confirm-give-access-all-sites').modal({ dismissible: false }).modal('open');
         }
 
         function $onInit() {
@@ -176,9 +176,11 @@
         }
 
         function onRowSelected() {
-            var selectedRowKeyCount = getSelectedRowsCount();
-            vm.isBulkActionsDisabled = selectedRowKeyCount === 0;
-            vm.isAllCheckboxSelected = selectedRowKeyCount === vm.siteAccess.length;
+            $timeout(function () {
+                var selectedRowKeyCount = getSelectedRowsCount();
+                vm.isBulkActionsDisabled = selectedRowKeyCount === 0;
+                vm.isAllCheckboxSelected = selectedRowKeyCount === vm.siteAccess.length;
+            });
         }
 
         function getPaginationLowerBound() {
@@ -255,15 +257,15 @@
         }
 
         function showRemoveAccessConfirm() {
-            $element.find('.delete-access-confirm-modal').openModal({ dismissible: false });
+            $element.find('.delete-access-confirm-modal').modal({ dismissible: false }).modal('open');
         }
 
         function showChangeAccessConfirm() {
-            $element.find('.change-access-confirm-modal').openModal({ dismissible: false });
+            $element.find('.change-access-confirm-modal').modal({ dismissible: false }).modal('open');
         }
 
         function showAddExistingUserModal() {
-            $element.find('.add-existing-user-modal').openModal({ dismissible: false });
+            $element.find('.add-existing-user-modal').modal({ dismissible: false }).modal('open');
         }
 
         function getSelectedRowsCount() {

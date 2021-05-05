@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -19,7 +19,7 @@ class GetBrand extends Base
         parent::init();
         $this->dimension     = new DeviceBrand();
         $this->name          = Piwik::translate('DevicesDetection_DeviceBrand');
-        $this->documentation = ''; // TODO
+        $this->documentation = Piwik::translate('DevicesDetection_DeviceBrandReportDocumentation');
         $this->order = 4;
         $this->hasGoalMetrics = true;
         $this->subcategoryId = 'DevicesDetection_Devices';

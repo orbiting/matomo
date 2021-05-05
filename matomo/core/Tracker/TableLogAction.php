@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -10,7 +10,6 @@
 namespace Piwik\Tracker;
 
 use Piwik\Common;
-use Piwik\Config;
 use Piwik\Container\StaticContainer;
 use Piwik\Segment\SegmentExpression;
 
@@ -44,7 +43,7 @@ class TableLogAction
 
         $actionIds = self::queryIdsAction($actionsNameAndType);
 
-        list($queriedIds, $fieldNamesToInsert) = self::processIdsToInsert($actionsNameAndType, $actionIds);
+        [$queriedIds, $fieldNamesToInsert] = self::processIdsToInsert($actionsNameAndType, $actionIds);
 
         $insertedIds = self::insertNewIdsAction($actionsNameAndType, $fieldNamesToInsert);
         $queriedIds  = $queriedIds + $insertedIds;
@@ -96,7 +95,7 @@ class TableLogAction
         $inserted = array();
 
         foreach ($fieldNamesToInsert as $fieldName) {
-            list($name, $type, $urlPrefix) = $actionsNameAndType[$fieldName];
+            [$name, $type, $urlPrefix] = $actionsNameAndType[$fieldName];
 
             $actionId = self::getModel()->createNewIdAction($name, $type, $urlPrefix);
 
@@ -117,7 +116,7 @@ class TableLogAction
     {
         $toQuery = array();
         foreach ($actionsNameAndType as &$actionNameType) {
-            list($name, $type, $urlPrefix) = $actionNameType;
+            [$name, $type, $urlPrefix] = $actionNameType;
             $toQuery[] = array('name' => $name, 'type' => $type);
         }
 
@@ -185,14 +184,20 @@ class TableLogAction
                 $valueToMatch = preg_replace('@^http[s]?://(www\.)?@i', '', $valueToMatch);
             }
 
+            $unsanitizedValue = $valueToMatch;
             $valueToMatch = self::normaliseActionString($actionType, $valueToMatch);
             if ($matchType == SegmentExpression::MATCH_EQUAL
                 || $matchType == SegmentExpression::MATCH_NOT_EQUAL
             ) {
                 $idAction = self::getModel()->getIdActionMatchingNameAndType($valueToMatch, $actionType);
-                // Action is not found (eg. &segment=pageTitle==Větrnásssssss)
+                // If action can't be found normalized try search for it with original value
+                // This can eg happen for outlinks that contain a &amp; see https://github.com/matomo-org/matomo/issues/11806
                 if (empty($idAction)) {
-                    $idAction = null;
+                    $idAction = self::getModel()->getIdActionMatchingNameAndType($unsanitizedValue, $actionType);
+                    // Action is not found (eg. &segment=pageTitle==Větrnásssssss)
+                    if (empty($idAction)) {
+                        $idAction = null;
+                    }
                 }
                 return $idAction;
             }
@@ -227,6 +232,8 @@ class TableLogAction
             'contentInteraction' => Action::TYPE_CONTENT_INTERACTION,
             'productName'        => Action::TYPE_ECOMMERCE_ITEM_NAME,
             'productSku'         => Action::TYPE_ECOMMERCE_ITEM_SKU,
+            'productViewName'    => Action::TYPE_ECOMMERCE_ITEM_NAME,
+            'productViewSku'     => Action::TYPE_ECOMMERCE_ITEM_SKU
         );
 
         if (!empty($exactMatch[$segmentName])) {
@@ -234,17 +241,14 @@ class TableLogAction
         }
 
         if (stripos($segmentName, 'pageurl') !== false) {
-            $actionType = Action::TYPE_PAGE_URL;
-            return $actionType;
+            return Action::TYPE_PAGE_URL;
         } elseif (stripos($segmentName, 'pagetitle') !== false) {
-            $actionType = Action::TYPE_PAGE_TITLE;
-            return $actionType;
+            return Action::TYPE_PAGE_TITLE;
         } elseif (stripos($segmentName, 'sitesearch') !== false) {
-            $actionType = Action::TYPE_SITE_SEARCH;
-            return $actionType;
-        } elseif (stripos($segmentName, 'productcategory') !== false) {
-            $actionType = Action::TYPE_ECOMMERCE_ITEM_CATEGORY;
-            return $actionType;
+            return Action::TYPE_SITE_SEARCH;
+        } elseif (stripos($segmentName, 'productcategory') !== false
+            || stripos($segmentName, 'productviewcategory') !== false) {
+            return Action::TYPE_ECOMMERCE_ITEM_CATEGORY;
         } else {
             throw new \Exception("We cannot guess the action type from the segment $segmentName.");
         }

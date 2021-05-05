@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -9,7 +9,7 @@
 namespace Piwik;
 
 use Exception;
-use Piwik\Network\IPUtils;
+use Matomo\Network\IPUtils;
 
 /**
  * Provides URL related helper methods.
@@ -208,15 +208,14 @@ class Url
         }
 
         if ($host === false) {
-            $host = @$_SERVER['HTTP_HOST'];
+            $host = self::getHostFromServerVariable();
             if (empty($host)) {
                 // if no current host, assume valid
-
                 return true;
             }
         }
 
-        // if host is in hardcoded whitelist, assume it's valid
+        // if host is in hardcoded allowlist, assume it's valid
         if (in_array($host, self::getAlwaysTrustedHosts())) {
             return true;
         }
@@ -298,18 +297,35 @@ class Url
      */
     public static function getHost($checkIfTrusted = true)
     {
-        // HTTP/1.1 request
-        if (isset($_SERVER['HTTP_HOST'])
-            && strlen($host = $_SERVER['HTTP_HOST'])
-            && (!$checkIfTrusted
-                || self::isValidHost($host))
-        ) {
+        $host = self::getHostFromServerVariable();
+
+        if (strlen($host) && (!$checkIfTrusted || self::isValidHost($host))) {
             return $host;
         }
 
         // HTTP/1.0 request doesn't include Host: header
         if (isset($_SERVER['SERVER_ADDR'])) {
             return $_SERVER['SERVER_ADDR'];
+        }
+
+        return false;
+    }
+
+    protected static function getHostFromServerVariable()
+    {
+        try {
+            // this fails when trying to get the hostname before the config was initialized
+            // e.g. for loading the domain specific configuration file
+            // in such a case we always use HTTP_HOST
+            $preferServerName = Config::getInstance()->General['host_validation_use_server_name'];
+        } catch (\Exception $e) {
+            $preferServerName = false;
+        }
+
+        if ($preferServerName && strlen($host = self::getHostFromServerNameVar())) {
+            return $host;
+        } elseif (isset($_SERVER['HTTP_HOST']) && strlen($host = $_SERVER['HTTP_HOST'])) {
+            return $host;
         }
 
         return false;
@@ -322,7 +338,9 @@ class Url
      */
     public static function setHost($host)
     {
+        $_SERVER['SERVER_NAME'] = $host;
         $_SERVER['HTTP_HOST'] = $host;
+        unset($_SERVER['SERVER_PORT']);
     }
 
     /**
@@ -373,7 +391,7 @@ class Url
     }
 
     /**
-     * Returns an array mapping query paramater names with query parameter values for
+     * Returns an array mapping query parameter names with query parameter values for
      * the current URL.
      *
      * @return array If current URL is `"http://example.org/dir1/dir2/index.php?param1=value1&param2=value2"`
@@ -613,8 +631,8 @@ class Url
      */
     public static function getHostSanitized($host)
     {
-        if (!class_exists("Piwik\\Network\\IPUtils")) {
-            throw new Exception("Piwik\\Network\\IPUtils could not be found, maybe you are using Matomo from git and need to update Composer. $ php composer.phar update");
+        if (!class_exists("Matomo\\Network\\IPUtils")) {
+            throw new Exception("Matomo\\Network\\IPUtils could not be found, maybe you are using Matomo from git and need to update Composer. $ php composer.phar update");
         }
         return IPUtils::sanitizeIp($host);
     }
@@ -760,5 +778,20 @@ class Url
     {
         $assume_secure_protocol = @Config::getInstance()->General['assume_secure_protocol'];
         return (bool) $assume_secure_protocol;
+    }
+
+    public static function getHostFromServerNameVar()
+    {
+        $host = @$_SERVER['SERVER_NAME'];
+        if (!empty($host)) {
+            if (strpos($host, ':') === false
+                && !empty($_SERVER['SERVER_PORT'])
+                && $_SERVER['SERVER_PORT'] != 80
+                && $_SERVER['SERVER_PORT'] != 443
+            ) {
+                $host .= ':' . $_SERVER['SERVER_PORT'];
+            }
+        }
+        return $host;
     }
 }

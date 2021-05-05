@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -144,6 +144,26 @@ abstract class LocationProvider
     abstract public function getSupportedLocationInfo();
 
     /**
+     * Renders Configuration or Setup View to be attached to the provider list
+     *
+     * @return string
+     */
+    public function renderConfiguration()
+    {
+        return '';
+    }
+
+    /**
+     * Renders SetUp Guide, which will be shown above Geolocation admin, if there is no working provider
+     *
+     * @return string
+     */
+    public function renderSetUpGuide()
+    {
+        return '';
+    }
+
+    /**
      * Method called when a provider gets activated.
      */
     public function activate()
@@ -156,6 +176,16 @@ abstract class LocationProvider
     public function isVisible()
     {
         return true;
+    }
+
+    /**
+     * Returns a message that should be shown as diagnostics warning if provider is used
+     *
+     * @return null|string
+     */
+    public function getUsageWarning(): ?string
+    {
+        return null;
     }
 
     /**
@@ -279,6 +309,7 @@ abstract class LocationProvider
             $info['statusMessage'] = $statusMessage;
             $info['location'] = $location;
             $info['isVisible'] = $provider->isVisible();
+            $info['usageWarning'] = $provider->getUsageWarning();
 
             $allInfo[$info['order']] = $info;
         }
@@ -498,9 +529,9 @@ abstract class LocationProvider
      */
     protected function getIpFromInfo($info)
     {
-        $ip = \Piwik\Network\IP::fromStringIP($info['ip']);
+        $ip = \Matomo\Network\IP::fromStringIP($info['ip']);
 
-        if ($ip instanceof \Piwik\Network\IPv6 && $ip->isMappedIPv4()) {
+        if ($ip instanceof \Matomo\Network\IPv6 && $ip->isMappedIPv4()) {
             return $ip->toIPv4String();
         } else {
             return $ip->toString();

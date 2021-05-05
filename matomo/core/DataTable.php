@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -11,6 +11,7 @@ namespace Piwik;
 
 use Closure;
 use Exception;
+use Piwik\Archive\DataTableFactory;
 use Piwik\DataTable\DataTableInterface;
 use Piwik\DataTable\Manager;
 use Piwik\DataTable\Renderer\Html;
@@ -1521,7 +1522,7 @@ class DataTable implements DataTableInterface, \IteratorAggregate, \ArrayAccess
         }
         if ($thisIsNotThatSimple === false) {
             // case when the array is indexed by the default numeric index
-            if (array_keys($array) == array_keys(array_fill(0, count($array), true))) {
+            if (array_keys($array) === array_keys(array_fill(0, count($array), true))) {
                 foreach ($array as $row) {
                     $this->addRow(new Row(array(Row::COLUMNS => array($row))));
                 }
@@ -1894,7 +1895,10 @@ class DataTable implements DataTableInterface, \IteratorAggregate, \ArrayAccess
     {
         $labelToLookFor = $row->getColumn('label');
         if ($labelToLookFor === false) {
-            throw new Exception("Label column not found in the table to add in addDataTable()");
+            $message = sprintf("Label column not found in the table to add in addDataTable(). Row: %s",
+                var_export($row->getColumns(), 1)
+            );
+            throw new Exception($message);
         }
         $rowFound = $this->getRowFromLabel($labelToLookFor);
         if ($rowFound === false) {

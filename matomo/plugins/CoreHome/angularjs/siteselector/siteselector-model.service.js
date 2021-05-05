@@ -1,7 +1,7 @@
 /*!
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 (function () {
@@ -23,7 +23,8 @@
             updateWebsitesList: updateWebsitesList,
             searchSite: searchSite,
             loadSite: loadSite,
-            loadInitialSites: loadInitialSites
+            loadInitialSites: loadInitialSites,
+            hasMultipleSites: hasMultipleSites
         };
 
         return model;
@@ -99,7 +100,12 @@
 
         function loadSite(idsite) {
             if (idsite == 'all') {
-                piwik.broadcast.propagateNewPage('module=MultiSites&action=index');
+                document.location.href = piwikHelper.getCurrentQueryStringWithParametersModified(piwikHelper.getQueryStringFromParameters({
+                    module: 'MultiSites',
+                    action: 'index',
+                    date: piwik.currentDateString,
+                    period: piwik.period
+                }));
             } else {
                 piwik.broadcast.propagateNewPage('segment=&idSite=' + idsite, false);
             }
@@ -117,8 +123,13 @@
             }
 
             searchSite('%').then(function () {
-                initialSites = model.sites
+                initialSites = model.sites;
+                model.isInitialized = true
             });
+        }
+
+        function hasMultipleSites() {
+            return initialSites && initialSites.length > 1;
         }
     }
 })();

@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -19,7 +19,7 @@ class BulkTracking extends \Piwik\Plugin
     private $requests;
 
     /**
-     * @see Piwik\Plugin::registerEvents
+     * @see \Piwik\Plugin::registerEvents
      */
     public function registerEvents()
     {
@@ -62,6 +62,7 @@ class BulkTracking extends \Piwik\Plugin
 
         if ($this->isUsingBulkRequest()) {
             $handler = new Handler();
+            $handler->getResponse()->setShouldSendResponse($this->shouldSendResponse());
         }
     }
 
@@ -71,6 +72,14 @@ class BulkTracking extends \Piwik\Plugin
         $rawData  = $requests->getRawBulkRequest();
 
         return $requests->isUsingBulkRequest($rawData);
+    }
+
+    private function shouldSendResponse(): bool
+    {
+        $requests = $this->buildBulkRequests();
+        $rawData  = $requests->getRawBulkRequest();
+
+        return $requests->shouldSendResponse($rawData);
     }
 
     private function buildBulkRequests()

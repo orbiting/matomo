@@ -5,13 +5,13 @@
  * Description: Scale your large traffic Matomo service by queuing tracking requests in Redis or MySQL for better performance and reliability when experiencing peaks.
  * Author: Matomo
  * Author URI: https://matomo.org
- * Version: 3.3.6
+ * Version: 4.0.2
  */
 ?><?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -47,8 +47,19 @@ class QueuedTracking extends \Piwik\Plugin
     public function registerEvents()
     {
         return array(
-            'Tracker.newHandler' => 'replaceHandlerIfQueueIsEnabled'
+            'Tracker.newHandler'    => 'replaceHandlerIfQueueIsEnabled',
+            'Db.getTablesInstalled' => 'getTablesInstalled'
         );
+    }
+
+    /**
+     * Register the new tables, so Matomo knows about them.
+     *
+     * @param array $allTablesInstalled
+     */
+    public function getTablesInstalled(&$allTablesInstalled)
+    {
+        $allTablesInstalled[] = Common::prefixTable('queuedtracking_queue');
     }
 
     public function install()

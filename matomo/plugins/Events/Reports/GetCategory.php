@@ -1,6 +1,6 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
@@ -19,7 +19,7 @@ class GetCategory extends Base
         parent::init();
         $this->dimension     = new EventCategory();
         $this->name          = Piwik::translate('Events_EventCategories');
-        $this->documentation = ''; // TODO
+        $this->documentation = Piwik::translate('Events_EventCategoriesReportDocumentation');
         $this->metrics       = array('nb_events', 'sum_event_value', 'min_event_value', 'max_event_value', 'nb_events_with_value');
         if (Common::getRequestVar('secondaryDimension', false) == 'eventName') {
             $this->actionToLoadSubTables = 'getNameFromCategoryId';

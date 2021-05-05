@@ -38,6 +38,7 @@
         "Segment_Deletion_Error": "Bu dilim %s raporun oluşturulmasında kullanıldığından silinemez ya da gizlenemez. Lütfen bu dilimi bu raporlardan kaldırıp yeniden deneyin.",
         "Segment_Help": "Bu e-posta raporundaki verilere uygulanacak var olan bir özel dilim seçebilirsiniz. Özel dilimleri panonuzdan ekleyip düzenleyebilirsiniz %1$s(açmak için tıklayın)%2$s sonra \"%3$s\" üzerine ve \"%4$s\" üzerine tıklayın.",
         "SegmentAppliedToReports": "Rapora '%s' dilimi uygulandı.",
+        "SegmentDeleted": "Dilim silindi",
         "SendReportNow": "Raporu gönder",
         "SendReportTo": "Raporu şuraya gönder",
         "SentToMe": "Bana gönder",
@@ -57,7 +58,7 @@
         "EvolutionGraphsShowForEachInPeriod": "Gelişim çizelgesi son %3$s gündeki gelişimi %1$sgünlük%2$s olarak görüntüler",
         "EvolutionGraphsShowForPreviousN": "Gelişme çizelgeleri önceki N %s içindeki gelişmeyi görüntüler",
         "ReportPeriod": "Raporlama Aralığı",
-        "ReportPeriodHelp": "Bu raporun kapsadığı verilerin zaman aralığı. Varsayılan olarak e-posta zamanlaması ile aynıdır. Yani bir rapor haftalık olarak gönderiliyorsa son haftanın verilerini kapsar.",
+        "ReportPeriodHelp": "Bu raporun kapsadığı verilerin zaman aralığı. Varsayılan olarak e-posta zamanlaması ile aynıdır. Yani bir rapor haftalık olarak gönderiliyorsa son haftanın verilerini içerir.",
         "ReportPeriodHelp2": "Bununla birlikte, e-posta zamanlamasını aynı tutarken farklı bilgiler görüntülenmesini istiyorsanız bu aralığı değiştirebilirsiniz. Örneğin e-posta sıklığı haftalık iken rapor aralığı 'gün' ise, her hafta son günün raporu gönderilir."
     }
 }

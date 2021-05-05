@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -66,7 +66,7 @@ class AddCustomDimension extends ConsoleCommand
         $numDimensionsAvailable = $tracking->getNumInstalledIndexes();
 
         $this->writeSuccessMessage($output, array(
-            sprintf('Your Piwik is now configured for up to %d Custom Dimensions in scope %s.', $numDimensionsAvailable, $scope)
+            sprintf('Your Matomo is now configured for up to %d Custom Dimensions in scope %s.', $numDimensionsAvailable, $scope)
         ));
     }
 

@@ -1,17 +1,8 @@
-<?php 
+<?php
 /**
- * Plugin Name: Custom Dimensions (Matomo Plugin)
- * Plugin URI: http://plugins.matomo.org/CustomDimensions
- * Description: Extend Matomo to your needs by defining and tracking Custom Dimensions in scope Action or Visit
- * Author: Matomo
- * Author URI: https://matomo.org
- * Version: 3.1.10
- */
-?><?php
-/**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -26,24 +17,6 @@ use Piwik\Plugins\CustomDimensions\Tracker\CustomDimensionsRequestProcessor;
 use Piwik\Tracker\Cache;
 use Piwik\Tracker;
 use Piwik\Plugin;
-
- 
-if (defined( 'ABSPATH')
-&& function_exists('add_action')) {
-    $path = '/matomo/app/core/Plugin.php';
-    if (defined('WP_PLUGIN_DIR') && WP_PLUGIN_DIR && file_exists(WP_PLUGIN_DIR . $path)) {
-        require_once WP_PLUGIN_DIR . $path;
-    } elseif (defined('WPMU_PLUGIN_DIR') && WPMU_PLUGIN_DIR && file_exists(WPMU_PLUGIN_DIR . $path)) {
-        require_once WPMU_PLUGIN_DIR . $path;
-    } else {
-        return;
-    }
-    add_action('plugins_loaded', function () {
-        if (function_exists('matomo_add_plugin')) {
-            matomo_add_plugin(__DIR__, __FILE__, true);
-        }
-    });
-}
 
 class CustomDimensions extends Plugin
 {
@@ -119,7 +92,8 @@ class CustomDimensions extends Plugin
             'Goals.getReportsWithGoalMetrics'  => 'getReportsWithGoalMetrics',
             'Dimension.addDimensions' => 'addDimensions',
             'Report.addReports' => 'addReports',
-            'Actions.getCustomActionDimensionFieldsAndJoins' => 'provideActionDimensionFields'
+            'Actions.getCustomActionDimensionFieldsAndJoins' => 'provideActionDimensionFields',
+            'Db.getTablesInstalled' => 'getTablesInstalled'
         );
     }
 
@@ -194,6 +168,11 @@ class CustomDimensions extends Plugin
         }
 
         $dimensions = $this->getCustomDimensions($idSite);
+
+        usort($dimensions, function ($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
+
         $order = 70;
 
         foreach ($dimensions as $dimension) {
@@ -436,6 +415,16 @@ class CustomDimensions extends Plugin
             $tracking = new LogTable($scope);
             $cacheContent['custom_dimension_indexes_installed_' . $scope] = $tracking->getInstalledIndexes();
         }
+    }
+
+    /**
+     * Register the new tables, so Matomo knows about them.
+     *
+     * @param array $allTablesInstalled
+     */
+    public function getTablesInstalled(&$allTablesInstalled)
+    {
+        $allTablesInstalled[] = Common::prefixTable('custom_dimensions');
     }
 
     public static function getScopes()
