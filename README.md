@@ -118,3 +118,42 @@ open http://localhost:8000/index.php?module=Installation&action=systemCheckPage
 ```
 
 It will often report files that can be removed after an update. PHP config issues and archiving completion can be ignored locally.
+
+### Migrating Production
+
+Watch out: big migration may take longer in production than locally.
+
+Before deploying you can put the admin interface into maintenance mode by setting `MAINTENANCE_MODE=1`:
+
+```
+# faster env switching
+heroku features:disable preboot
+heroku config:set MAINTENANCE_MODE=1
+git push production
+```
+
+Once the code is deployed you should disable tracking by setting the following env:
+
+```
+heroku config:set DISABLE_TRACKING=1
+```
+
+And then start the migration with a detached one-off dyno:
+
+```bash
+# run detached to avoid timeout
+heroku run:detached --size=performance-l "php ./generate.config.ini.php && php -d memory_limit=14G /app/matomo/console core:update --yes"
+heroku ps # get run number, e.g. 1
+# follow logs
+heroku logs --dyno run.1 -t
+# stop if needed
+heroku ps:stop run.1
+```
+
+After the migration remove the `MAINTENANCE_MODE` and `DISABLE_TRACKING` env. For minor migrations you may be able to skip `MAINTENANCE_MODE` and `DISABLE_TRACKING`.
+
+```
+heroku config:unset MAINTENANCE_MODE DISABLE_TRACKING
+# re-enable for seemless deploys without or small migrations
+heroku features:enable preboot
+```
