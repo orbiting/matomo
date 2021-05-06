@@ -12,6 +12,9 @@ $redis_host = $redis['host'];
 $redis_port = $redis['port'];
 $redis_pass = $redis['pass'];
 
+$maintenance_mode = empty(getenv('MAINTENANCE_MODE')) ? '0' : '1';
+$record_statistics = empty(getenv('DISABLE_TRACKING')) ? '1' : '0';
+
 $salt = getenv('SALT');
 $trusted_hosts = getenv('TRUSTED_HOSTS');
 if (empty($trusted_hosts)) {
@@ -63,7 +66,11 @@ redisPort = $redis_port
 redisPassword = "$redis_pass"
 redisDatabase = 0
 
+[Tracker]
+record_statistics = $record_statistics
+
 [General]
+maintenance_mode = $maintenance_mode
 browser_archiving_disabled_enforce = 1
 enable_processing_unique_visitors_year = 1
 secure_protocol = $secure_protocol
