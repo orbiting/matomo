@@ -24,6 +24,8 @@
 
         var showSubcategoryHelpOnLoad = null;
 
+        var initialLoad = true;
+
         $scope.currentCategory = piwikUrl.getSearchParam('category');
         $scope.currentSubcategory = piwikUrl.getSearchParam('subcategory');
 
@@ -218,6 +220,10 @@
         });
 
         $rootScope.$on('piwikPageChange', function (event) {
+            if (!initialLoad) {
+                globalAjaxQueue.abort();
+            }
+
             $scope.helpShownCategory = null;
             $scope.currentCategory = piwikUrl.getSearchParam('category');
             $scope.currentSubcategory = piwikUrl.getSearchParam('subcategory');
@@ -226,6 +232,10 @@
                 $scope.showHelp(showSubcategoryHelpOnLoad.category, showSubcategoryHelpOnLoad.subcategory);
                 showSubcategoryHelpOnLoad = null;
             }
+
+            $('#loadingError').hide();
+
+            initialLoad = false;
         });
     }
 })();

@@ -78,7 +78,7 @@
     addListener, enableLinkTracking, enableJSErrorTracking, setLinkTrackingTimer, getLinkTrackingTimer,
     enableHeartBeatTimer, disableHeartBeatTimer, killFrame, redirectFile, setCountPreRendered, setVisitStandardLength,
     trackGoal, trackLink, trackPageView, getNumTrackedPageViews, trackRequest, ping, queueRequest, trackSiteSearch, trackEvent,
-    requests, timeout, enabled, sendRequests, queueRequest, canQueue, pushMultiple, disableQueueRequest,setRequestQueueInterval,interval,getRequestQueue, unsetPageIsUnloading,
+    requests, timeout, enabled, sendRequests, queueRequest, canQueue, pushMultiple, disableQueueRequest,setRequestQueueInterval,interval,getRequestQueue, getJavascriptErrors, unsetPageIsUnloading,
     setEcommerceView, getEcommerceItems, addEcommerceItem, removeEcommerceItem, clearEcommerceCart, trackEcommerceOrder, trackEcommerceCartUpdate,
     deleteCookie, deleteCookies, offsetTop, offsetLeft, offsetHeight, offsetWidth, nodeType, defaultView,
     innerHTML, scrollLeft, scrollTop, currentStyle, getComputedStyle, querySelectorAll, splice,
@@ -2385,6 +2385,10 @@ if (typeof window.Matomo !== 'object') {
                 // holds all pending tracking requests that have not been tracked because we need consent
                 consentRequestsQueue = [],
 
+                // holds the actual javascript errors if enableJSErrorTracking is on, if the very same error is
+                // happening multiple times, then it will be tracked only once within the same page view
+                javaScriptErrors = [],
+
                 // a unique ID for this tracker during this request
                 uniqueTrackerId = trackerIdCounter++,
 
@@ -3381,11 +3385,12 @@ if (typeof window.Matomo !== 'object') {
 
             function isPossibleToSetCookieOnDomain(domainToTest)
             {
+                var testCookieName = configCookieNamePrefix + 'testcookie_domain';
                 var valueToSet = 'testvalue';
-                setCookie('test', valueToSet, 10000, null, domainToTest, configCookieIsSecure, configCookieSameSite);
+                setCookie(testCookieName, valueToSet, 10000, null, domainToTest, configCookieIsSecure, configCookieSameSite);
 
-                if (getCookie('test') === valueToSet) {
-                    deleteCookie('test', null, domainToTest);
+                if (getCookie(testCookieName) === valueToSet) {
+                    deleteCookie(testCookieName, null, domainToTest);
 
                     return true;
                 }
@@ -3467,7 +3472,11 @@ if (typeof window.Matomo !== 'object') {
                     return request;
                 }
 
-                var performanceData = (typeof performanceAlias.getEntriesByType === 'function') && performanceAlias.getEntriesByType('navigation') ? performanceAlias.getEntriesByType('navigation')[0] : performanceAlias.timing;
+                var performanceData = (typeof performanceAlias.timing === 'object') && performanceAlias.timing ? performanceAlias.timing : undefined;
+
+                if (!performanceData) {
+                    performanceData = (typeof performanceAlias.getEntriesByType === 'function') && performanceAlias.getEntriesByType('navigation') ? performanceAlias.getEntriesByType('navigation')[0] : undefined;
+                }
 
                 if (!performanceData) {
                     return request;
@@ -3482,7 +3491,7 @@ if (typeof window.Matomo !== 'object') {
                         return;
                     }
 
-                    timings += '&pf_net=' + (performanceData.connectEnd - performanceData.fetchStart);
+                    timings += '&pf_net=' + Math.round(performanceData.connectEnd - performanceData.fetchStart);
                 }
 
                 if (performanceData.responseStart && performanceData.requestStart) {
@@ -3491,7 +3500,7 @@ if (typeof window.Matomo !== 'object') {
                         return;
                     }
 
-                    timings += '&pf_srv=' + (performanceData.responseStart - performanceData.requestStart);
+                    timings += '&pf_srv=' + Math.round(performanceData.responseStart - performanceData.requestStart);
                 }
 
                 if (performanceData.responseStart && performanceData.responseEnd) {
@@ -3500,16 +3509,27 @@ if (typeof window.Matomo !== 'object') {
                         return;
                     }
 
-                    timings += '&pf_tfr=' + (performanceData.responseEnd - performanceData.responseStart);
+                    timings += '&pf_tfr=' + Math.round(performanceData.responseEnd - performanceData.responseStart);
                 }
 
-                if (performanceData.domInteractive && performanceData.domLoading) {
+                if (isDefined(performanceData.domLoading)) {
+                    if (performanceData.domInteractive && performanceData.domLoading) {
 
-                    if (performanceData.domInteractive < performanceData.domLoading) {
-                        return;
+                        if (performanceData.domInteractive < performanceData.domLoading) {
+                            return;
+                        }
+
+                        timings += '&pf_dm1=' + Math.round(performanceData.domInteractive - performanceData.domLoading);
                     }
+                } else {
+                    if (performanceData.domInteractive && performanceData.responseEnd) {
 
-                    timings += '&pf_dm1=' + (performanceData.domInteractive - performanceData.domLoading);
+                        if (performanceData.domInteractive < performanceData.responseEnd) {
+                            return;
+                        }
+
+                        timings += '&pf_dm1=' + Math.round(performanceData.domInteractive - performanceData.responseEnd);
+                    }
                 }
 
                 if (performanceData.domComplete && performanceData.domInteractive) {
@@ -3518,7 +3538,7 @@ if (typeof window.Matomo !== 'object') {
                         return;
                     }
 
-                    timings += '&pf_dm2=' + (performanceData.domComplete - performanceData.domInteractive);
+                    timings += '&pf_dm2=' + Math.round(performanceData.domComplete - performanceData.domInteractive);
                 }
 
                 if (performanceData.loadEventEnd && performanceData.loadEventStart) {
@@ -3527,7 +3547,7 @@ if (typeof window.Matomo !== 'object') {
                         return;
                     }
 
-                    timings += '&pf_onl=' + (performanceData.loadEventEnd - performanceData.loadEventStart);
+                    timings += '&pf_onl=' + Math.round(performanceData.loadEventEnd - performanceData.loadEventStart);
                 }
 
                 return request + timings;
@@ -3879,7 +3899,7 @@ if (typeof window.Matomo !== 'object') {
                 var request = getRequest('action_name=' + encodeWrapper(titleFixup(customTitle || configTitle)), customData, 'log');
 
                 // append already available performance metrics if they were not already tracked (or appended)
-                if (!performanceTracked) {
+                if (configPerformanceTrackingEnabled && !performanceTracked) {
                     request = appendAvailablePerformanceMetrics(request);
                 }
 
@@ -4889,6 +4909,9 @@ if (typeof window.Matomo !== 'object') {
             };
             this.getRequestQueue = function () {
                 return requestQueue;
+            };
+            this.getJavascriptErrors = function () {
+                return javaScriptErrors;
             };
             this.unsetPageIsUnloading = function () {
                 isPageUnloading = false;
@@ -5935,7 +5958,7 @@ if (typeof window.Matomo !== 'object') {
              *
              * When you call this method, we imply that the user has given cookie consent for this page view, and will also
              * imply consent for all future page views unless the cookie expires or the user
-             * deletes all her or his cookies. Remembering cookie consent means even if you call {@link disableCookies()},
+             * deletes all their cookies. Remembering cookie consent means even if you call {@link disableCookies()},
              * then cookies will still be enabled and it won't disable cookies since the user has given consent for cookies.
              *
              * Please note that this feature requires you to set the `cookieDomain` and `cookiePath` correctly. Please
@@ -6087,7 +6110,11 @@ if (typeof window.Matomo !== 'object') {
                             action += ':' + column;
                         }
 
-                        logEvent(category, action, message);
+                        if (indexOfArray(javaScriptErrors, category + action + message) === -1) {
+                            javaScriptErrors.push(category + action + message);
+
+                            logEvent(category, action, message);
+                        }
                     });
 
                     if (onError) {
@@ -6213,6 +6240,7 @@ if (typeof window.Matomo !== 'object') {
             this.trackPageView = function (customTitle, customData, callback) {
                 trackedContentImpressions = [];
                 consentRequestsQueue = [];
+                javaScriptErrors = [];
 
                 if (isOverlaySession(configTrackerSiteId)) {
                     trackCallback(function () {
@@ -6732,8 +6760,8 @@ if (typeof window.Matomo !== 'object') {
 
             /**
              * When called, no tracking request will be sent to the Matomo server until you have called `setConsentGiven()`
-             * unless consent was given previously AND you called {@link rememberConsentGiven()} when the user gave her
-             * or his consent.
+             * unless consent was given previously AND you called {@link rememberConsentGiven()} when the user gave their
+             * consent.
              *
              * This may be useful when you want to implement for example a popup to ask for consent before tracking the user.
              * Once the user has given consent, you should call {@link setConsentGiven()} or {@link rememberConsentGiven()}.
@@ -6814,7 +6842,7 @@ if (typeof window.Matomo !== 'object') {
              *
              * When you call this method, we imply that the user has given consent for this page view, and will also
              * imply consent for all future page views unless the cookie expires (if timeout defined) or the user
-             * deletes all her or his cookies. This means even if you call {@link requireConsent()}, then all requests
+             * deletes all their cookies. This means even if you call {@link requireConsent()}, then all requests
              * will still be tracked.
              *
              * Please note that this feature requires you to set the `cookieDomain` and `cookiePath` correctly and requires

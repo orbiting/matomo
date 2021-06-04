@@ -46,6 +46,7 @@ password = "$pass"
 dbname = "$dbname"
 port = $port
 tables_prefix = "piwik_"
+charset = "utf8mb4"
 enable_ssl = $enable_ssl
 $ssl_ca
 
@@ -144,6 +145,7 @@ Plugins[] = "UserId"
 Plugins[] = "CustomJsTracker"
 Plugins[] = "Provider"
 Plugins[] = "CustomDimensions"
+Plugins[] = "DBStats"
 Plugins[] = "InvalidateReports"
 Plugins[] = "MarketingCampaignsReporting"
 Plugins[] = "GeoIp2"
@@ -217,6 +219,7 @@ PluginsInstalled[] = "IntranetMeasurable"
 PluginsInstalled[] = "TwoFactorAuth"
 PluginsInstalled[] = "GeoIp2"
 PluginsInstalled[] = "QueuedTracking"
+PluginsInstalled[] = "DBStats"
 EOD;
 
 
