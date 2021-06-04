@@ -58,7 +58,7 @@ php -S 0.0.0.0:8000 -t matomo/
 ```bash
 # invalidate all reports via Settings -> System -> Invalidate reports
 # run detached to avoid timeout
-heroku run:detached --size=performance-l "php ./generate.config.ini.php && php -d memory_limit=14G ./matomo/console core:archive --force-all-websites --force-all-periods=315576000 --force-date-last-n=1000 --php-cli-options=\"-d memory_limit=14G\" --concurrent-requests-per-website=8"
+heroku run:detached --size=performance-l "php ./generate.config.ini.php && php -d memory_limit=14G ./matomo/console core:archive --force-all-websites --php-cli-options=\"-d memory_limit=14G\" --concurrent-requests-per-website=8"
 heroku ps # get run number, e.g. 1
 # follow logs
 heroku logs --dyno run.1 -t
