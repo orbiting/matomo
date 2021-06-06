@@ -51,6 +51,37 @@ php ./generate.config.ini.php
 php -S 0.0.0.0:8000 -t matomo/
 ```
 
+## Queued Tracking
+
+`Process during tracking request` should be disabled in `System -> General Settings # QueuedTracking`. And a scheduler or dedicated worker should be used to process the queue.
+
+This is because Heroku generally has a 30s timeout for requests and by default also for php-fpm script execution time—the processing will be aborted if it exceeds 30s.
+
+### Scheduler
+
+Use the «Heroku Scheduler» addon and setup a job to run the following command every 10 minutes with an performance-l dyno:
+
+```bash
+php ./generate.config.ini.php && php -d memory_limit=14G ./matomo/console queuedtracking:process
+```
+
+### Monitor
+
+```bash
+heroku run "php ./generate.config.ini.php && ./matomo/console queuedtracking:monitor"
+```
+
+### Alternative: Raise Timeout
+
+One could also raise the php-fpm execution limit in `fpm_custom.conf`:
+
+```
+request_slowlog_timeout = 25s
+request_terminate_timeout = 5m
+```
+
+However this will still produce warnings in the logs, high response times and possibly timeouts in the Heroku metrics.
+
 ## Archiving
 
 ### Rebuild all reports
@@ -70,7 +101,7 @@ See [Matomo docs](https://matomo.org/docs/setup-auto-archiving/) for more option
 
 ### Scheduler
 
-Add the «Heroku Scheduler» addon and setup a job to run the following command every hour with an performance-l dyno:
+Use the «Heroku Scheduler» addon and setup a job to run the following command every hour with an performance-l dyno:
 
 ```bash
 php ./generate.config.ini.php && php -d memory_limit=14G ./matomo/console core:archive --force-periods="day,week" --force-date-last-n=2 --php-cli-options="-d memory_limit=14G"
