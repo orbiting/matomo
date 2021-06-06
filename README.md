@@ -163,7 +163,7 @@ heroku config:set MAINTENANCE_MODE=1
 git push production
 ```
 
-Once the code is deployed you should disable tracking by setting the following env:
+Once the code is deployed you should disable tracking by setting the following env or if you're using the `queuedtracking:process` scheduler you can keep tracking but just temporarily remove the process job. You might also want to remove the archive jobs.
 
 ```
 heroku config:set DISABLE_TRACKING=1
@@ -188,3 +188,5 @@ heroku config:unset MAINTENANCE_MODE DISABLE_TRACKING
 # re-enable for seemless deploys without or small migrations
 heroku features:enable preboot
 ```
+
+If you removed any scheduler jobs: make sure to add them again.
