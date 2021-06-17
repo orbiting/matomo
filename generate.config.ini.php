@@ -46,7 +46,6 @@ password = "$pass"
 dbname = "$dbname"
 port = $port
 tables_prefix = "piwik_"
-charset = "utf8mb4"
 enable_ssl = $enable_ssl
 $ssl_ca
 
