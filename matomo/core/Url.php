@@ -145,13 +145,13 @@ class Url
             }
 
             // strip parameters
-            if (($pos = strpos($url, "?")) !== false) {
-                $url = substr($url, 0, $pos);
+            if (($pos = mb_strpos($url, "?")) !== false) {
+                $url = mb_substr($url, 0, $pos);
             }
 
             // strip path_info
             if ($removePathInfo && !empty($_SERVER['PATH_INFO'])) {
-                $url = substr($url, 0, -strlen($_SERVER['PATH_INFO']));
+                $url = mb_substr($url, 0, -mb_strlen($_SERVER['PATH_INFO']));
             }
         }
 
@@ -173,6 +173,14 @@ class Url
         if (!isset($url[0]) || $url[0] !== '/') {
             $url = '/' . $url;
         }
+
+        // A hash part should actually be never send to the server, as browsers automatically remove them from the request
+        // The same happens for tools like cUrl. While Apache won't answer requests that contain them, Nginx would handle them
+        // and the hash part would be included in REQUEST_URI. Therefor we always remove any hash parts here.
+        if (mb_strpos($url, '#')) {
+            $url = mb_substr($url, 0, mb_strpos($url, '#'));
+        }
+
         return $url;
     }
 
@@ -240,10 +248,10 @@ class Url
         }
         $trustedHosts = str_replace("/", "\\/", $trustedHosts);
 
-        $untrustedHost = Common::mb_strtolower($host);
+        $untrustedHost = mb_strtolower($host);
         $untrustedHost = rtrim($untrustedHost, '.');
 
-        $hostRegex = Common::mb_strtolower('/(^|.)' . implode('$|', $trustedHosts) . '$/');
+        $hostRegex = mb_strtolower('/(^|.)' . implode('$|', $trustedHosts) . '$/');
 
         $result = preg_match($hostRegex, $untrustedHost);
         return 0 !== $result;
@@ -660,13 +668,17 @@ class Url
      */
     public static function getHostFromUrl($url)
     {
-        $parsedUrl = parse_url($url);
-
-        if (empty($parsedUrl['host'])) {
-            return;
+        if (!is_string($url)) {
+            return null;
         }
 
-        return Common::mb_strtolower($parsedUrl['host']);
+        $urlHost = parse_url($url, PHP_URL_HOST);
+
+        if (empty($urlHost)) {
+            return null;
+        }
+
+        return mb_strtolower($urlHost);
     }
 
     /**
@@ -684,11 +696,11 @@ class Url
             return false;
         }
 
-        $host = Common::mb_strtolower($host);
+        $host = mb_strtolower($host);
 
         if (!empty($urls)) {
             foreach ($urls as $url) {
-                if (Common::mb_strtolower($url) === $host) {
+                if (mb_strtolower($url) === $host) {
                     return true;
                 }
 
@@ -723,7 +735,7 @@ class Url
      */
     public static function getLocalHostnames()
     {
-        return array('localhost', '127.0.0.1', '::1', '[::1]');
+        return array('localhost', '127.0.0.1', '::1', '[::1]', '[::]', '0000::1', '0177.0.0.1', '2130706433', '[0:0:0:0:0:ffff:127.0.0.1]');
     }
 
     /**

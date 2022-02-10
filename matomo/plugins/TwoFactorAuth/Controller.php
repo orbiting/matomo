@@ -21,6 +21,10 @@ use Piwik\Session\SessionNamespace;
 use Piwik\Url;
 use Piwik\View;
 use Exception;
+use Piwik\Plugins\CoreAdminHome\Emails\RecoveryCodesShowedEmail;
+use Piwik\Plugins\CoreAdminHome\Emails\TwoFactorAuthEnabledEmail;
+use Piwik\Plugins\CoreAdminHome\Emails\TwoFactorAuthDisabledEmail;
+use Piwik\Plugins\CoreAdminHome\Emails\RecoveryCodesRegeneratedEmail;
 
 class Controller extends \Piwik\Plugin\Controller
 {
@@ -79,7 +83,8 @@ class Controller extends \Piwik\Plugin\Controller
         $form->removeAttribute('action'); // remove action attribute, otherwise hash part will be lost
         if ($form->validate()) {
             $nonce = $form->getSubmitValue('form_nonce');
-            if ($nonce && Nonce::verifyNonce(self::LOGIN_2FA_NONCE, $nonce) && $form->validate()) {
+            $messageNoAccess = Nonce::verifyNonceWithErrorMessage(self::LOGIN_2FA_NONCE, $nonce);
+            if ($nonce && $messageNoAccess === "" && $form->validate()) {
                 $authCode = $form->getSubmitValue('form_authcode');
                 if ($authCode && is_string($authCode)) {
                     $authCode = str_replace('-', '', $authCode);
@@ -102,12 +107,9 @@ class Controller extends \Piwik\Plugin\Controller
                         // ignore error eg if login plugin is disabled
                      }
                 }
-            } else {
-                $messageNoAccess = Piwik::translate('Login_InvalidNonceOrHeadersOrReferrer', array('<a target="_blank" rel="noreferrer noopener" href="https://matomo.org/faq/how-to-install/#faq_98">', '</a>'));
             }
         }
-        $superUsers = Request::processRequest('UsersManager.getUsersHavingSuperUserAccess', [], []);
-        $view->superUserEmails = implode(',', array_column($superUsers, 'email'));
+        $view->contactEmail = implode(',', Piwik::getContactEmailAddresses());
         $view->loginModule = Piwik::getLoginPluginName();
         $view->AccessErrorString = $messageNoAccess;
         $view->addForm($form);
@@ -147,6 +149,13 @@ class Controller extends \Piwik\Plugin\Controller
 
             $this->twoFa->disable2FAforUser(Piwik::getCurrentUserLogin());
             $this->passwordVerify->forgetVerifiedPassword();
+
+            $container = StaticContainer::getContainer();
+            $email = $container->make(TwoFactorAuthDisabledEmail::class, array(
+                'login' => Piwik::getCurrentUserLogin(),
+                'emailAddress' => Piwik::getCurrentUserEmail()
+            ));
+            $email->safeSend();
 
             $this->redirectToIndex('UsersManager', 'userSecurity', null, null, null, array(
                 'disableNonce' => false
@@ -218,6 +227,13 @@ class Controller extends \Piwik\Plugin\Controller
 
                 Piwik::postEvent('TwoFactorAuth.enabled', array($login));
 
+                $container = StaticContainer::getContainer();
+                $email = $container->make(TwoFactorAuthEnabledEmail::class, array(
+                    'login' => Piwik::getCurrentUserLogin(),
+                    'emailAddress' => Piwik::getCurrentUserEmail()
+                ));
+                $email->safeSend();
+
                 if ($standalone) {
                     $this->redirectToIndex('CoreHome', 'index');
                     return;
@@ -270,15 +286,23 @@ class Controller extends \Piwik\Plugin\Controller
         $this->validator->check2FaEnabled();
 
         $regenerateNonce = Common::getRequestVar('regenerateNonce', '', 'string', $_POST);
-        $postedValidNonce = !empty($regenerateNonce) && Nonce::verifyNonce(self::REGENERATE_CODES_2FA_NONCE, $regenerateNonce);
+        $postedValidNonce = !empty($regenerateNonce) && Nonce::verifyNonce(self::REGENERATE_CODES_2FA_NONCE,
+            $regenerateNonce);
 
         $regenerateSuccess = false;
         $regenerateError = false;
+        $container = StaticContainer::getContainer();
 
         if ($postedValidNonce && $this->passwordVerify->hasBeenVerified()) {
             $this->passwordVerify->forgetVerifiedPassword();
             $this->recoveryCodeDao->createRecoveryCodesForLogin(Piwik::getCurrentUserLogin());
             $regenerateSuccess = true;
+
+            $email = $container->make(RecoveryCodesRegeneratedEmail::class, array(
+                'login' => Piwik::getCurrentUserLogin(),
+                'emailAddress' => Piwik::getCurrentUserEmail()
+            ));
+            $email->safeSend();
             // no need to redirect as password was verified nonce
             // if user has posted a valid nonce, we do not need to require password again as nonce must have been generated recent
             // avoids use case where eg password verify is only valid for one more minute when opening the page but user regenerates 2min later
@@ -292,6 +316,14 @@ class Controller extends \Piwik\Plugin\Controller
         }
 
         $recoveryCodes = $this->recoveryCodeDao->getAllRecoveryCodesForLogin(Piwik::getCurrentUserLogin());
+
+        if (!$regenerateSuccess && !$regenerateError) {
+            $email = $container->make(RecoveryCodesShowedEmail::class, array(
+                'login' => Piwik::getCurrentUserLogin(),
+                'emailAddress' => Piwik::getCurrentUserEmail()
+            ));
+            $email->safeSend();
+        }
 
         return $this->renderTemplate('showRecoveryCodes', array(
             'codes' => $recoveryCodes,

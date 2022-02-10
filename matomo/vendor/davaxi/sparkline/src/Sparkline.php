@@ -7,6 +7,7 @@ use Davaxi\Sparkline\FormatTrait;
 use Davaxi\Sparkline\Picture;
 use Davaxi\Sparkline\PointTrait;
 use Davaxi\Sparkline\StyleTrait;
+use InvalidArgumentException;
 
 /**
  * Class Sparkline.
@@ -60,12 +61,12 @@ class Sparkline
     public function __construct()
     {
         if (!extension_loaded('gd')) {
-            throw new \InvalidArgumentException('GD extension is not installed');
+            throw new InvalidArgumentException('GD extension is not installed');
         }
     }
 
     /**
-     * @param string $eTag
+     * @param string|null $eTag
      */
     public function setETag($eTag)
     {
@@ -81,7 +82,7 @@ class Sparkline
      * @param string $filename
      *                         Without extension
      */
-    public function setFilename($filename)
+    public function setFilename(string $filename)
     {
         $this->filename = $filename;
     }
@@ -113,12 +114,15 @@ class Sparkline
 
         $picture = new Picture($width, $height);
         $picture->applyBackground($this->backgroundColor);
-        $picture->applyThickness($this->lineThickness * $this->ratioComputing);
+
+        $lineThickness = (int)round($this->lineThickness * $this->ratioComputing);
+        $picture->applyThickness($lineThickness);
 
         $stepCount = $this->getMaxNumberOfDataPointsAcrossSerieses();
 
         foreach ($this->data as $seriesIndex => $series) {
-            list($polygon, $line) = $this->getChartElements($series, $stepCount);
+            $seriesNormalized = $this->getNormalizedData($seriesIndex);
+            list($polygon, $line) = $this->getChartElements($seriesNormalized, $stepCount);
             $picture->applyPolygon($polygon, $this->getFillColor($seriesIndex), $count);
             $picture->applyLine($line, $this->getLineColor($seriesIndex));
 
@@ -150,11 +154,11 @@ class Sparkline
     }
 
     /**
-     * @param $key
+     * @param string $key
      *
      * @return mixed|null
      */
-    public function getServerValue($key)
+    public function getServerValue(string $key)
     {
         if (isset($this->server[$key])) {
             return $this->server[$key];
@@ -166,7 +170,7 @@ class Sparkline
     /**
      * @return bool
      */
-    protected function checkNoModified()
+    protected function checkNoModified(): bool
     {
         $httpIfNoneMatch = $this->getServerValue('HTTP_IF_NONE_MATCH');
         if ($this->eTag && $httpIfNoneMatch) {
@@ -203,7 +207,10 @@ class Sparkline
         imagepng($this->file);
     }
 
-    public function save($savePath)
+    /**
+     * @param string $savePath
+     */
+    public function save(string $savePath)
     {
         if (!$this->file) {
             $this->generate();
@@ -214,7 +221,7 @@ class Sparkline
     /**
      * @return string
      */
-    public function toBase64()
+    public function toBase64(): string
     {
         if (!$this->file) {
             $this->generate();

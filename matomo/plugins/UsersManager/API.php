@@ -18,18 +18,17 @@ use Piwik\Common;
 use Piwik\Config;
 use Piwik\Container\StaticContainer;
 use Piwik\Date;
-use Piwik\IP;
-use Piwik\Mail;
 use Piwik\Metrics\Formatter;
 use Piwik\NoAccessException;
 use Piwik\Option;
 use Piwik\Piwik;
 use Piwik\Plugin;
+use Piwik\Plugins\CoreAdminHome\Emails\UserCreatedEmail;
 use Piwik\Plugins\Login\PasswordVerifier;
-use Piwik\SettingsPiwik;
+use Piwik\Plugins\UsersManager\Emails\UserInfoChangedEmail;
 use Piwik\Site;
 use Piwik\Tracker\Cache;
-use Piwik\View;
+use Piwik\Plugins\CoreAdminHome\Emails\UserDeletedEmail;
 
 /**
  * The UsersManager API lets you Manage Users and their permissions to access specific websites.
@@ -364,7 +363,7 @@ class API extends \Piwik\Plugin\API
                 return [];
 
             } else {
-                list($users, $totalResults) = $this->model->getUsersWithRole($idSite, $limit, $offset, $filter_search, $filter_access, $loginsToLimit);
+                [$users, $totalResults] = $this->model->getUsersWithRole($idSite, $limit, $offset, $filter_search, $filter_access, $loginsToLimit);
 
                 foreach ($users as &$user) {
                     $user['superuser_access'] = $user['superuser_access'] == 1;
@@ -372,7 +371,7 @@ class API extends \Piwik\Plugin\API
                         $user['role'] = 'superuser';
                         $user['capabilities'] = [];
                     } else {
-                        list($user['role'], $user['capabilities']) = $this->getRoleAndCapabilitiesFromAccess($user['access']);
+                        [$user['role'], $user['capabilities']] = $this->getRoleAndCapabilitiesFromAccess($user['access']);
                         $user['role'] = empty($user['role']) ? 'noaccess' : reset($user['role']);
                     }
 
@@ -460,19 +459,39 @@ class API extends \Piwik\Plugin\API
         return $userSites;
     }
 
+    /**
+     * Throws an exception if one of the given access types does not exists.
+     *
+     * @param string|array $access
+     * @throws Exception
+     */
     private function checkAccessType($access)
     {
         $access = (array) $access;
 
-        $roles = $this->roleProvider->getAllRoleIds();
-        $capabilities = $this->capabilityProvider->getAllCapabilityIds();
-        $list = array_merge($roles, $capabilities);
-
         foreach ($access as $entry) {
-            if (!in_array($entry, $list, true)) {
-                throw new Exception(Piwik::translate("UsersManager_ExceptionAccessValues", implode(", ", $list), $entry));
+            if (!$this->isValidAccessType($entry)) {
+                throw new Exception(Piwik::translate("UsersManager_ExceptionAccessValues", [implode(", ", $this->getAllRolesAndCapabilities()), $entry]));
             }
         }
+    }
+
+    /**
+     * returns if the given access type exists
+     *
+     * @param string $access
+     * @return bool
+     */
+    private function isValidAccessType($access)
+    {
+        return in_array($access, $this->getAllRolesAndCapabilities(), true);
+    }
+
+    private function getAllRolesAndCapabilities()
+    {
+        $roles = $this->roleProvider->getAllRoleIds();
+        $capabilities = $this->capabilityProvider->getAllCapabilityIds();
+        return array_merge($roles, $capabilities);
     }
 
     /**
@@ -590,9 +609,9 @@ class API extends \Piwik\Plugin\API
             }
         }
 
-        list($sites, $totalResults) = $this->model->getSitesAccessFromUserWithFilters($userLogin, $limit, $offset, $filter_search, $filter_access, $idSites);
+        [$sites, $totalResults] = $this->model->getSitesAccessFromUserWithFilters($userLogin, $limit, $offset, $filter_search, $filter_access, $idSites);
         foreach ($sites as &$siteAccess) {
-            list($siteAccess['role'], $siteAccess['capabilities']) = $this->getRoleAndCapabilitiesFromAccess($siteAccess['access']);
+            [$siteAccess['role'], $siteAccess['capabilities']] = $this->getRoleAndCapabilitiesFromAccess($siteAccess['access']);
             $siteAccess['role'] = empty($siteAccess['role']) ? 'noaccess' : reset($siteAccess['role']);
             unset($siteAccess['access']);
         }
@@ -665,7 +684,7 @@ class API extends \Piwik\Plugin\API
             throw new Exception(Piwik::translate('UsersManager_ExceptionEmailExists', $email));
         }
 
-        if ($userLogin && Common::mb_strtolower($userLogin) !== Common::mb_strtolower($email) && $this->userExists($email)) {
+        if ($userLogin && mb_strtolower($userLogin) !== mb_strtolower($email) && $this->userExists($email)) {
             throw new Exception(Piwik::translate('UsersManager_ExceptionEmailExistsAsLogin', $email));
         }
 
@@ -721,6 +740,14 @@ class API extends \Piwik\Plugin\API
         $passwordTransformed = $this->password->hash($passwordTransformed);
 
         $this->model->addUser($userLogin, $passwordTransformed, $email, Date::now()->getDatetime());
+
+        $container = StaticContainer::getContainer();
+        $mail = $container->make(UserCreatedEmail::class, array(
+            'login' => Piwik::getCurrentUserLogin(),
+            'emailAddress' => Piwik::getCurrentUserEmail(),
+            'userLogin' => $userLogin
+        ));
+        $mail->safeSend();
 
         // we reload the access list which doesn't yet take in consideration this new user
         Access::getInstance()->reloadAccess();
@@ -848,6 +875,11 @@ class API extends \Piwik\Plugin\API
         unset($user['token_auth']);
         unset($user['password']);
         unset($user['ts_password_modified']);
+        unset($user['idchange_last_viewed']);
+
+        if ($lastSeen = LastSeenTimeLogger::getLastSeenTimeForUser($user['login'])) {
+            $user['last_seen'] = Date::getDatetimeFromTimestamp($lastSeen);
+        }
 
         if (Piwik::hasUserSuperUserAccess()) {
             $user['uses_2fa'] = !empty($user['twofactor_secret']) && $this->isTwoFactorAuthPluginEnabled();
@@ -870,6 +902,10 @@ class API extends \Piwik\Plugin\API
 
         if (isset($user['superuser_access'])) {
             $newUser['superuser_access'] = $user['superuser_access'];
+        }
+
+        if (isset($user['last_seen'])) {
+            $newUser['last_seen'] = $user['last_seen'];
         }
 
         return $newUser;
@@ -927,7 +963,7 @@ class API extends \Piwik\Plugin\API
             $email = $userInfo['email'];
         }
 
-        $hasEmailChanged = Common::mb_strtolower($email) !== Common::mb_strtolower($userInfo['email']);
+        $hasEmailChanged = mb_strtolower($email) !== mb_strtolower($userInfo['email']);
 
         if ($hasEmailChanged) {
             $this->checkEmail($email, $userLogin);
@@ -987,6 +1023,14 @@ class API extends \Piwik\Plugin\API
         $this->model->deleteUserOnly($userLogin);
         $this->model->deleteUserOptions($userLogin);
         $this->model->deleteUserAccess($userLogin);
+
+        $container = StaticContainer::getContainer();
+        $email = $container->make(UserDeletedEmail::class, array(
+            'login' => Piwik::getCurrentUserLogin(),
+            'emailAddress' => Piwik::getCurrentUserEmail(),
+            'userLogin' => $userLogin
+        ));
+        $email->safeSend();
 
         Cache::deleteTrackerCache();
     }
@@ -1084,7 +1128,7 @@ class API extends \Piwik\Plugin\API
 
         if (is_array($access)) {
             // we require one role, and optionally multiple capabilities
-            list($roles, $capabilities) = $this->getRoleAndCapabilitiesFromAccess($access);
+            [$roles, $capabilities] = $this->getRoleAndCapabilitiesFromAccess($access);
 
             if (count($roles) < 1) {
                 $ids = implode(', ', $this->roleProvider->getAllRoleIds());
@@ -1157,7 +1201,7 @@ class API extends \Piwik\Plugin\API
             $this->capabilityProvider->checkValidCapability($entry);
         }
 
-        list($sitesIdWithRole, $sitesIdWithCapability) = $this->getRolesAndCapabilitiesForLogin($userLogin);
+        [$sitesIdWithRole, $sitesIdWithCapability] = $this->getRolesAndCapabilitiesForLogin($userLogin);
 
         foreach ($capabilities as $entry) {
             $cap = $this->capabilityProvider->getCapability($entry);
@@ -1363,6 +1407,7 @@ class API extends \Piwik\Plugin\API
             }
         }
 
+        $passwordConfirmation = Common::unsanitizeInputValue($passwordConfirmation);
         if (empty($user) || !$this->passwordVerifier->isPasswordCorrect($userLogin, $passwordConfirmation)) {
             if (empty($user)) {
                 /**
@@ -1430,8 +1475,9 @@ class API extends \Piwik\Plugin\API
             if ($this->roleProvider->isValidRole($entry)) {
                 $roles[] = $entry;
             } else {
-                $this->checkAccessType($entry);
-                $capabilities[] = $entry;
+                if ($this->isValidAccessType($entry)) {
+                    $capabilities[] = $entry;
+                }
             }
         }
         return [$roles, $capabilities];
@@ -1463,23 +1509,10 @@ class API extends \Piwik\Plugin\API
     {
         $deviceDescription = $this->getDeviceDescription();
 
-        $view = new View('@UsersManager/_userInfoChangedEmail.twig');
-        $view->type = $type;
-        $view->accountName = Common::sanitizeInputValue($user['login']);
-        $view->newEmail = Common::sanitizeInputValue($newValue);
-        $view->ipAddress = IP::getIpFromHeader();
-        $view->deviceDescription = $deviceDescription;
-
-        $mail = new Mail();
+        $mail = new UserInfoChangedEmail($type, $newValue, $deviceDescription, $user['login']);
 
         $mail->addTo($emailTo, $user['login']);
         $mail->setSubject(Piwik::translate($subject));
-        $mail->setDefaultFromPiwik();
-        $mail->setWrappedHtmlBody($view);
-
-        $replytoEmailName = Config::getInstance()->General['login_password_recovery_replyto_email_name'];
-        $replytoEmailAddress = Config::getInstance()->General['login_password_recovery_replyto_email_address'];
-        $mail->addReplyTo($replytoEmailAddress, $replytoEmailName);
 
         $mail->send();
     }

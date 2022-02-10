@@ -10,6 +10,7 @@ namespace Piwik;
 
 use Piwik\Archive\ArchiveQuery;
 use Piwik\Archive\ArchiveQueryFactory;
+use Piwik\Archive\DataCollection;
 use Piwik\Archive\Parameters;
 use Piwik\ArchiveProcessor\Rules;
 use Piwik\Container\StaticContainer;
@@ -181,7 +182,7 @@ class Archive implements ArchiveQuery
      * @param bool $forceIndexedByDate Whether to force index the result of a query by period.
      */
     public function __construct(Parameters $params, $forceIndexedBySite = false,
-                                   $forceIndexedByDate = false)
+                                $forceIndexedByDate = false)
     {
         $this->params = $params;
         $this->forceIndexedBySite = $forceIndexedBySite;
@@ -287,6 +288,21 @@ class Archive implements ArchiveQuery
     }
 
     /**
+     * Queries and returns blob records without turning them into DataTables.
+     *
+     * Unlike other methods, this returns a DataCollection instance directly. Use it to directly access
+     * and process blob data.
+     *
+     * @param string|string[] $names One or more archive names, eg, `'nb_visits'`, `'Referrers_distinctKeywords'`,
+     *                            etc.
+     * @return DataCollection the queried data.
+     */
+    public function getBlob($names, $idSubtable = null)
+    {
+        return $this->get($names, 'blob', $idSubtable);
+    }
+
+    /**
      * Queries and returns metric data in a DataTable instance.
      *
      * If multiple sites were requested in {@link build()} or {@link factory()} the result will
@@ -326,7 +342,7 @@ class Archive implements ArchiveQuery
      */
     public function getDataTableFromNumericAndMergeChildren($names)
     {
-        $data  = $this->get($names, 'numeric');
+        $data = $this->get($names, 'numeric');
         $resultIndexes = $this->getResultIndices();
         return $data->getMergedDataTable($resultIndexes);
     }
@@ -438,7 +454,7 @@ class Archive implements ArchiveQuery
         }
 
         $archive = Archive::build($idSite, $period, $date, $segment, $_restrictSitesToLogin = false);
-        if ($idSubtable === false) {
+        if ($idSubtable === false || $idSubtable === '') {
             $idSubtable = null;
         }
 
@@ -523,7 +539,7 @@ class Archive implements ArchiveQuery
                 $result->addMetadata($row['idsite'], $periodStr, DataTable::ARCHIVED_DATE_METADATA_NAME, $row['ts_archived']);
             }
 
-            $result->set($row['idsite'], $periodStr, $row['name'], $row['value']);
+            $result->set($row['idsite'], $periodStr, $row['name'], $row['value'], [DataTable::ARCHIVED_DATE_METADATA_NAME => $row['ts_archived']]);
         }
 
         return $result;

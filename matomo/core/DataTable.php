@@ -432,6 +432,11 @@ class DataTable implements DataTableInterface, \IteratorAggregate, \ArrayAccess
         return $this->totalsRow;
     }
 
+    public function getSummaryRow()
+    {
+        return $this->summaryRow;
+    }
+
     /**
      * Returns the name of the column this table was sorted by (if any).
      *
@@ -997,6 +1002,31 @@ class DataTable implements DataTableInterface, \IteratorAggregate, \ArrayAccess
     }
 
     /**
+     * Delete row metadata by name in every row.
+     *
+     * @param       $name
+     * @param bool $deleteRecursiveInSubtables
+     */
+    public function deleteRowsMetadata($name, $deleteRecursiveInSubtables = false)
+    {
+        foreach ($this->rows as $row) {
+            $row->deleteMetadata($name);
+
+            $subTable = $row->getSubtable();
+            if ($subTable) {
+                $subTable->deleteRowsMetadata($name, $deleteRecursiveInSubtables);
+            }
+        }
+        if (!is_null($this->summaryRow)) {
+            $this->summaryRow->deleteMetadata($name);
+        }
+        if (!is_null($this->totalsRow)) {
+            $this->totalsRow->deleteMetadata($name);
+        }
+
+    }
+
+    /**
      * Returns the number of rows in the table including the summary row.
      *
      * @return int
@@ -1352,7 +1382,19 @@ class DataTable implements DataTableInterface, \IteratorAggregate, \ArrayAccess
         }
 
         if (isset($this->summaryRow)) {
-            $rows[self::ID_SUMMARY_ROW] = $this->summaryRow->export();
+            $id = self::ID_SUMMARY_ROW;
+            $row = $this->summaryRow;
+
+            // duplicating code above so we don't create a new array w/ getRows() above in this function which is
+            // used heavily in matomo.
+            if (isset($consecutiveSubtableIds[$id])) {
+                $backup = $row->subtableId;
+                $row->subtableId = $consecutiveSubtableIds[$id];
+                $rows[$id] = $row->export();
+                $row->subtableId = $backup;
+            } else {
+                $rows[$id] = $row->export();
+            }
         }
 
         if (!empty($metadata)) {
@@ -1907,23 +1949,30 @@ class DataTable implements DataTableInterface, \IteratorAggregate, \ArrayAccess
     private function aggregateRow($thisRow, Row $otherRow, $columnAggregationOps, $isSummaryRow)
     {
         if (empty($thisRow)) {
-            if ($isSummaryRow) {
-                $this->addSummaryRow($otherRow);
-            } else {
-                $this->addRow($otherRow);
+            $thisRow = new Row();
+            $otherRowLabel = $otherRow->getColumn('label');
+            if ($otherRowLabel !== false) {
+                $thisRow->addColumn('label', $otherRowLabel);
             }
-        } else {
-            $thisRow->sumRow($otherRow, $copyMeta = true, $columnAggregationOps);
+            $thisRow->setAllMetadata($otherRow->getMetadata());
 
-            // if the row to add has a subtable whereas the current row doesn't
-            // we simply add it (cloning the subtable)
-            // if the row has the subtable already
-            // then we have to recursively sum the subtables
-            $subTable = $otherRow->getSubtable();
-            if ($subTable) {
-                $subTable->metadata[self::COLUMN_AGGREGATION_OPS_METADATA_NAME] = $columnAggregationOps;
-                $thisRow->sumSubtable($subTable);
+            if ($isSummaryRow) {
+                $this->addSummaryRow($thisRow);
+            } else {
+                $this->addRow($thisRow);
             }
+        }
+
+        $thisRow->sumRow($otherRow, $copyMeta = true, $columnAggregationOps);
+
+        // if the row to add has a subtable whereas the current row doesn't
+        // we simply add it (cloning the subtable)
+        // if the row has the subtable already
+        // then we have to recursively sum the subtables
+        $subTable = $otherRow->getSubtable();
+        if ($subTable) {
+            $subTable->metadata[self::COLUMN_AGGREGATION_OPS_METADATA_NAME] = $columnAggregationOps;
+            $thisRow->sumSubtable($subTable);
         }
     }
 
@@ -1959,29 +2008,29 @@ class DataTable implements DataTableInterface, \IteratorAggregate, \ArrayAccess
     /**
      * @return \ArrayIterator|Row[]
      */
-    public function getIterator()
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->getRows());
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         $row = $this->getRowFromId($offset);
 
         return false !== $row;
     }
 
-    public function offsetGet($offset)
+    public function offsetGet($offset): Row
     {
         return $this->getRowFromId($offset);
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         $this->rows[$offset] = $value;
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         $this->deleteRow($offset);
     }

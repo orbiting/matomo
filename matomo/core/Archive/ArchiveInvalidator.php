@@ -9,10 +9,7 @@
 
 namespace Piwik\Archive;
 
-use Piwik\Access;
 use Piwik\Archive\ArchiveInvalidator\InvalidationResult;
-use Piwik\ArchiveProcessor\ArchivingStatus;
-use Piwik\ArchiveProcessor\Loader;
 use Piwik\ArchiveProcessor\Rules;
 use Piwik\Config;
 use Piwik\Container\StaticContainer;
@@ -74,11 +71,6 @@ class ArchiveInvalidator
     private $model;
 
     /**
-     * @var ArchivingStatus
-     */
-    private $archivingStatus;
-
-    /**
      * @var SegmentArchiving
      */
     private $segmentArchiving;
@@ -93,10 +85,9 @@ class ArchiveInvalidator
      */
     private $allIdSitesCache;
 
-    public function __construct(Model $model, ArchivingStatus $archivingStatus, LoggerInterface $logger)
+    public function __construct(Model $model, LoggerInterface $logger)
     {
         $this->model = $model;
-        $this->archivingStatus = $archivingStatus;
         $this->segmentArchiving = null;
         $this->logger = $logger;
     }
@@ -231,7 +222,6 @@ class ArchiveInvalidator
         // The process pid is added to the end of the entry in order to support multiple concurrent transactions.
         //  So this must be a deleteLike call to get all the entries, where there used to only be one.
         $this->deleteOptionLike($id);
-        Cache::clearCacheGeneral();
     }
 
     private function deleteOptionLike($id)
@@ -401,6 +391,7 @@ class ArchiveInvalidator
     {
         if ($period->getLabel() == 'year'
             || $period->getLabel() == 'range'
+            || !Period\Factory::isPeriodEnabledForAPI($period->getParentPeriodLabel())
         ) {
             return;
         }
@@ -466,7 +457,7 @@ class ArchiveInvalidator
      */
     public function reArchiveReport($idSites, string $plugin = null, string $report = null, Date $startDate = null, Segment $segment = null)
     {
-        $date2 = Date::yesterday();
+        $date2 = Date::today();
 
         $earliestDateToRearchive = $this->getEarliestDateToRearchive();
         if (empty($startDate)) {

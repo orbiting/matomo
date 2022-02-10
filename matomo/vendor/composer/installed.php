@@ -1,457 +1,463 @@
-<?php return array (
-  'root' => 
-  array (
-    'pretty_version' => '4.3.1',
-    'version' => '4.3.1.0',
-    'aliases' => 
-    array (
+<?php return array(
+    'root' => array(
+        'pretty_version' => '4.7.1',
+        'version' => '4.7.1.0',
+        'type' => 'application',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'reference' => '4f1edc24869edefd37b0a78f2bda81708834f7f6',
+        'name' => 'matomo/matomo',
+        'dev' => false,
     ),
-    'reference' => '0da4e6cd403a42c24612cd6613cc05a21c51eb8f',
-    'name' => 'matomo/matomo',
-  ),
-  'versions' => 
-  array (
-    'composer/ca-bundle' => 
-    array (
-      'pretty_version' => '1.2.8',
-      'version' => '1.2.8.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '8a7ecad675253e4654ea05505233285377405215',
+    'versions' => array(
+        'composer/ca-bundle' => array(
+            'pretty_version' => '1.3.1',
+            'version' => '1.3.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/./ca-bundle',
+            'aliases' => array(),
+            'reference' => '4c679186f2aca4ab6a0f1b0b9cf9252decb44d0b',
+            'dev_requirement' => false,
+        ),
+        'composer/semver' => array(
+            'pretty_version' => '1.3.0',
+            'version' => '1.3.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/./semver',
+            'aliases' => array(),
+            'reference' => 'df4463baa9f44fe6cf0a6da4fde2934d4c0a2747',
+            'dev_requirement' => false,
+        ),
+        'davaxi/sparkline' => array(
+            'pretty_version' => '2.1.0',
+            'version' => '2.1.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../davaxi/sparkline',
+            'aliases' => array(),
+            'reference' => 'dc73091cdda1d4218a99794e91a3232917620ed5',
+            'dev_requirement' => false,
+        ),
+        'geoip2/geoip2' => array(
+            'pretty_version' => 'v2.12.2',
+            'version' => '2.12.2.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../geoip2/geoip2',
+            'aliases' => array(),
+            'reference' => '83adb44ac4b9553d36b579a14673ed124583082f',
+            'dev_requirement' => false,
+        ),
+        'lox/xhprof' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../lox/xhprof',
+            'aliases' => array(
+                0 => '9999999-dev',
+            ),
+            'reference' => 'c64571f892bda1298bad9c5e94ede0bc3f0e4627',
+            'dev_requirement' => false,
+        ),
+        'matomo/cache' => array(
+            'pretty_version' => '2.0.5',
+            'version' => '2.0.5.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../matomo/cache',
+            'aliases' => array(),
+            'reference' => 'a54c3ae324ba1297121aea78dec7724ddaaefb56',
+            'dev_requirement' => false,
+        ),
+        'matomo/decompress' => array(
+            'pretty_version' => '2.1.0',
+            'version' => '2.1.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../matomo/decompress',
+            'aliases' => array(),
+            'reference' => '44dcf77dcd633a9c336f90d80658ad3d25225e05',
+            'dev_requirement' => false,
+        ),
+        'matomo/device-detector' => array(
+            'pretty_version' => '5.0.3',
+            'version' => '5.0.3.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../matomo/device-detector',
+            'aliases' => array(),
+            'reference' => '42c06b9031048b90f7bc6c9d530dbe135bc3e381',
+            'dev_requirement' => false,
+        ),
+        'matomo/doctrine-cache-fork' => array(
+            'pretty_version' => '1.10.4',
+            'version' => '1.10.4.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../matomo/doctrine-cache-fork',
+            'aliases' => array(),
+            'reference' => 'a3f6b7e86061a2f3c68122ee58e9d8aa815baff6',
+            'dev_requirement' => false,
+        ),
+        'matomo/ini' => array(
+            'pretty_version' => '3.0.0',
+            'version' => '3.0.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../matomo/ini',
+            'aliases' => array(),
+            'reference' => '14c8cf5e78c8046a3e1b3f2fe8dc6cb474bc3f6b',
+            'dev_requirement' => false,
+        ),
+        'matomo/matomo' => array(
+            'pretty_version' => '4.7.1',
+            'version' => '4.7.1.0',
+            'type' => 'application',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'reference' => '4f1edc24869edefd37b0a78f2bda81708834f7f6',
+            'dev_requirement' => false,
+        ),
+        'matomo/matomo-php-tracker' => array(
+            'pretty_version' => '3.0.4',
+            'version' => '3.0.4.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../matomo/matomo-php-tracker',
+            'aliases' => array(),
+            'reference' => '441d377411296e04558f88c27706545c9524ac2e',
+            'dev_requirement' => false,
+        ),
+        'matomo/network' => array(
+            'pretty_version' => '2.0.1',
+            'version' => '2.0.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../matomo/network',
+            'aliases' => array(),
+            'reference' => 'ff654b8fc7778b80279815d06a368f7b41249501',
+            'dev_requirement' => false,
+        ),
+        'matomo/referrer-spam-blacklist' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'matomo/referrer-spam-list' => array(
+            'pretty_version' => '4.0.0',
+            'version' => '4.0.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../matomo/referrer-spam-list',
+            'aliases' => array(),
+            'reference' => 'afe4c1ea107ee7a8915a0d5eb0031cf0366608a8',
+            'dev_requirement' => false,
+        ),
+        'matomo/searchengine-and-social-list' => array(
+            'pretty_version' => '3.13.0',
+            'version' => '3.13.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../matomo/searchengine-and-social-list',
+            'aliases' => array(),
+            'reference' => '49a3e558770852caa8ee777cc85522dda0c17e99',
+            'dev_requirement' => false,
+        ),
+        'maxmind-db/reader' => array(
+            'pretty_version' => 'v1.11.0',
+            'version' => '1.11.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../maxmind-db/reader',
+            'aliases' => array(),
+            'reference' => 'b1f3c0699525336d09cc5161a2861268d9f2ae5b',
+            'dev_requirement' => false,
+        ),
+        'maxmind/web-service-common' => array(
+            'pretty_version' => 'v0.8.1',
+            'version' => '0.8.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../maxmind/web-service-common',
+            'aliases' => array(),
+            'reference' => '32f274051c543fc865e5a84d3a2c703913641ea8',
+            'dev_requirement' => false,
+        ),
+        'monolog/monolog' => array(
+            'pretty_version' => '1.26.1',
+            'version' => '1.26.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../monolog/monolog',
+            'aliases' => array(),
+            'reference' => 'c6b00f05152ae2c9b04a448f99c7590beb6042f5',
+            'dev_requirement' => false,
+        ),
+        'mustangostang/spyc' => array(
+            'pretty_version' => '0.6.3',
+            'version' => '0.6.3.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../mustangostang/spyc',
+            'aliases' => array(),
+            'reference' => '4627c838b16550b666d15aeae1e5289dd5b77da0',
+            'dev_requirement' => false,
+        ),
+        'opis/closure' => array(
+            'pretty_version' => '3.6.2',
+            'version' => '3.6.2.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../opis/closure',
+            'aliases' => array(),
+            'reference' => '06e2ebd25f2869e54a306dda991f7db58066f7f6',
+            'dev_requirement' => false,
+        ),
+        'pear/archive_tar' => array(
+            'pretty_version' => '1.4.14',
+            'version' => '1.4.14.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../pear/archive_tar',
+            'aliases' => array(),
+            'reference' => '4d761c5334c790e45ef3245f0864b8955c562caa',
+            'dev_requirement' => false,
+        ),
+        'pear/console_getopt' => array(
+            'pretty_version' => 'v1.4.3',
+            'version' => '1.4.3.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../pear/console_getopt',
+            'aliases' => array(),
+            'reference' => 'a41f8d3e668987609178c7c4a9fe48fecac53fa0',
+            'dev_requirement' => false,
+        ),
+        'pear/pear-core-minimal' => array(
+            'pretty_version' => 'v1.10.11',
+            'version' => '1.10.11.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../pear/pear-core-minimal',
+            'aliases' => array(),
+            'reference' => '68d0d32ada737153b7e93b8d3c710ebe70ac867d',
+            'dev_requirement' => false,
+        ),
+        'pear/pear_exception' => array(
+            'pretty_version' => 'v1.0.2',
+            'version' => '1.0.2.0',
+            'type' => 'class',
+            'install_path' => __DIR__ . '/../pear/pear_exception',
+            'aliases' => array(),
+            'reference' => 'b14fbe2ddb0b9f94f5b24cf08783d599f776fff0',
+            'dev_requirement' => false,
+        ),
+        'php-di/invoker' => array(
+            'pretty_version' => '2.0.0',
+            'version' => '2.0.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-di/invoker',
+            'aliases' => array(),
+            'reference' => '540c27c86f663e20fe39a24cd72fa76cdb21d41a',
+            'dev_requirement' => false,
+        ),
+        'php-di/php-di' => array(
+            'pretty_version' => '6.3.5',
+            'version' => '6.3.5.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-di/php-di',
+            'aliases' => array(),
+            'reference' => 'b8126d066ce144765300ee0ab040c1ed6c9ef588',
+            'dev_requirement' => false,
+        ),
+        'php-di/phpdoc-reader' => array(
+            'pretty_version' => '2.2.1',
+            'version' => '2.2.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-di/phpdoc-reader',
+            'aliases' => array(),
+            'reference' => '66daff34cbd2627740ffec9469ffbac9f8c8185c',
+            'dev_requirement' => false,
+        ),
+        'phpmailer/phpmailer' => array(
+            'pretty_version' => 'v6.5.3',
+            'version' => '6.5.3.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpmailer/phpmailer',
+            'aliases' => array(),
+            'reference' => 'baeb7cde6b60b1286912690ab0693c7789a31e71',
+            'dev_requirement' => false,
+        ),
+        'piwik/device-detector' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '5.0.3',
+            ),
+        ),
+        'piwik/referrer-spam-blacklist' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'piwik/searchengine-and-social-list' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'psr/container' => array(
+            'pretty_version' => '1.1.1',
+            'version' => '1.1.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../psr/container',
+            'aliases' => array(),
+            'reference' => '8622567409010282b7aeebe4bb841fe98b58dcaf',
+            'dev_requirement' => false,
+        ),
+        'psr/container-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '^1.0',
+            ),
+        ),
+        'psr/log' => array(
+            'pretty_version' => '1.1.4',
+            'version' => '1.1.4.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../psr/log',
+            'aliases' => array(),
+            'reference' => 'd49695b909c3b7628b6289db5479a1c204601f11',
+            'dev_requirement' => false,
+        ),
+        'psr/log-implementation' => array(
+            'dev_requirement' => false,
+            'provided' => array(
+                0 => '1.0.0',
+            ),
+        ),
+        'rsky/pear-core-min' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v1.10.11',
+            ),
+        ),
+        'symfony/console' => array(
+            'pretty_version' => 'v2.6.13',
+            'version' => '2.6.13.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/console/Symfony/Component/Console',
+            'aliases' => array(),
+            'reference' => '0e5e18ae09d3f5c06367759be940e9ed3f568359',
+            'dev_requirement' => false,
+        ),
+        'symfony/event-dispatcher' => array(
+            'pretty_version' => 'v2.6.13',
+            'version' => '2.6.13.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/event-dispatcher/Symfony/Component/EventDispatcher',
+            'aliases' => array(),
+            'reference' => '672593bc4b0043a0acf91903bb75a1c82d8f2e02',
+            'dev_requirement' => false,
+        ),
+        'symfony/monolog-bridge' => array(
+            'pretty_version' => 'v2.6.13',
+            'version' => '2.6.13.0',
+            'type' => 'symfony-bridge',
+            'install_path' => __DIR__ . '/../symfony/monolog-bridge/Symfony/Bridge/Monolog',
+            'aliases' => array(),
+            'reference' => 'ba66eeabaa004e3ab70764cab59b056b182aa535',
+            'dev_requirement' => false,
+        ),
+        'symfony/polyfill-ctype' => array(
+            'pretty_version' => 'v1.24.0',
+            'version' => '1.24.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/polyfill-ctype',
+            'aliases' => array(),
+            'reference' => '30885182c981ab175d4d034db0f6f469898070ab',
+            'dev_requirement' => false,
+        ),
+        'symfony/polyfill-iconv' => array(
+            'pretty_version' => 'v1.24.0',
+            'version' => '1.24.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/polyfill-iconv',
+            'aliases' => array(),
+            'reference' => 'f1aed619e28cb077fc83fac8c4c0383578356e40',
+            'dev_requirement' => false,
+        ),
+        'symfony/polyfill-mbstring' => array(
+            'pretty_version' => 'v1.24.0',
+            'version' => '1.24.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/polyfill-mbstring',
+            'aliases' => array(),
+            'reference' => '0abb51d2f102e00a4eefcf46ba7fec406d245825',
+            'dev_requirement' => false,
+        ),
+        'symfony/polyfill-php54' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'symfony/polyfill-php55' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'symfony/polyfill-php56' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'symfony/polyfill-php70' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'symfony/polyfill-php71' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'symfony/polyfill-php72' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '*',
+            ),
+        ),
+        'szymach/c-pchart' => array(
+            'pretty_version' => 'v3.0.12',
+            'version' => '3.0.12.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../szymach/c-pchart',
+            'aliases' => array(),
+            'reference' => '6e06f3f764210956d9372c787d8ffff0b83706d5',
+            'dev_requirement' => false,
+        ),
+        'tecnickcom/tcpdf' => array(
+            'pretty_version' => '6.4.4',
+            'version' => '6.4.4.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../tecnickcom/tcpdf',
+            'aliases' => array(),
+            'reference' => '42cd0f9786af7e5db4fcedaa66f717b0d0032320',
+            'dev_requirement' => false,
+        ),
+        'tedivm/jshrink' => array(
+            'pretty_version' => 'v1.4.0',
+            'version' => '1.4.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../tedivm/jshrink',
+            'aliases' => array(),
+            'reference' => '0513ba1407b1f235518a939455855e6952a48bbc',
+            'dev_requirement' => false,
+        ),
+        'twig/twig' => array(
+            'pretty_version' => 'v3.3.7',
+            'version' => '3.3.7.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../twig/twig',
+            'aliases' => array(),
+            'reference' => '8f168c6ffa3ce76d1786b3cd52275424a3fc675b',
+            'dev_requirement' => false,
+        ),
+        'wikimedia/less.php' => array(
+            'pretty_version' => 'v3.1.0',
+            'version' => '3.1.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../wikimedia/less.php',
+            'aliases' => array(),
+            'reference' => 'a486d78b9bd16b72f237fc6093aa56d69ce8bd13',
+            'dev_requirement' => false,
+        ),
     ),
-    'composer/semver' => 
-    array (
-      'pretty_version' => '1.3.0',
-      'version' => '1.3.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'df4463baa9f44fe6cf0a6da4fde2934d4c0a2747',
-    ),
-    'davaxi/sparkline' => 
-    array (
-      'pretty_version' => '1.2.2',
-      'version' => '1.2.2.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '380d447fcfc6468f7d8e5c041e8c01b8ec969959',
-    ),
-    'doctrine/cache' => 
-    array (
-      'pretty_version' => '1.10.2',
-      'version' => '1.10.2.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '13e3381b25847283a91948d04640543941309727',
-    ),
-    'geoip2/geoip2' => 
-    array (
-      'pretty_version' => 'v2.11.0',
-      'version' => '2.11.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'd01be5894a5c1a3381c58c9b1795cd07f96c30f7',
-    ),
-    'matomo/cache' => 
-    array (
-      'pretty_version' => '2.0.2',
-      'version' => '2.0.2.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '01e82b9dc0f2f8b0ee070212b0e9e91045f60926',
-    ),
-    'matomo/decompress' => 
-    array (
-      'pretty_version' => '2.1.0',
-      'version' => '2.1.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '44dcf77dcd633a9c336f90d80658ad3d25225e05',
-    ),
-    'matomo/device-detector' => 
-    array (
-      'pretty_version' => '4.2.3',
-      'version' => '4.2.3.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'd879f07496d6e6ee89cef5bcd925383d9b0c2cc0',
-    ),
-    'matomo/ini' => 
-    array (
-      'pretty_version' => '2.0.2',
-      'version' => '2.0.2.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'f7b0d6ce594b34ead16864fbc5062c771328ac31',
-    ),
-    'matomo/matomo' => 
-    array (
-      'pretty_version' => '4.3.1',
-      'version' => '4.3.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '0da4e6cd403a42c24612cd6613cc05a21c51eb8f',
-    ),
-    'matomo/matomo-php-tracker' => 
-    array (
-      'pretty_version' => '3.0.0',
-      'version' => '3.0.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '31e2b0bdf479c6fc00758228d2c6d7c85c1863a0',
-    ),
-    'matomo/network' => 
-    array (
-      'pretty_version' => '2.0.1',
-      'version' => '2.0.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'ff654b8fc7778b80279815d06a368f7b41249501',
-    ),
-    'matomo/referrer-spam-blacklist' => 
-    array (
-      'replaced' => 
-      array (
-        0 => '*',
-      ),
-    ),
-    'matomo/referrer-spam-list' => 
-    array (
-      'pretty_version' => '4.0.0',
-      'version' => '4.0.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'afe4c1ea107ee7a8915a0d5eb0031cf0366608a8',
-    ),
-    'matomo/searchengine-and-social-list' => 
-    array (
-      'pretty_version' => '3.11.0',
-      'version' => '3.11.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '80ab98ed17ea5b72730f4f4d96acc03847440103',
-    ),
-    'maxmind-db/reader' => 
-    array (
-      'pretty_version' => 'v1.8.0',
-      'version' => '1.8.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'b566d429ac9aec10594b0935be8ff38302f8d5c8',
-    ),
-    'maxmind/web-service-common' => 
-    array (
-      'pretty_version' => 'v0.8.1',
-      'version' => '0.8.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '32f274051c543fc865e5a84d3a2c703913641ea8',
-    ),
-    'monolog/monolog' => 
-    array (
-      'pretty_version' => '1.25.5',
-      'version' => '1.25.5.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '1817faadd1846cd08be9a49e905dc68823bc38c0',
-    ),
-    'mustangostang/spyc' => 
-    array (
-      'pretty_version' => '0.6.3',
-      'version' => '0.6.3.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '4627c838b16550b666d15aeae1e5289dd5b77da0',
-    ),
-    'opis/closure' => 
-    array (
-      'pretty_version' => '3.6.1',
-      'version' => '3.6.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '943b5d70cc5ae7483f6aff6ff43d7e34592ca0f5',
-    ),
-    'pear/archive_tar' => 
-    array (
-      'pretty_version' => '1.4.13',
-      'version' => '1.4.13.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '2b87b41178cc6d4ad3cba678a46a1cae49786011',
-    ),
-    'pear/console_getopt' => 
-    array (
-      'pretty_version' => 'v1.4.3',
-      'version' => '1.4.3.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'a41f8d3e668987609178c7c4a9fe48fecac53fa0',
-    ),
-    'pear/pear-core-minimal' => 
-    array (
-      'pretty_version' => 'v1.10.10',
-      'version' => '1.10.10.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '625a3c429d9b2c1546438679074cac1b089116a7',
-    ),
-    'pear/pear_exception' => 
-    array (
-      'pretty_version' => 'v1.0.1',
-      'version' => '1.0.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'dbb42a5a0e45f3adcf99babfb2a1ba77b8ac36a7',
-    ),
-    'php-di/invoker' => 
-    array (
-      'pretty_version' => '2.0.0',
-      'version' => '2.0.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '540c27c86f663e20fe39a24cd72fa76cdb21d41a',
-    ),
-    'php-di/php-di' => 
-    array (
-      'pretty_version' => '6.3.0',
-      'version' => '6.3.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '955cacea6b0beaba07e8c11b8367f5b3d5abe89f',
-    ),
-    'php-di/phpdoc-reader' => 
-    array (
-      'pretty_version' => '2.2.1',
-      'version' => '2.2.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '66daff34cbd2627740ffec9469ffbac9f8c8185c',
-    ),
-    'phpmailer/phpmailer' => 
-    array (
-      'pretty_version' => 'v6.4.1',
-      'version' => '6.4.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '9256f12d8fb0cd0500f93b19e18c356906cbed3d',
-    ),
-    'piwik/device-detector' => 
-    array (
-      'replaced' => 
-      array (
-        0 => '4.2.3',
-      ),
-    ),
-    'piwik/referrer-spam-blacklist' => 
-    array (
-      'replaced' => 
-      array (
-        0 => '*',
-      ),
-    ),
-    'piwik/searchengine-and-social-list' => 
-    array (
-      'replaced' => 
-      array (
-        0 => '*',
-      ),
-    ),
-    'psr/container' => 
-    array (
-      'pretty_version' => '1.0.0',
-      'version' => '1.0.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'b7ce3b176482dbbc1245ebf52b181af44c2cf55f',
-    ),
-    'psr/container-implementation' => 
-    array (
-      'provided' => 
-      array (
-        0 => '^1.0',
-      ),
-    ),
-    'psr/log' => 
-    array (
-      'pretty_version' => '1.1.3',
-      'version' => '1.1.3.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '0f73288fd15629204f9d42b7055f72dacbe811fc',
-    ),
-    'psr/log-implementation' => 
-    array (
-      'provided' => 
-      array (
-        0 => '1.0.0',
-      ),
-    ),
-    'rsky/pear-core-min' => 
-    array (
-      'replaced' => 
-      array (
-        0 => 'v1.10.10',
-      ),
-    ),
-    'symfony/console' => 
-    array (
-      'pretty_version' => 'v2.6.13',
-      'version' => '2.6.13.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '0e5e18ae09d3f5c06367759be940e9ed3f568359',
-    ),
-    'symfony/event-dispatcher' => 
-    array (
-      'pretty_version' => 'v2.6.13',
-      'version' => '2.6.13.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '672593bc4b0043a0acf91903bb75a1c82d8f2e02',
-    ),
-    'symfony/monolog-bridge' => 
-    array (
-      'pretty_version' => 'v2.6.13',
-      'version' => '2.6.13.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'ba66eeabaa004e3ab70764cab59b056b182aa535',
-    ),
-    'symfony/polyfill-ctype' => 
-    array (
-      'pretty_version' => 'v1.20.0',
-      'version' => '1.20.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'f4ba089a5b6366e453971d3aad5fe8e897b37f41',
-    ),
-    'symfony/polyfill-mbstring' => 
-    array (
-      'pretty_version' => 'v1.20.0',
-      'version' => '1.20.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '39d483bdf39be819deabf04ec872eb0b2410b531',
-    ),
-    'symfony/polyfill-php54' => 
-    array (
-      'replaced' => 
-      array (
-        0 => '*',
-      ),
-    ),
-    'symfony/polyfill-php55' => 
-    array (
-      'replaced' => 
-      array (
-        0 => '*',
-      ),
-    ),
-    'symfony/polyfill-php56' => 
-    array (
-      'replaced' => 
-      array (
-        0 => '*',
-      ),
-    ),
-    'symfony/polyfill-php70' => 
-    array (
-      'replaced' => 
-      array (
-        0 => '*',
-      ),
-    ),
-    'symfony/polyfill-php71' => 
-    array (
-      'replaced' => 
-      array (
-        0 => '*',
-      ),
-    ),
-    'symfony/polyfill-php72' => 
-    array (
-      'replaced' => 
-      array (
-        0 => '*',
-      ),
-    ),
-    'szymach/c-pchart' => 
-    array (
-      'pretty_version' => 'v2.0.12',
-      'version' => '2.0.12.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'f5fad68b303f65225db1a3d3f4bb58aea7a418b4',
-    ),
-    'tecnickcom/tcpdf' => 
-    array (
-      'pretty_version' => '6.4.1',
-      'version' => '6.4.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '5ba838befdb37ef06a16d9f716f35eb03cb1b329',
-    ),
-    'tedivm/jshrink' => 
-    array (
-      'pretty_version' => 'v1.4.0',
-      'version' => '1.4.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '0513ba1407b1f235518a939455855e6952a48bbc',
-    ),
-    'twig/twig' => 
-    array (
-      'pretty_version' => 'v3.1.1',
-      'version' => '3.1.1.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'b02fa41f3783a2616eccef7b92fbc2343ffed737',
-    ),
-    'wikimedia/less.php' => 
-    array (
-      'pretty_version' => 'v3.1.0',
-      'version' => '3.1.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => 'a486d78b9bd16b72f237fc6093aa56d69ce8bd13',
-    ),
-  ),
 );

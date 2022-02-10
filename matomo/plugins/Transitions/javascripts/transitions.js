@@ -123,6 +123,45 @@ DataTable_RowActions_Registry.register({
     },
 
     isAvailableOnReport: function (dataTableParams) {
+
+        if (piwik.transitionsMaxPeriodAllowed && dataTableParams['period']) {
+
+            if (dataTableParams['period'] === 'range') {
+
+                var piwikPeriods = piwikHelper.getAngularDependency('piwikPeriods');
+                if (piwikPeriods) {
+                    var range = piwikPeriods.parse(dataTableParams['period'], dataTableParams['date']);
+                    if (range) {
+                        var rangeDays = range.getDayCount();
+                        if ((piwik.transitionsMaxPeriodAllowed === 'day' && rangeDays > 1) ||
+                            (piwik.transitionsMaxPeriodAllowed === 'week' && rangeDays > 7) ||
+                            (piwik.transitionsMaxPeriodAllowed === 'month' && rangeDays > 31) ||
+                            (piwik.transitionsMaxPeriodAllowed === 'year' && rangeDays > 365))
+                        {
+                          return false;
+                        }
+                    }
+                }
+            } else {
+                if (piwik.transitionsMaxPeriodAllowed === 'day' && dataTableParams['period'] !== 'day') {
+                    return false;
+                }
+                if (piwik.transitionsMaxPeriodAllowed === 'week' && dataTableParams['period'] !== 'day'
+                    && dataTableParams['period'] !== 'week') {
+                    return false;
+                }
+                if (piwik.transitionsMaxPeriodAllowed === 'month' && dataTableParams['period'] !== 'day'
+                    && dataTableParams['period'] !== 'week' && dataTableParams['period'] !== 'month') {
+                    return false;
+                }
+                if (piwik.transitionsMaxPeriodAllowed === 'year' && dataTableParams['period'] !== 'day'
+                    && dataTableParams['period'] !== 'week' && dataTableParams['period'] !== 'month'
+                    && dataTableParams['period'] !== 'year'
+                ) {
+                    return false;
+                }
+            }
+        }
         var i = 0;
         for (i; i < DataTable_RowActions_Transitions.registeredReports.length; i++) {
             var report = DataTable_RowActions_Transitions.registeredReports[i];
@@ -289,8 +328,8 @@ Piwik_Transitions.prototype.preparePopover = function () {
     var element = textContainer.add(self.popover.find('p.Transitions_Pageviews'));
 
     element.tooltip({
-        track:        true,
-        content:      function () {
+        track: true,
+        content: function () {
             var totalNbPageviews = self.model.getTotalNbPageviews();
             if (totalNbPageviews > 0) {
 
@@ -347,6 +386,11 @@ Piwik_Transitions.prototype.render = function () {
     this.renderRightSide();
 
     this.renderLoops();
+
+    var $rootScope = piwikHelper.getAngularDependency('$rootScope');
+    if ($rootScope) {
+        $rootScope.$emit('Transitions.dataChanged', {'actionType': this.actionType, 'actionName': this.actionName});
+    }
 };
 
 /** Render left side: referrer groups & direct entries */
@@ -446,7 +490,7 @@ Piwik_Transitions.prototype.renderCenterBox = function () {
     box.find('.Transitions_CenterBoxMetrics').show();
 };
 
-Piwik_Transitions.prototype.addTooltipShowingPercentageOfAllPageviews = function(element, metric) {
+Piwik_Transitions.prototype.addTooltipShowingPercentageOfAllPageviews = function (element, metric) {
     var tip = Piwik_Transitions_Translations.XOfAllPageviews;
     var percentage = this.model.getPercentage(metric, true);
     tip = sprintf(tip, '<strong>' + percentage + '</strong>');
@@ -603,7 +647,10 @@ Piwik_Transitions.prototype.renderOpenGroup = function (groupName, side, onlyBg)
             } else {
                 onClick = (function (url) {
                     return function () {
-                        self.reloadPopover(url.replace(/^(?!http)/, 'http://'));
+                        if (self.actionType == 'url') {
+                            url = url.replace(/^(?!http)/, 'http://');
+                        }
+                        self.reloadPopover(url);
                     };
                 })(label);
             }
@@ -1578,8 +1625,8 @@ Piwik_Transitions_Ajax.prototype.callApi = function (method, params, callback) {
 
                 if (typeof Piwik_Transitions_Translations == 'undefined') {
                     self.callApi('Transitions.getTranslations', {}, function (response) {
-                        if (typeof response[0] == 'object') {
-                            Piwik_Transitions_Translations = response[0];
+                        if (typeof response == 'object') {
+                            Piwik_Transitions_Translations = response;
                         } else {
                             Piwik_Transitions_Translations = {};
                         }

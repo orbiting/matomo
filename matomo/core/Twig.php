@@ -26,7 +26,7 @@ use Twig\TwigTest;
 
 function piwik_filter_truncate($string, $size)
 {
-    if (Common::mb_strlen(html_entity_decode($string)) <= $size) {
+    if (mb_strlen(html_entity_decode($string)) <= $size) {
         return $string;
     } else {
         preg_match('/^(&(?:[a-z\d]+|#\d+|#x[a-f\d]+);|.){'.$size.'}/i', $string, $shortenString);
@@ -42,26 +42,7 @@ function piwik_format_number($string, $minFractionDigits, $maxFractionDigits)
 
 function piwik_fix_lbrace($string)
 {
-    $chars = array('{', '&#x7B;', '&#123;', '&lcub;', '&lbrace;', '&#x0007B;');
-
-    static $search;
-    static $replace;
-
-    if (!isset($search)) {
-        $search = array_map(function ($val) { return $val . $val; }, $chars);
-    }
-    if (!isset($replace)) {
-        $replace = array_map(function ($val) { return $val . '&#8291;' . $val; }, $chars);
-    }
-
-    $replacedString = str_replace($search, $replace, $string);
-
-    // try to replace characters until there are no changes
-    if ($string !== $replacedString) {
-        return piwik_fix_lbrace($replacedString);
-    }
-
-    return $string;
+    return Common::fixLbrace($string);
 }
 
 function piwik_escape_filter(Environment $env, $string, $strategy = 'html', $charset = null, $autoescape = false) {
@@ -116,7 +97,7 @@ class PiwikTwigFilterExtension extends \Twig\Extension\AbstractExtension
  */
 class Twig
 {
-    const SPARKLINE_TEMPLATE = '<img alt="" data-src="%s" width="%d" height="%d" />
+    const SPARKLINE_TEMPLATE = '<img loading="lazy" alt="" data-src="%s" width="%d" height="%d" />
     <script type="text/javascript">$(function() { piwik.initSparklines(); });</script>';
 
     /**
@@ -153,7 +134,7 @@ class Twig
         $chainLoader = new ChainLoader($loaders);
 
         // Create new Twig Environment and set cache dir
-        $templatesCompiledPath = StaticContainer::get('path.tmp') . '/templates_c';
+        $templatesCompiledPath = StaticContainer::get('path.tmp.templates');
 
         $this->twig = new Environment($chainLoader,
             array(
@@ -185,6 +166,9 @@ class Twig
         $this->twig->addFilter(new TwigFilter('ucwords', 'ucwords'));
         $this->twig->addFilter(new TwigFilter('lcfirst', 'lcfirst'));
         $this->twig->addFilter(new TwigFilter('ucfirst', 'ucfirst'));
+        $this->twig->addFilter(new TwigFilter('preg_replace', function ($subject, $pattern, $replacement) {
+            return preg_replace($pattern, $replacement, $subject);
+        }));
 
         $this->addFunction_includeAssets();
         $this->addFunction_linkTo();

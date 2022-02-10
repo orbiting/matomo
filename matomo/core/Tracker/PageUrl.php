@@ -179,7 +179,7 @@ class PageUrl
         }
 
         if (!empty($parsedUrl['host'])) {
-            $parsedUrl['host'] = Common::mb_strtolower($parsedUrl['host']);
+            $parsedUrl['host'] = mb_strtolower($parsedUrl['host']);
         }
 
         if (!empty($parsedUrl['fragment'])) {
@@ -287,8 +287,8 @@ class PageUrl
         if (function_exists('mb_check_encoding')) {
             // if query params are encoded w/ non-utf8 characters (due to browser bug or whatever),
             // encode to UTF-8.
-            if (strtolower($encoding) != 'utf-8'
-                && $encoding != false
+            if (is_string($encoding) &&
+                strtolower($encoding) !== 'utf-8'
             ) {
                 Common::printDebug("Encoding page URL query parameters to $encoding.");
 
@@ -365,7 +365,7 @@ class PageUrl
             $hostSiteCache = false;
 
             foreach ($siteUrlCache as $siteUrl) {
-                if (strpos(Common::mb_strtolower($siteUrl), Common::mb_strtolower('https://' . $host)) === 0) {
+                if (strpos(mb_strtolower($siteUrl), mb_strtolower('https://' . $host)) === 0) {
                     $hostSiteCache = true;
                     break;
                 }

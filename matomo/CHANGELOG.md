@@ -4,6 +4,54 @@ This is the Developer Changelog for Matomo platform developers. All changes in o
 
 The Product Changelog at **[matomo.org/changelog](https://matomo.org/changelog)** lets you see more details about any Matomo release, such as the list of new guides and FAQs, security fixes, and links to all closed issues. 
 
+## Matomo 4.7.0
+
+### Deprecated APIs
+
+* The `piwik-field` and related directives have been converted to Vue and the `template-file` attribute is now considered deprecated and will be removed in Matomo 5. Instead,
+  the `component` property should be used to add a new form field, it should be an object with two properties that reference a Vue component, `plugin` and `name`, where `plugin`
+  is the plugin the Vue component is located in and `name` is the Vue name of the component's export. 
+
+### New Change Notifications
+
+* Plugins can now provide a list of changes which will be displayed as part of the "What's New?" menu notification. Learn more about how this works in the [developer guide.](https://developer.matomo.org/guides/providing-updates) 
+
+
+## Matomo 4.6.0
+
+### New Framework
+
+* We have begun introducing Vue 3 as the frontend framework to replace AngularJS. You can learn more about it in [our developer guide.](https://developer.matomo.org/guides/working-with-piwiks-ui)
+
+### New APIs
+* New API Methods `SecurityPolicy.addPolicy`, `SecurityPolicy.overridePolicy`, `SecurityPolicy.removeDirective`, `SecurityPolicy.allowEmbedPage`, `SecurityPolicy.disable` allow developers to modify or disable the default Content Security Policy. `Plugins\Controller` has a new member `securityPolicy` so plugins can use `$this->securityPolicy` to access these new methods when a custom Content Security Policy is needed.
+
+### Breaking Changes
+
+* With the introduction of Vue 3 we are also dropping support for IE11. All new supported browsers are determined by the browserslist tool. Running `npx browserslist` will list the browsers currently supported.
+* When the Ecommerce feature is disabled for a site, then the Live API no longer returns the Ecommerce related visitor properties `totalEcommerceRevenue`, `totalEcommerceConversions`, `totalEcommerceItems`,  `totalAbandonedCartsRevenue`, `totalAbandonedCarts` and `totalAbandonedCartsItems`.
+* Content Security Policy (added in Matomo 4.4.0) is no longer in Report Only mode by default. 
+
+### New config.ini.php settings
+
+* The config setting `contact_email_address` in `General` has been added. It will be used as contact email address for users. If not defined (default) all email addresses of all super users will be used instead, which equals the behavior it used to be.
+
+## Matomo 4.4.0
+
+### Breaking Changes
+
+* The `logme` method for [automatic logins](https://matomo.org/faq/how-to/faq_30/) is now disabled by default for new installations. For existing installations it will be enabled automatically on update. If you do not need it please consider disabling it again for security reasons by setting `login_allow_logme = 0` in `General` section of `config.ini.php`.
+* The redirect using the `url` param for the automatic login action `logme`, will no longer do redirects to untrusted hosts. If you need to do redirects to other URLs on purpose, please add the according hosts as `trusted_hosts` entry in `config.ini.php`
+
+### New config.ini.php settings
+
+* When determining the client IP address from proxy headers like X-Forwarded-For, Matomo will by default look at the first IP in the list. If you need to read the last IP instead, the new INI config option `[General] proxy_ip_read_last_in_list` be set to `1`. Using the last IP can be more secure when you are using proxy headers in combination with a load balancer.
+* Matomo logs can now be written into "errorlog" (logs using the error_log() php function) and "syslog" (logs to the syslog service) (to complement existing log writers: "screen", "file", "database"). [Learn more.](https://matomo.org/faq/troubleshooting/faq_115/)
+
+### New commands
+
+* Added new command `core:version` which returns the Matomo version number.
+
 ## Matomo 4.3.1
 
 ### New commands
@@ -11,6 +59,12 @@ The Product Changelog at **[matomo.org/changelog](https://matomo.org/changelog)*
 * Added new command `core:create-security-files` which creates some web server security files if they haven't existed previously (useful when using for example Apache or IIS web server).
 
 ## Matomo 4.3.0
+
+### JavaScript Tracker
+
+#### Breaking changes in Matomo JS tracker
+
+* Before the JS tracker method, `enableLinkTracking` did not follow the DOM changes, from this version when the DOM updates, Matomo automatically adds event listeners for new links on the page. It makes it easier to track clicks on links in SPAs. From this version, if we use the `addListener` method to add event listener manually after the DOM has changed and the `enableLinkTracking` is turned on we will track the click event for that element twice.
 
 ### Breaking Changes
 

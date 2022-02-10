@@ -9,6 +9,7 @@
 namespace Piwik\AssetManager\UIAssetFetcher;
 
 use Piwik\AssetManager\UIAssetFetcher;
+use Piwik\Development;
 use Piwik\Piwik;
 
 class JScriptUIAssetFetcher extends UIAssetFetcher
@@ -43,6 +44,8 @@ class JScriptUIAssetFetcher extends UIAssetFetcher
              * @param string[] $jsFiles The JavaScript files to load.
              */
              Piwik::postEvent('AssetManager.getJavaScriptFiles', array(&$this->fileLocations), null, $this->plugins);
+
+             $this->addUmdFilesIfDetected($this->plugins);
         }
 
         $this->addThemeFiles();
@@ -71,13 +74,16 @@ class JScriptUIAssetFetcher extends UIAssetFetcher
     {
         return array(
             'node_modules/jquery/dist/jquery.min.js',
+            'node_modules/jquery/dist/jquery.js',
             'node_modules/materialize-css/dist/js/materialize.min.js', // so jquery ui datepicker overrides materializecss
             'node_modules/jquery-ui-dist/jquery-ui.min.js',
+            'node_modules/jquery-ui-dist/jquery-ui.js',
             "plugins/CoreHome/javascripts/materialize-bc.js",
             "node_modules/jquery.browser/dist/jquery.browser.min.js",
             'node_modules/',
             'libs/',
             'js/',
+            'plugins/CoreVue/polyfills/dist/MatomoPolyfills',
             'piwik.js',
             'matomo.js',
             'plugins/CoreHome/javascripts/require.js',
@@ -89,5 +95,65 @@ class JScriptUIAssetFetcher extends UIAssetFetcher
             'plugins/',
             'tests/',
         );
+    }
+
+    private function addUmdFilesIfDetected($plugins)
+    {
+        $plugins = self::orderPluginsByPluginDependencies($plugins);
+
+        foreach ($plugins as $plugin) {
+            $devUmd = "plugins/$plugin/vue/dist/$plugin.development.umd.js";
+            $minifiedUmd = "plugins/$plugin/vue/dist/$plugin.umd.min.js";
+            $umdSrcFolder = "plugins/$plugin/vue/src";
+
+            // in case there are dist files but no src files, which can happen during development
+            if (is_dir($umdSrcFolder)) {
+                if (Development::isEnabled() && is_file(PIWIK_INCLUDE_PATH . '/' . $devUmd)) {
+                    $this->fileLocations[$plugin] = $devUmd;
+                } else if (is_file(PIWIK_INCLUDE_PATH . '/' . $minifiedUmd)) {
+                    $this->fileLocations[$plugin] = $minifiedUmd;
+                }
+            }
+        }
+    }
+
+    public static function orderPluginsByPluginDependencies($plugins)
+    {
+        $result = [];
+
+        while (!empty($plugins)) {
+            self::visitPlugin(reset($plugins), $plugins, $result);
+        }
+
+        return $result;
+    }
+
+    private static function visitPlugin($plugin, &$plugins, &$result)
+    {
+        // remove the plugin from the array of plugins to visit
+        $index = array_search($plugin, $plugins);
+        if ($index !== false) {
+            unset($plugins[$index]);
+        } else {
+            return; // already visited
+        }
+
+        // read the plugin dependencies, if any
+        $umdMetadata = "plugins/$plugin/vue/dist/umd.metadata.json";
+
+        $pluginDependencies = [];
+        if (is_file($umdMetadata)) {
+            $pluginDependencies = json_decode(file_get_contents($umdMetadata), true);
+        }
+
+        if (!empty($pluginDependencies['dependsOn'])) {
+            // visit each plugin this one depends on first, so it is loaded first
+            foreach ($pluginDependencies['dependsOn'] as $pluginDependency) {
+                self::visitPlugin($pluginDependency, $plugins, $result);
+            }
+        }
+
+        // add the plugin to the load order after visiting its dependencies
+        $result[] = $plugin;
     }
 }

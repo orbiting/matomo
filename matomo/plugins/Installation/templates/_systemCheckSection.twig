@@ -5,7 +5,7 @@
        onclick="var textarea = document.getElementById('matomo_system_check_info');textarea.select();document.execCommand('copy');jQuery(textarea).effect('highlight', {}, 600)"
        class='btn'>{{ 'Installation_CopySystemCheck'|translate }}</a>
     <a href="javascript:void(0);"
-       onclick="var textarea = document.getElementById('matomo_system_check_info');piwik.helper.sendContentAsDownload('matomo_system_check.txt', textarea.innerHTML);"
+       onclick="var textarea = document.getElementById('matomo_system_check_info');piwikHelper.sendContentAsDownload('matomo_system_check.txt', textarea.innerHTML);"
        class='btn'>{{ 'Installation_DownloadSystemCheck'|translate }}</a>
 
 </p>
@@ -41,19 +41,19 @@
 </details>
 </textarea>
 
-<table class="entityTable system-check" id="systemCheckRequired" piwik-content-table>
+<table class="entityTable system-check" id="systemCheckRequired" {% if isInstallation is not defined %}piwik-content-table{% endif %}>
     {{ local.diagnosticTable(diagnosticReport.getMandatoryDiagnosticResults()) }}
 </table>
 
 <h3>{{ 'Installation_Optional'|translate }}</h3>
 
-<table class="entityTable system-check" id="systemCheckOptional" piwik-content-table>
+<table class="entityTable system-check" id="systemCheckOptional" {% if isInstallation is not defined %}piwik-content-table{% endif %}>
     {{ local.diagnosticTable(diagnosticReport.getOptionalDiagnosticResults()) }}
 </table>
 
 <h3>{{ 'Installation_InformationalResults'|translate }}</h3>
 
-<table class="entityTable system-check" id="systemCheckInformational" piwik-content-table>
+<table class="entityTable system-check" id="systemCheckInformational" {% if isInstallation is not defined %}piwik-content-table{% endif %}>
     {{ local.diagnosticTable(diagnosticReport.getInformationalResults()) }}
 </table>
 
@@ -79,7 +79,7 @@
                     {% elseif item.status == warning %}
                         {{ warningIcon }} {{ item.comment|raw }}
                     {% elseif item.status == informational %}
-                        {{ infoIcon }} {{ item.comment }}
+                        {{ infoIcon }} {{ item.comment|raw }}
                     {% else %}
                         {{ okIcon }} {{ item.comment|raw }}
                     {% endif %}

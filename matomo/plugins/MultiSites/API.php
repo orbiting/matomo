@@ -267,12 +267,27 @@ class API extends \Piwik\Plugin\API
         }
 
         // move the site id to a metadata column 
-        $dataTable->queueFilter('MetadataCallbackAddMetadata', array('idsite', 'group', array('\Piwik\Site', 'getGroupFor'), array()));
-        $dataTable->queueFilter('MetadataCallbackAddMetadata', array('idsite', 'main_url', array('\Piwik\Site', 'getMainUrlFor'), array()));
+        $dataTable->queueFilter('MetadataCallbackAddMetadata', array('idsite', 'group', function($idSite) {
+            if ($idSite == '-1') { // Others row might occur when `filter_truncate` API parameter is used
+                return '';
+            }
+            return Site::getGroupFor($idSite);
+        }, array()));
+        $dataTable->queueFilter('MetadataCallbackAddMetadata', array('idsite', 'main_url', function($idSite) {
+            if ($idSite == '-1') { // Others row might occur when `filter_truncate` API parameter is used
+                return '';
+            }
+            return Site::getMainUrlFor($idSite);
+        }, array()));
 
         // set the label of each row to the site name
         if ($multipleWebsitesRequested) {
-            $dataTable->queueFilter('ColumnCallbackReplace', array('label', '\Piwik\Site::getNameFor'));
+            $dataTable->queueFilter('ColumnCallbackReplace', array('label', function($idSite) {
+                if ($idSite == '-1') { // Others row might occur when `filter_truncate` API parameter is used
+                    return Piwik::translate('General_Others');
+                }
+                return Site::getNameFor($idSite);
+            }));
         } else {
             $dataTable->queueFilter('ColumnDelete', array('label'));
         }
@@ -297,6 +312,12 @@ class API extends \Piwik\Plugin\API
                 )
             );
         }
+
+        // Remove <ts_archived> row metadata, it's already been used by any filters that needed it
+        $dataTable->queueFilter(function($dataTable) {
+            $dataTable->deleteRowsMetadata(DataTable::ARCHIVED_DATE_METADATA_NAME);
+            $dataTable->deleteColumn('_metadata');
+        });
 
         if ($multipleWebsitesRequested && $dataTable->getRowsCount() === 1 && $dataTable instanceof DataTable\Simple) {
             $simpleTable = $dataTable;
@@ -338,11 +359,13 @@ class API extends \Piwik\Plugin\API
                                       ? "Piwik\\Plugins\\MultiSites\\Columns\\Metrics\\EcommerceOnlyEvolutionMetric"
                                       : "Piwik\\Plugins\\CoreHome\\Columns\\Metrics\\EvolutionMetric";
 
+                $extraProcessedMetrics = is_array($extraProcessedMetrics) ? $extraProcessedMetrics : [];
                 $extraProcessedMetrics[] = new $evolutionMetricClass(
                     $metricSettings[self::METRIC_RECORD_NAME_KEY],
                     $pastData,
                     $metricSettings[self::METRIC_EVOLUTION_COL_NAME_KEY],
-                    $quotientPrecision = 1
+                    $quotientPrecision = 1,
+                    $currentData
                 );
             }
             $currentData->setMetadata(DataTable::EXTRA_PROCESSED_METRICS_METADATA_NAME, $extraProcessedMetrics);

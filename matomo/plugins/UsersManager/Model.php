@@ -316,6 +316,15 @@ class Model
         return $db->fetchRow("SELECT * FROM " . $this->tokenTable . " WHERE `password` = ?", $tokenAuth);
     }
 
+    public function getUserTokenDescriptionByIdTokenAuth($idTokenAuth, $login)
+    {
+        $db = $this->getDb();
+
+        $token = $db->fetchRow("SELECT description FROM " . $this->tokenTable . " WHERE `idusertokenauth` = ? and login = ? LIMIT 1", array($idTokenAuth, $login));
+
+        return $token ? $token['description'] : '';
+    }
+
     private function getQueryNotExpiredToken()
     {
         return array(
@@ -447,6 +456,7 @@ class Model
             'date_registered'  => $dateRegistered,
             'superuser_access' => 0,
             'ts_password_modified' => Date::now()->getDatetime(),
+            'idchange_last_viewed' => null
         );
 
         $db = $this->getDb();

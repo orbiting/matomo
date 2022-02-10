@@ -8,10 +8,13 @@
  */
 namespace Piwik;
 
+use DI\NotFoundException;
+use DI\DependencyException;
 use Piwik\Container\StaticContainer;
 use Piwik\Email\ContentGenerator;
 use Piwik\Plugins\CoreAdminHome\CustomLogo;
 use Piwik\Translation\Translator;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class for sending mails
@@ -189,9 +192,9 @@ class Mail
      * Add Bcc address
      *
      * @param string $email
-     * @param null|string $name
+     * @param string $name
      */
-    public function addBcc($email, $name = null)
+    public function addBcc($email, $name = '')
     {
         $this->bccs[$email] = $name;
     }
@@ -219,9 +222,9 @@ class Mail
      * Add Reply-To address
      *
      * @param string $email
-     * @param null|string $name
+     * @param string $name
      */
-    public function addReplyTo($email, $name = null)
+    public function addReplyTo($email, $name = '')
     {
         $this->replyTos[$this->parseDomainPlaceholderAsPiwikHostName($email)] = $name;
     }
@@ -232,7 +235,7 @@ class Mail
      * @param string $email
      * @param string $name
      */
-    public function setReplyTo($email, $name = null)
+    public function setReplyTo($email, $name = '')
     {
         $this->replyTos = [];
         $this->addReplyTo($email, $name);
@@ -267,7 +270,7 @@ class Mail
     /**
      * Sends the mail
      *
-     * @return bool
+     * @return bool|null returns null if sending the mail was aborted by the Mail.send event
      * @throws \DI\NotFoundException
      */
     public function send()
@@ -287,6 +290,23 @@ class Mail
         Piwik::postEvent('Mail.send', [$mail]);
 
         return StaticContainer::get('Piwik\Mail\Transport')->send($mail);
+    }
+
+    /**
+     * If the send email process throws an exception, we catch it and log it
+     *
+     * @return void
+     * @throws NotFoundException
+     * @throws DependencyException
+     */
+    public function safeSend()
+    {
+        try {
+            $this->send();
+        } catch (\Exception $e) {
+            // we do nothing but log if the email send was unsuccessful
+            StaticContainer::get(LoggerInterface::class)->warning('Could not send {class} email: {exception}', ['class' => get_class($this), 'exception' => $e]);
+        }
     }
 
     /**

@@ -5,7 +5,7 @@ Import your server logs in Matomo with this powerful and easy to use tool.
 ## Requirements
 
 * Python 3.5, 3.6 or 3.7.
-* Matomo >= 4.0.0
+* Matomo On-Premise >= 4.0.0 or Matomo Cloud. Doesn't work when [Matomo for WordPress](https://wordpress.org/plugins/matomo/) is used.
 
 Build status (master branch) [![Build Status](https://travis-ci.org/matomo-org/matomo-log-analytics.svg?branch=4.x-dev)](https://travis-ci.org/matomo-org/matomo-log-analytics)
 
@@ -14,7 +14,7 @@ Build status (master branch) [![Build Status](https://travis-ci.org/matomo-org/m
 
 The script will import all standard web server log files, and some files with non-standard formats. The following log formats are supported:
  * all default log formats for: Nginx, Apache, IIS, Tomcat, Haproxy
- * all log formats commonly used such as: NCSA Common log format, Extended log format, W3C Extended log files, Nginx JSON, OVH
+ * all log formats commonly used such as: NCSA Common log format, Extended log format, W3C Extended log files, Nginx JSON, OVH, Gandi virtualhost servers
  * log files of some popular Cloud services: Amazon AWS CloudFront logs, AWS S3 logs, AWS ELB logs.
  * streaming media server log files such as: Icecast
  * log files with and without the virtual host will be imported

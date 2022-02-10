@@ -13,7 +13,10 @@ use Exception;
 use Piwik\Application\Kernel\GlobalSettingsProvider;
 use Piwik\Container\StaticContainer;
 use Piwik\Exception\MissingFilePermissionException;
+use Piwik\Plugins\CoreAdminHome\Controller;
+use Piwik\Plugins\CorePluginsAdmin\CorePluginsAdmin;
 use Piwik\ProfessionalServices\Advertising;
+use Psr\Log\LoggerInterface;
 
 /**
  * Singleton that provides read & write access to Piwik's INI configuration.
@@ -139,7 +142,7 @@ class Config
         if (!empty($GLOBALS['CONFIG_INI_PATH_RESOLVER']) && is_callable($GLOBALS['CONFIG_INI_PATH_RESOLVER'])) {
             return call_user_func($GLOBALS['CONFIG_INI_PATH_RESOLVER']);
         }
-        
+
         $path = self::getByDomainConfigPath();
         if ($path) {
             return $path;
@@ -183,10 +186,12 @@ class Config
         return array(
             'action_url_category_delimiter' => $general['action_url_category_delimiter'],
             'action_title_category_delimiter' => $general['action_title_category_delimiter'],
+            'are_ads_enabled' => Advertising::isAdsEnabledInConfig($general),
             'autocomplete_min_sites' => $general['autocomplete_min_sites'],
             'datatable_export_range_as_day' => $general['datatable_export_range_as_day'],
             'datatable_row_limits' => $this->getDatatableRowLimits(),
-            'are_ads_enabled' => Advertising::isAdsEnabledInConfig($general)
+            'enable_general_settings_admin' => Controller::isGeneralSettingsAdminEnabled(),
+            'enable_plugins_admin' => CorePluginsAdmin::isPluginsAdminEnabled(),
         );
     }
 
@@ -220,13 +225,14 @@ class Config
 
     /**
      * Returns the hostname of the current request (without port number)
+     * @param bool $checkIfTrusted Check trusted requires config which is maybe not ready yet,
+     *                             make sure the config is ready when you call with true
      *
      * @return string
      */
-    public static function getHostname()
+    public static function getHostname($checkIfTrusted = false)
     {
-        // Check trusted requires config file which is not ready yet
-        $host = Url::getHost($checkIfTrusted = false);
+        $host = Url::getHost($checkIfTrusted);
 
         // Remove any port number to get actual hostname
         $host = Url::getHostSanitized($host);
@@ -309,7 +315,7 @@ class Config
     public function deleteLocalConfig()
     {
         $configLocal = $this->getLocalPath();
-        
+
         if(file_exists($configLocal)){
             @unlink($configLocal);
         }
@@ -345,7 +351,7 @@ class Config
     {
         return $this->settings->getIniFileChain()->getFrom($this->getCommonPath(), $name);
     }
-    
+
     /**
      * @api
      */
@@ -389,9 +395,8 @@ class Config
     protected function writeConfig()
     {
         $output = $this->dumpConfig();
-        if ($output !== null
-            && $output !== false
-        ) {
+
+        if ($output !== null && $output !== false) {
             $localPath = $this->getLocalPath();
 
             if ($this->doNotWriteConfigInTests) {
@@ -403,6 +408,13 @@ class Config
 
             if ($success === false) {
                 throw $this->getConfigNotWritableException();
+            }
+
+            if (!$this->sanityCheck($localPath, $output)) {
+                // If sanity check fails, try to write the contents once more before logging the issue.
+                if (@file_put_contents($localPath, $output, LOCK_EX) === false || !$this->sanityCheck($localPath, $output, true)) {
+                    StaticContainer::get(LoggerInterface::class)->info("The configuration file {$localPath} did not write correctly.");
+                }
             }
 
             $this->settings->getIniFileChain()->deleteConfigCache();
@@ -449,5 +461,35 @@ class Config
         $section = self::getInstance()->$sectionName;
         $section[$name] = $value;
         self::getInstance()->$sectionName = $section;
+    }
+
+    /**
+     * Sanity check a config file by checking contents
+     *
+     * @param string $localPath
+     * @param string $expectedContent
+     * @param bool $notify
+     * @return bool
+     */
+    public function sanityCheck(string $localPath, string $expectedContent, bool $notify = false): bool
+    {
+        clearstatcache(true, $localPath);
+
+        $content = @file_get_contents($localPath);
+
+        if (trim($content) !== trim($expectedContent)) {
+            if ($notify) {
+                /**
+                 * Triggered when the INI config file was not written correctly with the expected content.
+                 *
+                 * @param string $localPath Absolute path to the changed file on the server.
+                 */
+                Piwik::postEvent('Core.configFileSanityCheckFailed', [$localPath]);
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }

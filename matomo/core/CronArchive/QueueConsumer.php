@@ -108,6 +108,11 @@ class QueueConsumer
      */
     private $currentSiteArchivingStartTime;
 
+    /**
+     * @var int|null
+     */
+    private $maxSitesToProcess = null;
+
     private $processedSiteCount = 0;
 
     public function __construct(LoggerInterface $logger, $websiteIdArchiveList, $countOfProcesses, $pid, Model $model,
@@ -131,9 +136,22 @@ class QueueConsumer
         $this->periodIdsToLabels = array_flip(Piwik::$idPeriods);
     }
 
+    /**
+     * Get next archives to process.
+     *
+     * Returns either an array of archives to process for the current site (may be
+     * empty if there are no more archives to process for it) or null when there are
+     * no more sites to process.
+     *
+     * @return null|array
+     */
     public function getNextArchivesToProcess()
     {
         if (empty($this->idSite)) {
+            if ($this->maxSitesToProcess && $this->processedSiteCount >= $this->maxSitesToProcess) {
+                $this->logger->info("Maximum number of sites to process per execution has been reached.");
+                return null;
+            }
             $this->idSite = $this->getNextIdSiteToArchive();
             if (empty($this->idSite)) { // no sites left to archive, stop
                 $this->logger->debug("No more sites left to archive, stopping.");
@@ -237,8 +255,13 @@ class QueueConsumer
             list($isUsableExists, $archivedTime) = $this->usableArchiveExists($invalidatedArchive);
             if ($isUsableExists) {
                 $now = Date::now()->getDatetime();
-                $this->logger->debug("Found invalidation with usable archive (not yet outdated, ts_archived of existing = $archivedTime, now = $now) skipping until archive is out of date: $invalidationDesc");
                 $this->addInvalidationToExclude($invalidatedArchive);
+                if (empty($invalidatedArchive['plugin'])) {
+                    $this->logger->debug("Found invalidation with usable archive (not yet outdated, ts_archived of existing = $archivedTime, now = $now) skipping until archive is out of date: $invalidationDesc");
+                } else {
+                    $this->logger->debug("Found invalidation with usable archive (not yet outdated, ts_archived of existing = $archivedTime, now = $now) ignoring and deleting: $invalidationDesc");
+                    $this->model->deleteInvalidations([$invalidatedArchive]);
+                }
                 continue;
             } else {
                 $now = Date::now()->getDatetime();
@@ -347,6 +370,14 @@ class QueueConsumer
             $this->detectPluginForArchive($nextArchive);
 
             $periodLabel = $this->periodIdsToLabels[$nextArchive['period']];
+            if (!PeriodFactory::isPeriodEnabledForAPI($periodLabel)
+                || PeriodFactory::isAnyLowerPeriodDisabledForAPI($periodLabel)
+            ) {
+                $this->logger->info("Found invalidation for period that is disabled in the API, skipping and removing: {$nextArchive['idinvalidation']}");
+                $this->model->deleteInvalidations([$nextArchive]);
+                continue;
+            }
+
             $periodDate = $periodLabel == 'range' ? $nextArchive['date1'] . ',' . $nextArchive['date2'] : $nextArchive['date1'];
             $nextArchive['periodObj'] = PeriodFactory::build($periodLabel, $periodDate);
 
@@ -603,5 +634,20 @@ class QueueConsumer
     public function getIdSite()
     {
         return $this->idSite;
+    }
+
+    /**
+     * Set or get the maximum number of sites to process
+     *
+     * @param int|null $newValue New value or null to just return current value
+     *
+     * @return int|null New or existing value
+     */
+    public function setMaxSitesToProcess($newValue = null)
+    {
+        if (null !== $newValue) {
+            $this->maxSitesToProcess = $newValue;
+        }
+        return $this->maxSitesToProcess;
     }
 }

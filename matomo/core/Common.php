@@ -135,11 +135,11 @@ class Common
         if(PHP_SAPI === 'cli'){
             return true;
         }
-        
+
         if(self::isPhpCgiType() && (!isset($_SERVER['REMOTE_ADDR']) || empty($_SERVER['REMOTE_ADDR']))){
             return true;
         }
-        
+
         return false;
     }
 
@@ -184,21 +184,13 @@ class Common
      *
      * @param string $string
      * @param int $start
-     * @param int ...      optional length
+     * @param int|null $length      optional length
      * @return string
-     * @api
+     * @deprecated since 4.4 - directly use mb_substr instead
      */
-    public static function mb_substr($string, $start)
+    public static function mb_substr($string, $start, $length = null)
     {
-        $length = func_num_args() > 2
-            ? func_get_arg(2)
-            : self::mb_strlen($string);
-
-        if (function_exists('mb_substr')) {
-            return mb_substr($string, $start, $length, 'UTF-8');
-        }
-
-        return substr($string, $start, $length);
+        return mb_substr($string, $start, $length, 'UTF-8');
     }
 
     /**
@@ -233,15 +225,11 @@ class Common
      *
      * @param string $string
      * @return int
-     * @api
+     * @deprecated since 4.4 - directly use mb_strlen instead
      */
     public static function mb_strlen($string)
     {
-        if (function_exists('mb_strlen')) {
-            return mb_strlen($string, 'UTF-8');
-        }
-
-        return strlen($string);
+        return mb_strlen($string, 'UTF-8');
     }
 
     /**
@@ -251,16 +239,11 @@ class Common
      *
      * @param string $string
      * @return string
-     * @api
+     * @deprecated since 4.4 - directly use mb_strtolower instead
      */
     public static function mb_strtolower($string)
     {
-        if (function_exists('mb_strtolower')) {
-            return mb_strtolower($string, 'UTF-8');
-        }
-
-        // return unchanged string as using `strtolower` might cause unicode problems
-        return $string;
+        return mb_strtolower($string, 'UTF-8');
     }
 
     /**
@@ -270,16 +253,11 @@ class Common
      *
      * @param string $string
      * @return string
-     * @api
+     * @deprecated since 4.4 - directly use mb_strtoupper instead
      */
     public static function mb_strtoupper($string)
     {
-        if (function_exists('mb_strtoupper')) {
-            return mb_strtoupper($string, 'UTF-8');
-        }
-
-        // return unchanged string as using `strtoupper` might cause unicode problems
-        return $string;
+        return mb_strtoupper($string, 'UTF-8');
     }
 
     /**
@@ -320,7 +298,7 @@ class Common
     {
         try {
             // phpcs:ignore Generic.PHP.ForbiddenFunctions
-            return unserialize($string, ['allowed_classes' => empty($allowedClasses) ? false : $allowedClasses]);
+            return unserialize($string ?? '', ['allowed_classes' => empty($allowedClasses) ? false : $allowedClasses]);
         } catch (\Throwable $e) {
             if ($rethrow) {
                 throw $e;
@@ -442,7 +420,7 @@ class Common
      */
     public static function unsanitizeInputValue($value)
     {
-        return htmlspecialchars_decode($value, self::HTML_ENCODING_QUOTE_STYLE);
+        return htmlspecialchars_decode($value ?? '', self::HTML_ENCODING_QUOTE_STYLE);
     }
 
     /**
@@ -478,7 +456,7 @@ class Common
      */
     public static function sanitizeLineBreaks($value)
     {
-        return str_replace(array("\n", "\r"), '', $value);
+        return is_null($value) ? '' : str_replace(array("\n", "\r"), '', $value);
     }
 
     /**
@@ -599,6 +577,38 @@ class Common
         return $value;
     }
 
+    /**
+     * Replaces lbrace with an encoded entity to prevent angular from parsing the content
+     *
+     * @deprecated Will be removed, once the vue js migration is done
+     *
+     * @param $string
+     * @return array|string|string[]|null
+     */
+    public static function fixLbrace($string)
+    {
+        $chars = array('{', '&#x7B;', '&#123;', '&lcub;', '&lbrace;', '&#x0007B;');
+
+        static $search;
+        static $replace;
+
+        if (!isset($search)) {
+            $search = array_map(function ($val) { return $val . $val; }, $chars);
+        }
+        if (!isset($replace)) {
+            $replace = array_map(function ($val) { return $val . '&#8291;' . $val; }, $chars);
+        }
+
+        $replacedString = is_null($string) ? $string : str_replace($search, $replace, $string);
+
+        // try to replace characters until there are no changes
+        if ($string !== $replacedString) {
+            return self::fixLbrace($replacedString);
+        }
+
+        return $string;
+    }
+
     /*
      * Generating unique strings
      */
@@ -608,40 +618,14 @@ class Common
      *
      * @param int $min
      * @param null|int $max Defaults to max int value
-     * @return int|null
+     * @return int
      */
     public static function getRandomInt($min = 0, $max = null)
     {
-        $rand = null;
-
-        if (function_exists('random_int')) {
-            try {
-                if (!isset($max)) {
-                    $max = PHP_INT_MAX;
-                }
-                $rand = random_int($min, $max);
-            } catch (Exception $e) {
-                // If none of the crypto sources are available, an Exception will be thrown.
-                $rand = null;
-            }
+        if (!isset($max)) {
+            $max = PHP_INT_MAX;
         }
-
-        if (!isset($rand)) {
-            if (function_exists('mt_rand')) {
-                if (!isset($max)) {
-                    $max = mt_getrandmax();
-                }
-                $rand = mt_rand($min, $max);
-            } else {
-                if (!isset($max)) {
-                    $max = getrandmax();
-                }
-
-                $rand = rand($min, $max);
-            }
-        }
-
-        return $rand;
+        return random_int($min, $max);
     }
 
     /**
@@ -791,8 +775,12 @@ class Common
 
     public static function stringEndsWith($haystack, $needle)
     {
-        if ('' === $needle) {
+        if (strlen(strval($needle)) === 0) {
             return true;
+        }
+
+        if (strlen(strval($haystack)) === 0) {
+            return false;
         }
 
         $lastCharacters = substr($haystack, -strlen($needle));

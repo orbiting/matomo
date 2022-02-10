@@ -239,8 +239,8 @@ class Php extends GeoIp2
     protected function setCountryResults($lookupResult, &$result)
     {
         $result[self::CONTINENT_NAME_KEY] = $lookupResult->continent->name;
-        $result[self::CONTINENT_CODE_KEY] = strtoupper($lookupResult->continent->code);
-        $result[self::COUNTRY_CODE_KEY]   = strtoupper($lookupResult->country->isoCode);
+        $result[self::CONTINENT_CODE_KEY] = strtoupper($lookupResult->continent->code ?? '');
+        $result[self::COUNTRY_CODE_KEY]   = strtoupper($lookupResult->country->isoCode ?? '');
         $result[self::COUNTRY_NAME_KEY]   = $lookupResult->country->name;
     }
 
@@ -253,7 +253,7 @@ class Php extends GeoIp2
         if (is_array($lookupResult->subdivisions) && count($lookupResult->subdivisions) > 0) {
             $subdivisions = $lookupResult->subdivisions;
             $subdivision = $this->determinSubdivision($subdivisions, $result[self::COUNTRY_CODE_KEY]);
-            $result[self::REGION_CODE_KEY] = strtoupper($subdivision->isoCode) ?: $this->determineRegionIsoCodeByNameAndCountryCode($subdivision->name, $result[self::COUNTRY_CODE_KEY]);
+            $result[self::REGION_CODE_KEY] = $subdivision->isoCode ? strtoupper($subdivision->isoCode) : $this->determineRegionIsoCodeByNameAndCountryCode($subdivision->name, $result[self::COUNTRY_CODE_KEY]);
             $result[self::REGION_NAME_KEY] = $subdivision->name;
         }
     }
@@ -274,7 +274,7 @@ class Php extends GeoIp2
         }
 
         foreach ($regionNames[$countryCode] as $isoCode => $name) {
-            if (Common::mb_strtolower($name) === Common::mb_strtolower($regionName)) {
+            if (mb_strtolower($name) === mb_strtolower($regionName)) {
                 return $isoCode;
             }
         }

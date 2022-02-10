@@ -50,6 +50,7 @@ var Piwik_Overlay = (function () {
         globalAjaxQueue.abort();
         var ajaxRequest = new ajaxHelper();
         ajaxRequest.addParams(params, 'get');
+        ajaxRequest.withTokenInUrl(); // needed because it is calling a controller and not the API
         ajaxRequest.setCallback(
             function (response) {
                 hideLoading();
@@ -228,6 +229,10 @@ var Piwik_Overlay = (function () {
             params.module = 'API';
             params.action = 'index';
 
+            // these should be sent as post parameters
+            delete params.token_auth;
+            delete params.force_api_session;
+
             if (ALLOWED_API_REQUEST_WHITELIST.indexOf(params.method) === -1) {
                 sendResponse({
                     result: 'error',
@@ -237,13 +242,14 @@ var Piwik_Overlay = (function () {
             }
 
             angular.element(document).injector().invoke(['piwikApi', function (piwikApi) {
+                piwikApi.withTokenInUrl();
                 piwikApi.fetch(params)
                     .then(function (response) {
                         sendResponse(response);
                     }).catch(function (err) {
                         sendResponse({
                             result: 'error',
-                            message: err.message,
+                            message: err.message || err || 'unknown error',
                         });
                     });
             }]);
@@ -382,6 +388,9 @@ var Piwik_Overlay = (function () {
                 var newLocation = window.location.href.split('#')[0] + '#?' + currentHashStr;
                 // window.location.replace changes the current url without pushing it on the browser's history stack
                 window.location.replace(newLocation);
+
+                // manually trigger hashchange since angularjs doesn't seem to pick it up anymore
+                hashChangeCallback(broadcast.getHash());
             } else {
                 // happens when the url is changed by hand or when the l parameter is there on page load
                 setIframeOrigin(currentUrl);

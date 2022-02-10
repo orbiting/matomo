@@ -184,6 +184,10 @@ class Db
 
         $db = @Adapter::factory($dbConfig['adapter'], $dbConfig);
 
+        if (!empty($dbConfig['aurora_readonly_read_committed'])) {
+            $db->exec('set session aurora_read_replica_read_committed = ON;set session transaction isolation level read committed;');
+        }
+
         self::$readerConnection = $db;
     }
 
@@ -416,7 +420,7 @@ class Db
      * @param string|array $tables The name of the table to optimize or an array of tables to optimize.
      *                             Table names must be prefixed (see {@link Piwik\Common::prefixTable()}).
      * @param bool $force If true, the `OPTIMIZE TABLE` query will be run even if InnoDB tables are being used.
-     * @return \Zend_Db_Statement
+     * @return bool
      */
     public static function optimizeTables($tables, $force = false)
     {
@@ -457,7 +461,16 @@ class Db
         }
 
         // optimize the tables
-        return self::query("OPTIMIZE TABLE " . implode(',', $tables));
+        $success = true;
+        foreach ($tables as &$t) {
+            $ok = self::query('OPTIMIZE TABLE ' . $t);
+            if (!$ok) {
+                $success = false;
+            }
+        }
+
+        return $success;
+
     }
 
     private static function getTableStatus()
@@ -805,6 +818,8 @@ class Db
 
     private static function logSql($functionName, $sql, $parameters = array())
     {
+        self::checkBoundParametersIfInDevMode($sql, $parameters);
+
         if (self::$logQueries === false
             || @Config::getInstance()->Debug['log_sql_queries'] != 1
         ) {
@@ -813,6 +828,23 @@ class Db
 
         // NOTE: at the moment we don't log parameters in order to avoid sensitive information leaks
         Log::debug("Db::%s() executing SQL: %s", $functionName, $sql);
+    }
+
+    private static function checkBoundParametersIfInDevMode($sql, $parameters)
+    {
+        if (!Development::isEnabled()) {
+            return;
+        }
+
+        if (!is_array($parameters)) {
+            $parameters = [$parameters];
+        }
+
+        foreach ($parameters as $index => $parameter) {
+            if ($parameter instanceof Date) {
+                throw new \Exception("Found bound parameter (index = $index) is Date instance which will not work correctly in following SQL: $sql");
+            }
+        }
     }
 
     /**

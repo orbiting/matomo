@@ -62,8 +62,8 @@
     setCustomRequestProcessing,
     setCustomVariable, getCustomVariable, deleteCustomVariable, storeCustomVariablesInCookie, setCustomDimension, getCustomDimension,
     deleteCustomVariables, deleteCustomDimension, setDownloadExtensions, addDownloadExtensions, removeDownloadExtensions,
-    setDomains, setIgnoreClasses, setRequestMethod, setRequestContentType, setGenerationTimeMs,
-    setReferrerUrl, setCustomUrl, setAPIUrl, setDocumentTitle, getPiwikUrl, getMatomoUrl, getCurrentUrl,
+    setDomains, setIgnoreClasses, setRequestMethod, setRequestContentType, setGenerationTimeMs, setPagePerformanceTiming,
+    setReferrerUrl, setCustomUrl, setAPIUrl, setDocumentTitle, setPageViewId, getPiwikUrl, getMatomoUrl, getCurrentUrl,
     setDownloadClasses, setLinkClasses,
     setCampaignNameKey, setCampaignKeywordKey,
     getConsentRequestsQueue, requireConsent, getRememberedConsent, hasRememberedConsent, isConsentRequired,
@@ -71,11 +71,11 @@
     discardHashTag, alwaysUseSendBeacon, disableAlwaysUseSendBeacon, isUsingAlwaysUseSendBeacon,
     setCookieNamePrefix, setCookieDomain, setCookiePath, setSecureCookie, setVisitorIdCookie, getCookieDomain, hasCookies, setSessionCookie,
     setVisitorCookieTimeout, setSessionCookieTimeout, setReferralCookieTimeout, getCookie, getCookiePath, getSessionCookieTimeout,
-    setConversionAttributionFirstReferrer, tracker, request,
+    setExcludedQueryParams, setConversionAttributionFirstReferrer, tracker, request,
     disablePerformanceTracking, maq_confirm_opted_in,
     doNotTrack, setDoNotTrack, msDoNotTrack, getValuesFromVisitorIdCookie,
     enableCrossDomainLinking, disableCrossDomainLinking, isCrossDomainLinkingEnabled, setCrossDomainLinkingTimeout, getCrossDomainLinkingUrlParameter,
-    addListener, enableLinkTracking, enableJSErrorTracking, setLinkTrackingTimer, getLinkTrackingTimer,
+    addListener, enableLinkTracking, disableBrowserFeatureDetection, enableJSErrorTracking, setLinkTrackingTimer, getLinkTrackingTimer,
     enableHeartBeatTimer, disableHeartBeatTimer, killFrame, redirectFile, setCountPreRendered, setVisitStandardLength,
     trackGoal, trackLink, trackPageView, getNumTrackedPageViews, trackRequest, ping, queueRequest, trackSiteSearch, trackEvent,
     requests, timeout, enabled, sendRequests, queueRequest, canQueue, pushMultiple, disableQueueRequest,setRequestQueueInterval,interval,getRequestQueue, getJavascriptErrors, unsetPageIsUnloading,
@@ -107,12 +107,12 @@
     isNodeAuthorizedToTriggerInteraction, getConfigDownloadExtensions, disableLinkTracking,
     substr, setAnyAttribute, max, abs, childNodes, compareDocumentPosition, body,
     getConfigVisitorCookieTimeout, getRemainingVisitorCookieTimeout, getDomains, getConfigCookiePath,
-    getConfigCookieSameSite, setCookieSameSite,
+    getConfigCookieSameSite, getCustomPagePerformanceTiming, setCookieSameSite,
     getConfigIdPageView, newVisitor, uuid, createTs, currentVisitTs,
      "", "\b", "\t", "\n", "\f", "\r", "\"", "\\", apply, call, charCodeAt, getUTCDate, getUTCFullYear, getUTCHours,
     getUTCMinutes, getUTCMonth, getUTCSeconds, hasOwnProperty, join, lastIndex, length, parse, prototype, push, replace,
     sort, slice, stringify, test, toJSON, toString, valueOf, objectToJSON, addTracker, removeAllAsyncTrackersButFirst,
-    optUserOut, forgetUserOptOut, isUserOptedOut, withCredentials
+    optUserOut, forgetUserOptOut, isUserOptedOut, withCredentials, visibilityState
  */
 /*global _paq:true */
 /*members push */
@@ -591,6 +591,43 @@ if (typeof window.Matomo !== 'object') {
                 matches = e.exec(url);
 
             return matches ? matches[1] : url;
+        }
+        function isPositiveNumberString(str) {
+            // !isNaN(str) could be used but does not cover '03' (octal) and '0xA' (hex)
+            // nor negative numbers
+            return (/^[0-9][0-9]*(\.[0-9]+)?$/).test(str);
+        }
+        function filterIn(object, byFunction) {
+            var result = {}, k;
+            for (k in object) {
+                if (object.hasOwnProperty(k) && byFunction(object[k])) {
+                    result[k] = object[k];
+                }
+            }
+            return result;
+        }
+        function onlyPositiveIntegers(data) {
+            var result = {}, k;
+            for (k in data) {
+                if (data.hasOwnProperty(k)) {
+                    if (isPositiveNumberString(data[k])) {
+                        result[k] = Math.round(data[k]);
+                    } else {
+                        throw new Error('Parameter "' + k + '" provided value "' + data[k] +
+                            '" is not valid. Please provide a numeric value.');
+                    }
+                }
+            }
+            return result;
+        }
+        function queryStringify(data) {
+            var queryString = '', k;
+            for (k in data) {
+                if (data.hasOwnProperty(k)) {
+                    queryString += '&' + encodeWrapper(k) + '=' + encodeWrapper(data[k]);
+                }
+            }
+            return queryString;
         }
 
         function stringStartsWith(str, prefix) {
@@ -2052,7 +2089,7 @@ if (typeof window.Matomo !== 'object') {
 
             // check whether we were redirected from the matomo overlay plugin
             var referrerRegExp = new RegExp('index\\.php\\?module=Overlay&action=startOverlaySession'
-                + '&idSite=([0-9]+)&period=([^&]+)&date=([^&]+)(&segment=.*)?$');
+                + '&idSite=([0-9]+)&period=([^&]+)&date=([^&]+)(&segment=[^&]*)?');
 
             var match = referrerRegExp.exec(documentAlias.referrer);
 
@@ -2184,6 +2221,9 @@ if (typeof window.Matomo !== 'object') {
                 // This string is appended to the Tracker URL Request (eg. to send data that is not handled by the existing setters/getters)
                 configAppendToTrackingUrl = '',
 
+                // setPagePerformanceTiming sets this manually for SPAs
+                customPagePerformanceTiming = '',
+
                 // Site ID
                 configTrackerSiteId = siteId || '',
 
@@ -2207,6 +2247,9 @@ if (typeof window.Matomo !== 'object') {
 
                 // HTML anchor element classes to not track
                 configIgnoreClasses = [],
+
+                // Query parameters to be excluded
+                configExcludedQueryParams = [],
 
                 // HTML anchor element classes to treat as downloads
                 configDownloadClasses = [],
@@ -2369,6 +2412,9 @@ if (typeof window.Matomo !== 'object') {
 
                 configIdPageView,
 
+                // Boolean indicating that a page view ID has been set manually
+                configIdPageViewSetManually = false,
+
                 // we measure how many pageviews have been tracked so plugins can use it to eg detect if a
                 // pageview was already tracked or not
                 numTrackedPageviews = 0,
@@ -2393,7 +2439,9 @@ if (typeof window.Matomo !== 'object') {
                 uniqueTrackerId = trackerIdCounter++,
 
                 // whether a tracking request has been sent yet during this page view
-                hasSentTrackingRequestYet = false;
+                hasSentTrackingRequestYet = false,
+
+                configBrowserFeatureDetection = true;
 
             // Document title
             try {
@@ -2401,6 +2449,22 @@ if (typeof window.Matomo !== 'object') {
             } catch(e) {
                 configTitle = '';
             }
+
+            /*
+             * Get cookie value
+             */
+            function getCookie(cookieName) {
+                if (configCookiesDisabled) {
+                    return 0;
+                }
+
+                var cookiePattern = new RegExp('(^|;)[ ]*' + cookieName + '=([^;]*)'),
+                    cookieMatch = cookiePattern.exec(documentAlias.cookie);
+
+                return cookieMatch ? decodeWrapper(cookieMatch[2]) : 0;
+            }
+
+            configHasConsent = !getCookie(CONSENT_REMOVED_COOKIE_NAME);
 
             /*
              * Set cookie value
@@ -2428,23 +2492,13 @@ if (typeof window.Matomo !== 'object') {
                     (domain ? ';domain=' + domain : '') +
                     (isSecure ? ';secure' : '') +
                     ';SameSite=' + sameSite;
-            }
 
-            /*
-             * Get cookie value
-             */
-            function getCookie(cookieName) {
-                if (configCookiesDisabled) {
-                    return 0;
+                // check the cookie was actually set
+                if ((!msToExpire || msToExpire >= 0) && getCookie(cookieName) !== String(value)) {
+                    var msg = 'There was an error setting cookie `' + cookieName + '`. Please check domain and path.';
+                    logConsoleError(msg);
                 }
-
-                var cookiePattern = new RegExp('(^|;)[ ]*' + cookieName + '=([^;]*)'),
-                    cookieMatch = cookiePattern.exec(documentAlias.cookie);
-
-                return cookieMatch ? decodeWrapper(cookieMatch[2]) : 0;
             }
-
-            configHasConsent = !getCookie(CONSENT_REMOVED_COOKIE_NAME);
 
             /*
              * Removes hash tag from the URL
@@ -2453,11 +2507,15 @@ if (typeof window.Matomo !== 'object') {
              * or before being sent as GET parameters
              */
             function purify(url) {
-                var targetPattern;
+                var targetPattern, i;
 
                 // we need to remove this parameter here, they wouldn't be removed in Matomo tracker otherwise eg
                 // for outlinks or referrers
                 url = removeUrlParameter(url, configVisitorIdUrlParameter);
+
+                for (i = 0; i < configExcludedQueryParams.length; i++) {
+                    url = removeUrlParameter(url, configExcludedQueryParams[i]);
+                }
 
                 if (configDiscardHashTag) {
                     targetPattern = new RegExp('#.*');
@@ -2845,6 +2903,14 @@ if (typeof window.Matomo !== 'object') {
                 }
             }
 
+            function heartBeatOnVisible() {
+                if (documentAlias.visibilityState === 'hidden' && hadWindowMinimalFocusToConsiderViewed()) {
+                    heartBeatPingIfActivityAlias();
+                } else if (documentAlias.visibilityState === 'visible') {
+                    timeWindowLastFocused = new Date().getTime();
+                }
+            }
+
             /*
              * Setup event handlers and timeout for initial heart beat.
              */
@@ -2859,6 +2925,7 @@ if (typeof window.Matomo !== 'object') {
 
                 addEventListener(windowAlias, 'focus', heartBeatOnFocus);
                 addEventListener(windowAlias, 'blur', heartBeatOnBlur);
+                addEventListener(windowAlias, 'visibilitychange', heartBeatOnVisible);
 
                 // when using multiple trackers then we need to add this event for each tracker
                 coreHeartBeatCounter++;
@@ -3063,6 +3130,11 @@ if (typeof window.Matomo !== 'object') {
              * Browser features (plugins, resolution, cookies)
              */
             function detectBrowserFeatures() {
+
+                // Browser Feature is disabled return empty object
+                if (!configBrowserFeatureDetection) {
+                    return {};
+                }
                 if (isDefined(browserFeatures.res)) {
                     return browserFeatures;
                 }
@@ -3468,6 +3540,12 @@ if (typeof window.Matomo !== 'object') {
             }
 
             function appendAvailablePerformanceMetrics(request) {
+                if (customPagePerformanceTiming !== '') {
+                    request += customPagePerformanceTiming;
+                    performanceTracked = true;
+                    return request;
+                }
+
                 if (!performanceAlias) {
                     return request;
                 }
@@ -3678,13 +3756,13 @@ if (typeof window.Matomo !== 'object') {
                     (charSet ? '&cs=' + encodeWrapper(charSet) : '') +
                     '&send_image=0';
 
-                var browserFeatures = detectBrowserFeatures();
-                // browser features
-                for (i in browserFeatures) {
-                    if (Object.prototype.hasOwnProperty.call(browserFeatures, i)) {
-                        request += '&' + i + '=' + browserFeatures[i];
+                    var browserFeatures = detectBrowserFeatures();
+                    // browser features
+                    for (i in browserFeatures) {
+                        if (Object.prototype.hasOwnProperty.call(browserFeatures, i)) {
+                            request += '&' + i + '=' + browserFeatures[i];
+                        }
                     }
-                }
 
                 var customDimensionIdsAlreadyHandled = [];
                 if (customData) {
@@ -3894,7 +3972,9 @@ if (typeof window.Matomo !== 'object') {
              * Log the page view / visit
              */
             function logPageView(customTitle, customData, callback) {
-                configIdPageView = generateUniqueId();
+                if (!configIdPageViewSetManually) {
+                    configIdPageView = generateUniqueId();
+                }
 
                 var request = getRequest('action_name=' + encodeWrapper(titleFixup(customTitle || configTitle)), customData, 'log');
 
@@ -4562,17 +4642,42 @@ if (typeof window.Matomo !== 'object') {
                 return event.target || event.srcElement;
             }
 
+            function isClickNode(nodeName)
+            {
+                return nodeName === 'A' || nodeName === 'AREA';
+            }
+
             /*
              * Handle click event
              */
             function clickHandler(enable) {
 
+                function getLinkTarget(event)
+                {
+                    var target = getTargetElementFromEvent(event);
+                    var nodeName = target.nodeName;
+                    var ignorePattern = getClassesRegExp(configIgnoreClasses, 'ignore');
+
+                    while (!isClickNode(nodeName) && target && target.parentNode) {
+                        target = target.parentNode;
+                        nodeName = target.nodeName;
+                    }
+
+                    if (target && isClickNode(nodeName) && !ignorePattern.test(target.className)) {
+                        return target;
+                    }
+                }
+
                 return function (event) {
 
                     event = event || windowAlias.event;
 
+                    var target = getLinkTarget(event);
+                    if (!target) {
+                        return;
+                    }
+
                     var button = getNameOfClickedButton(event);
-                    var target = getTargetElementFromEvent(event);
 
                     if (event.type === 'click') {
 
@@ -4609,50 +4714,18 @@ if (typeof window.Matomo !== 'object') {
             /*
              * Add click listener to a DOM element
              */
-            function addClickListener(element, enable) {
+            function addClickListener(element, enable, useCapture) {
                 var enableType = typeof enable;
                 if (enableType === 'undefined') {
                     enable = true;
                 }
 
-                addEventListener(element, 'click', clickHandler(enable), false);
+                addEventListener(element, 'click', clickHandler(enable), useCapture);
 
                 if (enable) {
-                    addEventListener(element, 'mouseup', clickHandler(enable), false);
-                    addEventListener(element, 'mousedown', clickHandler(enable), false);
-                    addEventListener(element, 'contextmenu', clickHandler(enable), false);
-                }
-            }
-
-            /*
-             * Add click handlers to anchor and AREA elements, except those to be ignored
-             */
-            function addClickListeners(enable, trackerInstance) {
-                linkTrackingInstalled = true;
-
-                // iterate through anchor elements with href and AREA elements
-                var i,
-                    ignorePattern = getClassesRegExp(configIgnoreClasses, 'ignore'),
-                    linkElements = documentAlias.links,
-                    linkElement = null, trackerType = null;
-
-                if (linkElements) {
-                    for (i = 0; i < linkElements.length; i++) {
-                        linkElement = linkElements[i];
-                        if (!ignorePattern.test(linkElement.className)) {
-                            trackerType = typeof linkElement.matomoTrackers;
-
-                            if ('undefined' === trackerType) {
-                                linkElement.matomoTrackers = [];
-                            }
-
-                            if (-1 === indexOfArray(linkElement.matomoTrackers, trackerInstance)) {
-                                // we make sure to setup link only once for each tracker
-                                linkElement.matomoTrackers.push(trackerInstance);
-                                addClickListener(linkElement, enable);
-                            }
-                        }
-                    }
+                    addEventListener(element, 'mouseup', clickHandler(enable), useCapture);
+                    addEventListener(element, 'mousedown', clickHandler(enable), useCapture);
+                    addEventListener(element, 'contextmenu', clickHandler(enable), useCapture);
                 }
             }
 
@@ -4894,11 +4967,15 @@ if (typeof window.Matomo !== 'object') {
                 linkTrackingInstalled = false;
                 linkTrackingEnabled   = false;
             };
+
             this.getConfigVisitorCookieTimeout = function () {
                 return configVisitorCookieTimeout;
             };
             this.getConfigCookieSameSite = function () {
                 return configCookieSameSite;
+            };
+            this.getCustomPagePerformanceTiming = function () {
+                return customPagePerformanceTiming;
             };
             this.removeAllAsyncTrackersButFirst = function () {
                 var firstTracker = asyncTrackers[0];
@@ -5567,7 +5644,49 @@ if (typeof window.Matomo !== 'object') {
              * @param generationTime
              */
             this.setGenerationTimeMs = function(generationTime) {
-                logConsoleError('setGenerationTimeMs is no longer supported since Matomo 4. The call will be ignored. There is currently no replacement yet.');
+                logConsoleError('setGenerationTimeMs is no longer supported since Matomo 4. The call will be ignored. The replacement is setPagePerformanceTiming.');
+            };
+
+            /**
+             * Replace setGenerationTimeMs with this more generic function
+             * Use in SPA
+             * @param networkTimeInMs
+             * @param serverTimeInMs
+             * @param transferTimeInMs
+             * @param domProcessingTimeInMs
+             * @param domCompletionTimeInMs
+             * @param onloadTimeInMs
+             */
+            this.setPagePerformanceTiming = function(
+                networkTimeInMs, serverTimeInMs, transferTimeInMs,
+                domProcessingTimeInMs, domCompletionTimeInMs, onloadTimeInMs
+            ) {
+                /*members pf_net, pf_srv, pf_tfr, pf_dm1, pf_dm2, pf_onl */
+                var data = {
+                    pf_net: networkTimeInMs,
+                    pf_srv: serverTimeInMs,
+                    pf_tfr: transferTimeInMs,
+                    pf_dm1: domProcessingTimeInMs,
+                    pf_dm2: domCompletionTimeInMs,
+                    pf_onl: onloadTimeInMs
+                };
+
+                try {
+                    data = filterIn(data, isDefined);
+                    data = onlyPositiveIntegers(data);
+                    customPagePerformanceTiming = queryStringify(data);
+                    if (customPagePerformanceTiming === '') {
+                        logConsoleError('setPagePerformanceTiming() called without parameters. This function needs to be called with at least one performance parameter.');
+                        return;
+                    }
+
+                    performanceTracked = false; // to ensure the values are sent (again)
+                    performanceAvailable = true; // so appendAvailablePerformanceMetrics will be called directly
+                    // Otherwise performanceAvailable will be set when the pageload finished, but there is no need
+                    // to wait for that, when the values are set manually.
+                } catch (error) {
+                    logConsoleError('setPagePerformanceTiming: ' + error.toString());
+                }
             };
 
             /**
@@ -5603,6 +5722,17 @@ if (typeof window.Matomo !== 'object') {
              */
             this.setDocumentTitle = function (title) {
                 configTitle = title;
+            };
+
+            /**
+             * Override PageView id for every use of logPageView(). Do not use this if you call trackPageView()
+             * multiple times during tracking (if, for example, you are tracking a single page application).
+             *
+             * @param string pageView
+             */
+            this.setPageViewId = function (pageView) {
+                configIdPageView = pageView;
+                configIdPageViewSetManually = true;
             };
 
             /**
@@ -5685,10 +5815,21 @@ if (typeof window.Matomo !== 'object') {
             this.setCookieDomain = function (domain) {
                 var domainFixed = domainFixup(domain);
 
-                if (isPossibleToSetCookieOnDomain(domainFixed)) {
+                if (!configCookiesDisabled && !isPossibleToSetCookieOnDomain(domainFixed)) {
+                    logConsoleError('Can\'t write cookie on domain ' + domain);
+                } else {
                     configCookieDomain = domainFixed;
                     updateDomainHash();
                 }
+            };
+
+            /**
+             * Set an array of query parameters to be excluded if in the url
+             *
+             * @param string|array excludedQueryParams  'uid' or ['uid', 'sid']
+             */
+            this.setExcludedQueryParams = function (excludedQueryParams) {
+                configExcludedQueryParams = isString(excludedQueryParams) ? [excludedQueryParams] : excludedQueryParams;
             };
 
             /**
@@ -5885,6 +6026,7 @@ if (typeof window.Matomo !== 'object') {
             this.setCookieConsentGiven = function () {
                 if (configCookiesDisabled && !configDoNotTrack) {
                     configCookiesDisabled = false;
+                    configBrowserFeatureDetection = true;
                     if (configTrackerSiteId && hasSentTrackingRequestYet) {
                         setVisitorIdCookie();
 
@@ -6032,14 +6174,14 @@ if (typeof window.Matomo !== 'object') {
              * @param bool enable If false, do not use pseudo click-handler (middle click + context menu)
              */
             this.addListener = function (element, enable) {
-                addClickListener(element, enable);
+                addClickListener(element, enable, false);
             };
 
             /**
              * Install link tracker.
              *
-             * If you change the DOM of your website or web application you need to make sure to call this method
-             * again so Matomo can detect links that were added newly.
+             * If you change the DOM of your website or web application Matomo will automatically detect links
+             * that were added newly.
              *
              * The default behaviour is to use actual click events. However, some browsers
              * (e.g., Firefox, Opera, and Konqueror) don't generate click events for the middle mouse button.
@@ -6063,17 +6205,20 @@ if (typeof window.Matomo !== 'object') {
              *                    to wrong click numbers.
              */
             this.enableLinkTracking = function (enable) {
+                if (linkTrackingEnabled) {
+                    return;
+                }
                 linkTrackingEnabled = true;
 
                 var self = this;
-                trackCallback(function () {
-                    trackCallbackOnReady(function () {
-                        addClickListeners(enable, self);
-                    });
-                    trackCallbackOnLoad(function () {
-                        addClickListeners(enable, self);
-                    });
+
+                trackCallbackOnReady(function () {
+                    linkTrackingInstalled = true;
+
+                    var element = documentAlias.body;
+                    addClickListener(element, enable, true);
                 });
+
             };
 
             /**
@@ -6156,9 +6301,11 @@ if (typeof window.Matomo !== 'object') {
                     if (windowAlias.removeEventListener) {
                         windowAlias.removeEventListener('focus', heartBeatOnFocus);
                         windowAlias.removeEventListener('blur', heartBeatOnBlur);
+                        windowAlias.removeEventListener('visibilitychange', heartBeatOnVisible);
                     } else if  (windowAlias.detachEvent) {
                         windowAlias.detachEvent('onfocus', heartBeatOnFocus);
                         windowAlias.detachEvent('onblur', heartBeatOnBlur);
+                        windowAlias.detachEvent('visibilitychange', heartBeatOnVisible);
                     }
                 }
 
@@ -6252,6 +6399,10 @@ if (typeof window.Matomo !== 'object') {
                         logPageView(customTitle, customData, callback);
                     });
                 }
+            };
+
+            this.disableBrowserFeatureDetection = function () {
+                configBrowserFeatureDetection = false;
             };
 
             /**
@@ -6809,7 +6960,7 @@ if (typeof window.Matomo !== 'object') {
              */
             this.setConsentGiven = function (setCookieConsent) {
                 configHasConsent = true;
-
+                configBrowserFeatureDetection = true;
                 deleteCookie(CONSENT_REMOVED_COOKIE_NAME, configCookiePath, configCookieDomain);
 
                 var i, requestType;
@@ -6968,7 +7119,7 @@ if (typeof window.Matomo !== 'object') {
          * Constructor
          ************************************************************/
 
-        var applyFirst = ['addTracker', 'forgetCookieConsentGiven', 'requireCookieConsent', 'disableCookies', 'setTrackerUrl', 'setAPIUrl', 'enableCrossDomainLinking', 'setCrossDomainLinkingTimeout', 'setSessionCookieTimeout', 'setVisitorCookieTimeout', 'setCookieNamePrefix', 'setCookieSameSite', 'setSecureCookie', 'setCookiePath', 'setCookieDomain', 'setDomains', 'setUserId', 'setVisitorId', 'setSiteId', 'alwaysUseSendBeacon', 'enableLinkTracking', 'setCookieConsentGiven', 'requireConsent', 'setConsentGiven', 'disablePerformanceTracking'];
+        var applyFirst = ['addTracker', 'forgetCookieConsentGiven', 'requireCookieConsent','disableBrowserFeatureDetection', 'disableCookies', 'setTrackerUrl', 'setAPIUrl', 'enableCrossDomainLinking', 'setCrossDomainLinkingTimeout', 'setSessionCookieTimeout', 'setVisitorCookieTimeout', 'setCookieNamePrefix', 'setCookieSameSite', 'setSecureCookie', 'setCookiePath', 'setCookieDomain', 'setDomains', 'setUserId', 'setVisitorId', 'setSiteId', 'alwaysUseSendBeacon', 'enableLinkTracking', 'setCookieConsentGiven', 'requireConsent', 'setConsentGiven', 'disablePerformanceTracking', 'setPagePerformanceTiming', 'setExcludedQueryParams'];
 
         function createFirstTracker(matomoUrl, siteId)
         {
@@ -7001,11 +7152,13 @@ if (typeof window.Matomo !== 'object') {
         // initialize the Matomo singleton
         addEventListener(windowAlias, 'beforeunload', beforeUnloadHandler, false);
         addEventListener(windowAlias, 'online', function () {
-            if (isDefined(navigatorAlias.serviceWorker) && isDefined(navigatorAlias.serviceWorker.ready)) {
+            if (isDefined(navigatorAlias.serviceWorker)) {
                 navigatorAlias.serviceWorker.ready.then(function(swRegistration) {
                     if (swRegistration && swRegistration.sync) {
                         return swRegistration.sync.register('matomoSync');
                     }
+                }, function() {
+                    // handle (but ignore) failed promise, see https://github.com/matomo-org/matomo/issues/17454
                 });
             }
         }, false);

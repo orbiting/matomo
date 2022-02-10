@@ -252,7 +252,7 @@ class SegmentEditor extends \Piwik\Plugin
         // check if segment archive does not exist
         $processorParams = new \Piwik\ArchiveProcessor\Parameters(new Site($idSite), $period, $segment);
         $archiveIdAndStats = ArchiveSelector::getArchiveIdAndVisits($processorParams, null);
-        if (!empty($archiveIdAndStats[0])) {
+        if (!empty($archiveIdAndStats[0]) || !empty($archiveIdAndStats[1])) {
             return null;
         }
 
@@ -314,6 +314,16 @@ class SegmentEditor extends \Piwik\Plugin
     public static function isAddingSegmentsForAllWebsitesEnabled()
     {
         return Config::getInstance()->General['allow_adding_segments_for_all_websites'] == 1;
+    }
+
+    /**
+     * Returns whether create realtime segments is enabled or not.
+     *
+     * @return bool
+     */
+    public static function isCreateRealtimeSegmentsEnabled(): bool
+    {
+        return Config::getInstance()->General['enable_create_realtime_segments'] == 1;
     }
 
     public function getClientSideTranslationKeys(&$translationKeys)

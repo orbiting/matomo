@@ -12,6 +12,7 @@ namespace Piwik;
 use Exception;
 use Piwik\API\Request;
 use Piwik\Container\StaticContainer;
+use Piwik\DataTable\Manager;
 use Piwik\Exception\AuthenticationFailedException;
 use Piwik\Exception\DatabaseSchemaIsNewerThanCodebaseException;
 use Piwik\Exception\PluginDeactivatedException;
@@ -253,6 +254,8 @@ class FrontController extends Singleton
 
     public static function triggerSafeModeWhenError()
     {
+        Manager::getInstance()->deleteAll();
+
         $lastError = error_get_last();
 
         if (!empty($lastError) && isset(self::$requestId)) {
@@ -302,7 +305,7 @@ class FrontController extends Singleton
             $tmpPath . '/cache/',
             $tmpPath . '/logs/',
             $tmpPath . '/tcpdf/',
-            $tmpPath . '/templates_c/',
+            StaticContainer::get('path.tmp.templates'),
         );
 
         Filechecks::dieIfDirectoriesNotWritable($directoriesToCheck);
@@ -393,6 +396,11 @@ class FrontController extends Singleton
 
         $loggedIn = false;
 
+        //move this up unsupported Browser do not create session
+        if ($this->isSupportedBrowserCheckNeeded()) {
+            SupportedBrowser::checkIfBrowserSupported();
+        }
+
         // don't use sessionauth in cli mode
         // try authenticating w/ session first...
         $sessionAuth = $this->makeSessionAuthenticator();
@@ -409,7 +417,8 @@ class FrontController extends Singleton
                 && Piwik::isUserIsAnonymous()
                 && $authAdapter->getLogin() === 'anonymous' //double checking the login
                 && Piwik::isUserHasSomeViewAccess()
-                && Session::isSessionStarted()) { // only if session was started, don't do it eg for API
+                && Session::isSessionStarted()
+                && Session::isWritable()) { // only if session was started and writable, don't do it eg for API
                 // usually the session would be started when someone logs in using login controller. But in this
                 // case we need to init session here for anoynymous users
                 $init = StaticContainer::get(SessionInitializer::class);
@@ -419,9 +428,7 @@ class FrontController extends Singleton
             $this->makeAuthenticator($sessionAuth); // Piwik\Auth must be set to the correct Login plugin
         }
 
-        if ($this->isSupportedBrowserCheckNeeded()) {
-            SupportedBrowser::checkIfBrowserSupported();
-        }
+
 
         // Force the auth to use the token_auth if specified, so that embed dashboard
         // and all other non widgetized controller methods works fine

@@ -11,8 +11,10 @@ namespace Piwik\DataTable;
 use Exception;
 use Piwik\Container\StaticContainer;
 use Piwik\DataTable;
+use Piwik\Date;
 use Piwik\Log;
 use Piwik\Metrics;
+use Piwik\Period;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -34,7 +36,8 @@ class Row extends \ArrayObject
      */
     private static $unsummableColumns = array(
         'label' => true,
-        'full_url' => true // column used w/ old Piwik versions,
+        'full_url' => true, // column used w/ old Piwik versions,
+        'ts_archived' => true // date column used in metadata for proportional tooltips
     );
 
     // @see sumRow - implementation detail
@@ -292,7 +295,7 @@ class Row extends \ArrayObject
         if ($this->isSubtableLoaded) {
             $thisSubTable = $this->getSubtable();
         } else {
-            $this->warnIfSubtableAlreadyExists();
+            $this->warnIfSubtableAlreadyExists($subTable);
 
             $thisSubTable = new DataTable();
             $this->setSubtable($thisSubTable);
@@ -368,6 +371,16 @@ class Row extends \ArrayObject
     public function setMetadata($name, $value)
     {
         $this->metadata[$name] = $value;
+    }
+
+    /**
+     * Sets all metadata at once.
+     *
+     * @param array $metadata new metadata to set
+     */
+    public function setAllMetadata($metadata)
+    {
+        $this->metadata = $metadata;
     }
 
     /**
@@ -461,6 +474,7 @@ class Row extends \ArrayObject
      */
     public function sumRow(Row $rowToSum, $enableCopyMetadata = true, $aggregationOperations = false)
     {
+        $operationsIsArray = is_array($aggregationOperations);
         foreach ($rowToSum as $columnToSumName => $columnToSumValue) {
             if (!$this->isSummableColumn($columnToSumName)) {
                 continue;
@@ -469,11 +483,12 @@ class Row extends \ArrayObject
             $thisColumnValue = $this->getColumn($columnToSumName);
 
             $operation = 'sum';
-            if (is_array($aggregationOperations) && isset($aggregationOperations[$columnToSumName])) {
-                if (is_string($aggregationOperations[$columnToSumName])) {
-                    $operation = strtolower($aggregationOperations[$columnToSumName]);
-                } elseif (is_callable($aggregationOperations[$columnToSumName])) {
-                    $operation = $aggregationOperations[$columnToSumName];
+            if ($operationsIsArray && isset($aggregationOperations[$columnToSumName])) {
+                $operationName = $aggregationOperations[$columnToSumName];
+                if (is_string($operationName)) {
+                    $operation = strtolower($operationName);
+                } elseif (is_callable($operationName)) {
+                    $operation = $operationName;
                 }
             }
 
@@ -638,20 +653,22 @@ class Row extends \ArrayObject
      */
     protected function sumRowArray($thisColumnValue, $columnToSumValue, $columnName = null)
     {
+        if ($columnToSumValue === false) {
+            return $thisColumnValue;
+        }
+
         if (is_numeric($columnToSumValue)) {
             if ($thisColumnValue === false) {
                 $thisColumnValue = 0;
             } else if (!is_numeric($thisColumnValue)) {
                 $label = $this->getColumn('label');
+                $thisColumnDescription = $this->getColumnValueDescriptionForError($thisColumnValue);
+                $columnToSumValueDescription = $this->getColumnValueDescriptionForError($columnToSumValue);
                 throw new \Exception(sprintf('Trying to sum unsupported operands for column %s in row with label = %s: %s + %s',
-                    $columnName, $label, gettype($thisColumnValue), gettype($columnToSumValue)));
+                    $columnName, $label, $thisColumnDescription, $columnToSumValueDescription));
             }
 
             return $thisColumnValue + $columnToSumValue;
-        }
-
-        if ($columnToSumValue === false) {
-            return $thisColumnValue;
         }
 
         if ($thisColumnValue === false) {
@@ -661,6 +678,9 @@ class Row extends \ArrayObject
         if (is_array($columnToSumValue)) {
             $newValue = $thisColumnValue;
             foreach ($columnToSumValue as $arrayIndex => $arrayValue) {
+                if (!is_numeric($arrayIndex) && !$this->isSummableColumn($arrayIndex)) {
+                    continue;
+                }
                 if (!isset($newValue[$arrayIndex])) {
                     $newValue[$arrayIndex] = false;
                 }
@@ -753,16 +773,33 @@ class Row extends \ArrayObject
         return true;
     }
 
-    private function warnIfSubtableAlreadyExists()
+    private function warnIfSubtableAlreadyExists(DataTable $subTable)
     {
         if (!is_null($this->subtableId)) {
-            $ex = new \Exception(sprintf(
-                "Row with label '%s' (columns = %s) has already a subtable id=%s but it was not loaded - overwriting the existing sub-table.",
-                $this->getColumn('label'),
-                implode(", ", $this->getColumns()),
-                $this->getIdSubDataTable()
-            ));
-            StaticContainer::get(LoggerInterface::class)->warning("{exception}", ['exception' => $ex]);
+            // we only print this warning out if the row isn't a summary row, and if the period start date of the
+            // data is later than the deploy date to cloud for Matomo 4.4.1.
+            //
+            // In 4.4.1 two bugs surrounding the serialization of summary rows with subtables were fixed. Previously,
+            // if a summary row had a subtable when it was inserted into the archive table, this warning would eventually
+            // get triggered. To properly fix this corrupt data, we'd want to invalidate and reporcess it, BUT, that would
+            // require a lot of compute resources, just for the subtable of a row most people would not look at.
+            //
+            // So instead, we simply ignore this issue for data that is for periods older than the deploy date for 4.4.1. If a user
+            // wants to see this subtable data, they can invalidate a specific date and reprocess it. For newer data,
+            // since the bugs were fixed, we don't expect to see the issue. So if the warning gets triggered in this case,
+            // we log the warning in order to be notified.
+            $period = $subTable->getMetadata('period');
+            if (!$this->isSummaryRow()
+                || $this->isStartDateLaterThanCloud441DeployDate($period)
+            ) {
+                $ex = new \Exception(sprintf(
+                    "Row with label '%s' (columns = %s) has already a subtable id=%s but it was not loaded - overwriting the existing sub-table.",
+                    $this->getColumn('label'),
+                    implode(", ", $this->getColumns()),
+                    $this->getIdSubDataTable()
+                ));
+                StaticContainer::get(LoggerInterface::class)->warning("{exception}", ['exception' => $ex]);
+            }
         }
     }
 
@@ -778,5 +815,28 @@ class Row extends \ArrayObject
             ));
             StaticContainer::get(LoggerInterface::class)->warning("{exception}", ['exception' => $ex]);
         }
+    }
+
+    private function getColumnValueDescriptionForError($value)
+    {
+        $result = gettype($value);
+        if (is_array($result)) {
+            $result .= ' ' . json_encode($value);
+        }
+        return $result;
+    }
+
+    private function isStartDateLaterThanCloud441DeployDate($period)
+    {
+        if (empty($period)
+            || !($period instanceof Period)
+        ) {
+            return true; // sanity check
+        }
+
+        $periodStartDate = $period->getDateStart();
+
+        $cloudDeployDate = Date::factory('2021-08-11 12:00:00'); // 2021-08-12 00:00:00 NZST
+        return $periodStartDate->isLater($cloudDeployDate);
     }
 }

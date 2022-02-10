@@ -47,6 +47,7 @@ class SegmentSelectorControl extends UIControl
         $this->segmentDescription = $formatter->getHumanReadable(Request::getRawSegmentFromRequest(), $this->idSite);
 
         $this->isAddingSegmentsForAllWebsitesEnabled = SegmentEditor::isAddingSegmentsForAllWebsitesEnabled();
+        $this->isCreateRealtimeSegmentsEnabled = SegmentEditor::isCreateRealtimeSegmentsEnabled();
 
         $segments = APIMetadata::getInstance()->getSegmentsMetadata($this->idSite);
 
@@ -56,7 +57,7 @@ class SegmentSelectorControl extends UIControl
             if ($segment['category'] == $visitTitle
                 && ($segment['type'] == 'metric' && $segment['segment'] != 'visitIp')
             ) {
-                $metricsLabel = Common::mb_strtolower(Piwik::translate('General_Metrics'));
+                $metricsLabel = mb_strtolower(Piwik::translate('General_Metrics'));
                 $segment['category'] .= ' (' . $metricsLabel . ')';
             }
             $segmentsByCategory[$segment['category']][] = $segment;

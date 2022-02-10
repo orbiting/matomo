@@ -1,7 +1,7 @@
 {
     "IntranetMeasurable": {
-        "Intranet": "Intranet Web Sitesi",
-        "Intranets": "Intranet Web Siteleri",
-        "IntranetDescription": "Bir Intranet ölçülebiliri bir iç ağda bulunan bir web sitesine benzer."
+        "Intranet": "Intranet web sitesi",
+        "IntranetDescription": "Bir Intranet ölçülebiliri bir iç ağda bulunan bir web sitesine benzer.",
+        "Intranets": "Intranet web siteleri"
     }
 }

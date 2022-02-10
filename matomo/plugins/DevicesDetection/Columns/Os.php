@@ -40,12 +40,13 @@ class Os extends Base
         $segment->setSegment('operatingSystemName');
         $segment->setName('DevicesDetection_ColumnOperatingSystem');
         $segment->setAcceptedValues('Windows, Linux, Mac, Android, iOS etc.');
+        $segment->setNeedsMostFrequentValues(false);
         $segment->setSqlFilterValue(function ($val) {
             $oss = OperatingSystem::getAvailableOperatingSystems();
             $oss = array_map(function($val) {
-                return Common::mb_strtolower($val);
+                return mb_strtolower($val);
             }, $oss);
-            $result   = array_search(Common::mb_strtolower($val), $oss);
+            $result   = array_search(mb_strtolower($val), $oss);
 
             if ($result === false) {
                 $result = 'UNK';
@@ -53,8 +54,9 @@ class Os extends Base
 
             return $result;
         });
-        $segment->setSuggestedValuesCallback(function ($idSite, $maxValuesToReturn) {
-            return array_values(OperatingSystem::getAvailableOperatingSystems() + ['Unknown']);
+        $segment->setSuggestedValuesCallback(function ($idSite, $maxValuesToReturn, $table) {
+            return $this->sortStaticListByUsage(OperatingSystem::getAvailableOperatingSystems(), $table,
+                'operatingSystemCode', $maxValuesToReturn);
         });
         $segmentsList->addSegment($dimensionSegmentFactory->createSegment($segment));
     }

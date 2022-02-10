@@ -75,6 +75,7 @@ class Manager
     // These are always activated and cannot be deactivated
     protected $pluginToAlwaysActivate = array(
         'BulkTracking',
+        'CoreVue',
         'CoreHome',
         'CoreUpdater',
         'CoreAdminHome',
@@ -867,7 +868,7 @@ class Manager
     {
         return $this->isPluginEnabledByDefault($name)
         || in_array($name, $this->pluginList->getCorePluginsDisabledByDefault())
-        || $name == self::DEFAULT_THEME || $name === 'CustomVariables' || $name === 'Provider';
+        || $name == self::DEFAULT_THEME;
     }
 
     /**
@@ -1184,6 +1185,7 @@ class Manager
         if (isset($this->loadedPlugins[$pluginName])) {
             return $this->loadedPlugins[$pluginName];
         }
+
         $newPlugin = $this->makePluginClass($pluginName);
 
         $this->addLoadedPlugin($pluginName, $newPlugin);

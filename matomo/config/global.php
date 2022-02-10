@@ -29,7 +29,11 @@ return array(
         return $root . $tmp . $instanceId;
     },
 
+    'path.tmp.templates' => DI\string('{path.tmp}/templates_c'),
+
     'path.cache' => DI\string('{path.tmp}/cache/tracker/'),
+
+    'view.clearcompiledtemplates.enable' => true,
 
     'Matomo\Cache\Eager' => function (ContainerInterface $c) {
         $backend = $c->get('Matomo\Cache\Backend');
@@ -162,18 +166,49 @@ return array(
         $ipsResolved = array();
 
         foreach ($ips as $ip) {
-            if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            $ip = trim($ip);
+            if (filter_var($ip, FILTER_VALIDATE_IP) || \Matomo\Network\IPUtils::getIPRangeBounds($ip) !== null) {
                 $ipsResolved[] = $ip;
             } else {
-                $ipFromHost = @gethostbyname($ip);
-                if (!empty($ipFromHost)) {
-                    $ipsResolved[] = $ipFromHost;
+                $lazyCache = \Piwik\Cache::getLazyCache();
+                $cacheKey = 'DNS.' . md5($ip);
+
+                $resolvedIps = $lazyCache->fetch($cacheKey);
+
+                if (!is_array($resolvedIps)) {
+                    $resolvedIps = [];
+
+                    $ipFromHost = @gethostbyname($ip);
+                    if (!empty($ipFromHost) && $ipFromHost !== $ip) {
+                        $resolvedIps[] = $ipFromHost;
+                    }
+
+                    if (function_exists('dns_get_record')) {
+                        $entry = @dns_get_record($ip, DNS_AAAA);
+
+                        if (!empty($entry['0']['ipv6'])
+                            && filter_var($entry['0']['ipv6'], FILTER_VALIDATE_IP)) {
+                            $resolvedIps[] = $entry['0']['ipv6'];
+                        }
+                    }
+
+                    $lazyCache->save($cacheKey, $resolvedIps, 30);
                 }
+
+                $ipsResolved = array_merge($ipsResolved, $resolvedIps);
             }
         }
 
         return $ipsResolved;
     },
+
+    /**
+     * This defines a list of hostnames Matomo's Http class will deny requests to. Wildcards (*) can be used in the
+     * beginning to match any subdomain level or in the end to match any tlds
+     */
+    'http.blocklist.hosts' => [
+        '*.amazonaws.com',
+    ],
 
     'Piwik\Tracker\VisitorRecognizer' => DI\autowire()
         ->constructorParameter('trustCookiesOnly', DI\get('ini.Tracker.trust_visitors_cookies'))

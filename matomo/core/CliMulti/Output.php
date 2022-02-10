@@ -11,7 +11,7 @@ use Piwik\CliMulti;
 use Piwik\Common;
 use Piwik\Filesystem;
 
-class Output
+class Output implements OutputInterface
 {
 
     private $tmpFile  = '';
@@ -45,14 +45,14 @@ class Output
         return $this->tmpFile;
     }
 
-    public function isAbnormal()
+    public function isAbnormal(): bool
     {
         $size = Filesystem::getFileSize($this->tmpFile, 'MB');
 
         return $size !== null && $size >= 100;
     }
 
-    public function exists()
+    public function exists(): bool
     {
         return file_exists($this->tmpFile);
     }
@@ -63,8 +63,8 @@ class Output
         $search = '#!/usr/bin/env php';
         if (!empty($content)
             && is_string($content)
-            && Common::mb_substr(trim($content), 0, strlen($search)) === $search) {
-            $content = trim(Common::mb_substr(trim($content), strlen($search)));
+            && mb_substr(trim($content), 0, strlen($search)) === $search) {
+            $content = trim(mb_substr(trim($content), strlen($search)));
         }
         return $content;
     }

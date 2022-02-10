@@ -117,7 +117,7 @@ class API extends \Piwik\Plugin\API
         }
 
         // if real-time segments are disabled, then allow user to create pre-processed report
-        $realTimeSegmentsEnabled = Config::getInstance()->General['enable_create_realtime_segments'];
+        $realTimeSegmentsEnabled = SegmentEditor::isCreateRealtimeSegmentsEnabled();
         if (!$realTimeSegmentsEnabled && !$autoArchive) {
             throw new Exception(
                 "Real time segments are disabled. You need to enable auto archiving."
@@ -181,6 +181,7 @@ class API extends \Piwik\Plugin\API
         $authorized =
             ($requiredAccess == 'view' && Piwik::isUserHasViewAccess($idSite)) ||
             ($requiredAccess == 'admin' && Piwik::isUserHasAdminAccess($idSite)) ||
+            ($requiredAccess == 'write' && Piwik::isUserHasWriteAccess($idSite)) ||
             ($requiredAccess == 'superuser' && Piwik::hasUserSuperUserAccess())
         ;
 
