@@ -1,6 +1,12 @@
 {
     "MarketingCampaignsReporting": {
+        "Name": "Kampanj",
+        "Keyword": "Kampanj Nyckelord",
         "Source": "Kampanjkälla",
+        "Medium": "Kampanjkälla - Medium",
+        "Content": "Kampanjinnehåll",
+        "Group": "Kampanjgrupp",
+        "Placement": "Kampanjplacering",
         "CombinedSourceMedium": "Källa - Medie",
         "CampaignId": "Kampanj-ID",
         "CombinedKeywordContent": "Nyckelord - Innehåll",
@@ -9,6 +15,9 @@
         "Sources": "Kampanjkällor",
         "Mediums": "Kampanjmedie",
         "Contents": "Kampanjinnehåll",
+        "Groups": "Kampanjgrupp",
+        "Placements": "Kampanjplaceringar",
+        "CampaignIds": "Kampanj-ID",
         "CombinedSourcesMediums": "Kampanjkälla - Medium"
     }
 }

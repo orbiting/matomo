@@ -5,7 +5,7 @@
  * Description: Measure the effectiveness of your marketing campaigns. New reports, segments & track up to five channels: campaign, source, medium, keyword, content.
  * Author: Matomo
  * Author URI: https://matomo.org
- * Version: 4.0.4
+ * Version: 4.1.1
  */
 ?><?php
 /**

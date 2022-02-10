@@ -1,4 +1,13 @@
-<?php
+<?php 
+/**
+ * Plugin Name: Provider (Matomo Plugin)
+ * Plugin URI: http://plugins.matomo.org/Provider
+ * Description: Reports the Internet Service Provider of the visitors.
+ * Author: Matomo
+ * Author URI: https://matomo.org
+ * Version: 4.0.3
+ */
+?><?php
 /**
  * Matomo - free/libre analytics platform
  *
@@ -14,6 +23,24 @@ use Piwik\Common;
 use Piwik\Db;
 use Piwik\FrontController;
 use Piwik\Piwik;
+
+ 
+if (defined( 'ABSPATH')
+&& function_exists('add_action')) {
+    $path = '/matomo/app/core/Plugin.php';
+    if (defined('WP_PLUGIN_DIR') && WP_PLUGIN_DIR && file_exists(WP_PLUGIN_DIR . $path)) {
+        require_once WP_PLUGIN_DIR . $path;
+    } elseif (defined('WPMU_PLUGIN_DIR') && WPMU_PLUGIN_DIR && file_exists(WPMU_PLUGIN_DIR . $path)) {
+        require_once WPMU_PLUGIN_DIR . $path;
+    } else {
+        return;
+    }
+    add_action('plugins_loaded', function () {
+        if (function_exists('matomo_add_plugin')) {
+            matomo_add_plugin(__DIR__, __FILE__, true);
+        }
+    });
+}
 
 class Provider extends \Piwik\Plugin
 {
