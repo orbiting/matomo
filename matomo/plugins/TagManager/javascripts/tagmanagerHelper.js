@@ -1,32 +1,42 @@
 (function ($) {
     var tagManagerHelper = {};
     tagManagerHelper.editTrigger = function ($scope, idContainer, idContainerVersion, idTag, callback) {
-        if (!$scope) {
-            $scope = piwikHelper.getAngularDependency('$rootScope');
-        }
+      var createVNode = Vue.createVNode;
+      var createVueApp = CoreHome.createVueApp;
+      var TriggerEdit = TagManager.TriggerEdit;
 
-        var childScope = $scope.$new(true, $scope);
-        var template = $('<div class="tag-ui-confirm"><div piwik-trigger-edit id-container="idContainer" on-change-trigger="onChangeTrigger(trigger)" id-container-version="idContainerVersion" id-trigger="' + parseInt(idTag,10) +'"></div><input role="no" type="button" value="' + _pk_translate('General_Cancel') +'"/></div>')
+      var template = $('<div class="tag-ui-confirm"><div></div><input role="no" type="button" value="'
+        + _pk_translate('General_Cancel') +'"/></div>')
 
-        var params = {
+      var app = createVueApp({
+        render: function () {
+          return createVNode(TriggerEdit, {
             idContainer: idContainer,
-            idContainerVersion: idContainerVersion,
-            onChangeTrigger: function (trigger) {
-                if ('function' === typeof callback) {
-                    callback(trigger);
-                }
-                var modal = M.Modal.getInstance(template.parents('.modal.open'));
+            idContainerVersion: parseInt(idContainerVersion, 10),
+            idTrigger: parseInt(idTag,10),
+            isEmbedded: true,
+            onChangeTrigger: function (event) {
+              if ('function' === typeof callback) {
+                callback(event.trigger);
+              }
+              var modal = M.Modal.getInstance(template.parents('.modal.open'));
 
-                if (modal) {
-                    modal.close();
-                }
-            }
-        };
-        piwikHelper.compileAngularComponents(template, {scope: childScope, params: params});
-        piwikHelper.modalConfirm(template, {}, {extraWide: true, onCloseEnd: function () {
-            childScope.$destroy();
-            template.empty();
-        }});
+              if (modal) {
+                modal.close();
+              }
+            },
+          });
+        },
+      });
+      app.mount(template.children()[0]);
+
+      piwikHelper.modalConfirm(template, {}, {
+        extraWide: true,
+        onCloseEnd: function () {
+          app.unmount();
+          template.empty();
+        },
+      });
     };
 
     tagManagerHelper.createNewVersion = function () {
@@ -35,64 +45,81 @@
         this.editVersion(null, containerId, 0, function () { window.location.reload(); });
     };
     tagManagerHelper.editVersion = function ($scope, idContainer, idContainerVersion, callback) {
-        if (!$scope) {
-            $scope = piwikHelper.getAngularDependency('$rootScope');
-        }
+      var createVNode = Vue.createVNode;
+      var createVueApp = CoreHome.createVueApp;
+      var VersionEdit = TagManager.VersionEdit;
 
-        var childScope = $scope.$new(true, $scope);
-        var template = $('<div class="tag-ui-confirm"><div piwik-version-edit id-container="idContainer" on-change-version="onChangeVersion(version)" id-container-version="idContainerVersion"></div><input role="no" type="button" value="' + _pk_translate('General_Cancel') +'"/></div>')
+      var template = $('<div class="tag-ui-confirm ui-confirm"><div></div><input role="no" type="button" value="'
+        + _pk_translate('General_Cancel') +'"/></div>')
 
-        var params = {
+      var app = createVueApp({
+        render: function () {
+          return createVNode(VersionEdit, {
             idContainer: idContainer,
             idContainerVersion: parseInt(idContainerVersion, 10),
-            onChangeVersion: function (version) {
-                if ('function' === typeof callback) {
-                    callback(version);
-                }
-                var modal = M.Modal.getInstance(template.parents('.modal.open'));
+            isEmbedded: true,
+            onChangeVersion: function (event) {
+              if ('function' === typeof callback) {
+                callback(event.version);
+              }
+              var modal = M.Modal.getInstance(template.parents('.modal.open'));
 
-                if (modal) {
-                    modal.close();
-                }
-            }
-        };
-        piwikHelper.compileAngularComponents(template, {scope: childScope, params: params});
-        piwikHelper.modalConfirm(template, {}, {extraWide: true, onCloseEnd: function () {
-            childScope.$destroy();
-            template.empty();
-        }});
+              if (modal) {
+                modal.close();
+              }
+            },
+          });
+        },
+      });
+      app.mount(template.children()[0]);
+
+      piwikHelper.modalConfirm(template, {}, {
+        extraWide: true,
+        onCloseEnd: function () {
+          app.unmount();
+          template.empty();
+        },
+      });
     };
 
-    tagManagerHelper.editVariable = function ($scope, idContainer, idContainerVersion, idVariable, callback, variableType) {
-        if (!$scope) {
-            $scope = piwikHelper.getAngularDependency('$rootScope');
-        }
+    tagManagerHelper.editVariable = function (ignored, idContainer, idContainerVersion, idVariable, callback, variableType) {
+        var createVNode = Vue.createVNode;
+        var createVueApp = CoreHome.createVueApp;
+        var VariableEdit = TagManager.VariableEdit;
 
-        var childScope = $scope.$new(true, $scope);
-        var template = $('<div class="tag-ui-confirm"><div piwik-variable-edit id-container="idContainer" variable-type="variableType" on-change-variable="onChangeVariable(variable)" id-container-version="idContainerVersion" id-variable="idVariable"></div><input role="no" type="button" value="' + _pk_translate('General_Cancel') +'"/></div>')
+        var template = $('<div class="tag-ui-confirm"><div></div><input role="no" type="button" value="'
+          + _pk_translate('General_Cancel') +'"/></div>')
 
-        var params = {
-            idContainer: idContainer,
-            idVariable: idVariable,
-            variableType: variableType,
-            idContainerVersion: parseInt(idContainerVersion, 10),
-            onChangeVariable: function (variable) {
+        var app = createVueApp({
+          render: function () {
+            return createVNode(VariableEdit, {
+              idContainer: idContainer,
+              idContainerVersion: parseInt(idContainerVersion, 10),
+              idVariable: idVariable,
+              variableType: variableType,
+              isEmbedded: true,
+              onChangeVariable: function (event) {
                 if ('function' === typeof callback) {
-                    callback(variable);
+                  callback(event.variable);
                 }
+
                 var modal = M.Modal.getInstance(template.parents('.modal.open'));
-
                 if (modal) {
-                    modal.close();
+                  modal.close();
                 }
-            }
-        };
+              },
+            });
+          },
+        });
+        app.mount(template.children()[0]);
 
-        piwikHelper.compileAngularComponents(template, {scope: childScope, params: params});
-        piwikHelper.modalConfirm(template, {}, {extraWide: true, onCloseEnd: function () {
-            childScope.$destroy();
+        piwikHelper.modalConfirm(template, {}, {
+          extraWide: true,
+          onCloseEnd: function () {
+            app.unmount();
             template.empty();
-        }});
+          },
+        });
     };
 
     tagManagerHelper.selectVariable = function (callback) {
@@ -144,18 +171,29 @@
     };
 
     tagManagerHelper.showInstallCode = function (idContainer) {
-        var $scope = piwikHelper.getAngularDependency('$rootScope');
-        var childScope = $scope.$new(true, $scope);
-        var template = $('<div class="tag-ui-confirm"><div piwik-manage-install-tag-code id-container="{{ idContainer }}"></div><input role="no" type="button" value="' + _pk_translate('General_Cancel') +'"/>')
+      var createVNode = Vue.createVNode;
+      var createVueApp = CoreHome.createVueApp;
+      var ManageInstallTagCode = TagManager.ManageInstallTagCode;
 
-        var params = {
-            idContainer: idContainer
-        };
-        piwikHelper.compileAngularComponents(template, {scope: childScope, params: params});
-        piwikHelper.modalConfirm(template, {}, {extraWide: true, onCloseEnd: function () {
-            childScope.$destroy();
-            template.empty();
-        }});
+      var template = $('<div class="tag-ui-confirm" ui-confirm><div></div><input role="no" '
+        + 'type="button" value="' + _pk_translate('General_Cancel') +'"/>')
+
+      var app = createVueApp({
+        render: function () {
+          return createVNode(ManageInstallTagCode, {
+            idContainer: idContainer,
+          });
+        },
+      });
+      app.mount(template.children()[0]);
+
+      piwikHelper.modalConfirm(template, {}, {
+        extraWide: true,
+        onCloseEnd: function () {
+          app.unmount();
+          template.empty();
+        },
+      });
     };
     tagManagerHelper.enablePreviewMode = function (idContainer, idContainerVersion) {
         if (!idContainerVersion) {
@@ -215,17 +253,29 @@
 
     };
     tagManagerHelper.importVersion = function ($scope, idContainer) {
-        var childScope = $scope.$new(true, $scope);
-        var template = $('<div class="ui-confirm"><div piwik-import-version id-container="idContainer"></div><input role="no" type="button" value="' + _pk_translate('General_Cancel') +'"/>')
+        var createVNode = Vue.createVNode;
+        var createVueApp = CoreHome.createVueApp;
+        var ImportVersion = TagManager.ImportVersion;
 
-        var params = {
-            idContainer: idContainer
-        };
-        piwikHelper.compileAngularComponents(template, {scope: childScope, params: params});
-        piwikHelper.modalConfirm(template, {}, {extraWide: true, onCloseEnd: function () {
-            childScope.$destroy();
+        var template = $('<div class="ui-confirm"><div></div><input role="no" type="button" value="'
+          + _pk_translate('General_Cancel') +'"/></div>')
+
+        var app = createVueApp({
+          render: function () {
+            return createVNode(ImportVersion, {
+              idContainer: idContainer,
+            });
+          },
+        });
+        app.mount(template.children()[0]);
+
+        piwikHelper.modalConfirm(template, {}, {
+          extraWide: true,
+          onCloseEnd() {
+            app.unmount();
             template.empty();
-        }});
+          },
+        });
     };
 
     window.tagManagerHelper = tagManagerHelper;
@@ -240,6 +290,11 @@
         var idContainer = $(event.target).data('idcontainer');
         var debugSiteUrl = $(event.target).data('debug-site-url');
         tagManagerHelper.changeDebugUrl(idContainer, debugSiteUrl);
+      });
+
+      $('body').on('click', 'a.createNewVersionLink', function (e) {
+        e.preventDefault();
+        tagManagerHelper.createNewVersion();
       });
     });
 })(jQuery);
