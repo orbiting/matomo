@@ -7,6 +7,7 @@ for Matomo anyway.
 
 * Recommended [Redis server 2.8+](http://redis.io/) - [Redis quickstart](http://redis.io/topics/quickstart)
 * Recommended [phpredis PHP extension](https://github.com/nicolasff/phpredis) - [Install](https://github.com/nicolasff/phpredis#installingconfiguring)
+* Instead of Redis it is possible to use MySQL
 * Transactions are used and must be supported by the SQL database.
 
 __Where can I configure and enable the queue?__
@@ -44,7 +45,7 @@ Example crontab entry that starts the processor every minute:
 
 __Can I keep track of the state of the queue?__
 
-Yes, you can. Just execute the command `./console queuedtracking:monitor`. This will show the current state of the queue.
+Yes, you can. Just execute the command `./console queuedtracking:monitor`. This will show the current state of the queue. To exit this command you can for example press `CTRL + C` key at the same time.
 
 __Can I improve the speed of inserting requests from the Redis queue to the database?__
 
@@ -56,7 +57,7 @@ If you process requests from the command line via `./console queuedtracking:proc
 
 __How fast are the requests inserted from Redis to the Database?__
 
-This very much depends on your setup and hardware. With fast CPUs you can achive up to 250req/s with 1 worker, 400req/s with 2 workers and 1500req/s with 8 workers (tested on a AWS c3.x2large instance).
+This very much depends on your setup and hardware. With fast CPUs you can achieve up to 250req/s with 1 worker, 400req/s with 2 workers and 1500req/s with 8 workers (tested on a AWS c3.x2large instance).
 
 __How should the redis server be configured?__
 
@@ -110,7 +111,7 @@ __How can I debug in case something goes wrong?__
 * Use the command `./console queuedtracking:monitor` to view the current state of all workers
 * Use the command `./console queuedtracking:lock-status` to view the current state of all locks
 * Set the option `-vvv` when processing via `./console queuedtracking:process -vvv` to enable the tracker debug mode for this run. This will print detailed information to screen.
-* Enable tracker mode in `config.ini.php` via `[Tracker] debug=1` if processing requests during tracking is enabled.
+* Enable tracker debug mode in `config.ini.php` via `[Tracker] debug=1` if processing requests during tracking is enabled.
 * Use the command `./console queuedtracking:print-queued-requests` to view the next requests to process in each queue. If you execute this command twice within 1-10 minutes, and it outputs the same, the queue is not being processed most likely indicating a problem.
 * You can add the tracking parameter `&queuedtracking=0` to the tracking request to insert a tracking request directly into the database instead of into the queued tracking handler
 

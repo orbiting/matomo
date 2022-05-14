@@ -16,7 +16,6 @@ use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
 use Piwik\Tracker\RequestSet;
 use Exception;
-use Piwik\Url;
 
 /**
  * @method Response getResponse()
@@ -45,7 +44,11 @@ class Handler extends Tracker\Handler
 
         $requests = $requestSet->getRequests();
         foreach ($requests as $request) {
-            $request->setThirdPartyCookie($request->getVisitorIdForThirdPartyCookie());
+            $visitorId = $request->getVisitorIdForThirdPartyCookie();
+            if (!$visitorId) {
+                $visitorId = \Piwik\Common::hex2bin(\Piwik\Tracker\Visit::generateUniqueVisitorId());
+            }
+            $request->setThirdPartyCookie($visitorId);
         }
 
         $this->sendResponseNow($tracker, $requestSet);

@@ -13,10 +13,8 @@ use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Tracker;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Piwik\Plugins\QueuedTracking\Queue;
-use Piwik\Plugins\QueuedTracking\Queue\Processor;
 
 /**
  * This class lets you define a new command. To read more about commands have a look at our Piwik Console guide on
@@ -208,6 +206,8 @@ class Test extends ConsoleCommand
 
         $output->writeln('');
         $output->writeln('<comment>Done</comment>');
+
+        return 0;
     }
 
     /**
@@ -233,11 +233,19 @@ class Test extends ConsoleCommand
     private function testRedis($redis, $method, $params, $keyToCleanUp, OutputInterface $output)
     {
         if ($keyToCleanUp) {
-            $redis->delete($keyToCleanUp);
+            $redis->del($keyToCleanUp);
         }
 
         $result = call_user_func_array(array($redis, $method), $params);
-        $paramsInline = implode(', ', $params);
+
+        $paramsMapped = array_map(function($item) {
+            if (is_string($item)) {
+                return $item;
+            }
+            
+            return str_replace(["\r", "\n", "  "], '', var_export($item, true));
+        }, $params);
+        $paramsInline = implode(', ', $paramsMapped);
 
         if ($result) {
             $output->writeln("Success for method $method($paramsInline)");
@@ -247,7 +255,7 @@ class Test extends ConsoleCommand
         }
 
         if ($keyToCleanUp) {
-            $redis->delete($keyToCleanUp);
+            $redis->del($keyToCleanUp);
         }
     }
 }
