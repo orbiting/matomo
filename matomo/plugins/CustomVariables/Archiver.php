@@ -11,11 +11,9 @@ namespace Piwik\Plugins\CustomVariables;
 use Piwik\Config;
 use Piwik\DataAccess\LogAggregator;
 use Piwik\DataArray;
-use Piwik\DataTable;
 use Piwik\DbHelper;
 use Piwik\Metrics;
 use Piwik\Tracker\GoalManager;
-use Piwik\Tracker;
 
 class Archiver extends \Piwik\Plugin\Archiver
 {
@@ -131,7 +129,7 @@ class Archiver extends \Piwik\Plugin\Archiver
 
     protected function cleanCustomVarValue($value)
     {
-        if (strlen($value)) {
+        if ($value !== null && strlen($value)) {
             return $value;
         }
         return self::LABEL_CUSTOM_VALUE_NOT_DEFINED;

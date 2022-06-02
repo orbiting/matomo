@@ -2,6 +2,20 @@
     "InvalidateReports": {
         "AllWebsites": "alle nettsteder",
         "ChooseSegment": "Velg segment",
-        "ChooseWebsite": "Velg nettsted"
+        "ChooseWebsite": "Velg nettsted",
+        "InvalidateHistoricalReports": "Ugyldiggjør historiske rapporter",
+        "InvalidateReports": "Ugyldiggjør rapporter",
+        "AllData": "all historisk data",
+        "AllSegments": "alle segmenter",
+        "ChooseRange": "Velg hvor langt tilbake data skal ugyldiggjøres",
+        "ExamplesCustomReports": "du har opprettet en ny %1$segendefinert rapport%2$s og ønsker at %1$segendefinerte rapporter%2$s skal behandles for all historisk data",
+        "XMonths": "siste %1$s måneder",
+        "LastMonth": "siste måned",
+        "ExamplesRawData": "du har endret rå besøksinfo (for eksempel ved å %1$simportere nye besøkslogger%2$s) og ønsker å utføre disse endringene for rå-loggene i alle rapportene dine.",
+        "InvalidateAPIReturn": "CoreAdminHome.invalidateArchivedReports-API-et svarte med følgende:",
+        "InvalidationSuccess": "Rapporter har blitt invalidisert. De vil bli behandlet igjen neste gang rapport-arkivering kjører.",
+        "ExamplesFunnels": "Du har opprettet en ny %1$strakt%2$s og ønsker å sende all historisk data gjennom den%1$s",
+        "PageDescription": "Du kan invalidere alle historiske rapporter eller alle nettsider ved å klikke «Invalider historiske rapporter»-knappen. Dette gjenbehandler dem fra rå-loggene neste gang arkivering kjøres.\nTving Matomo til å behandle historiske data igjen for alle data, for eksempel når:",
+        "ConfirmInvalidation": "Invalider alle historiske rapporter for %1$s og %2$s? (Dette får Matomo til å re-behandle alle historiske rapporter neste gang arkivering kjører, og det kan ta lang tid.)"
     }
 }
