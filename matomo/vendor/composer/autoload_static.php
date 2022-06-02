@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit00794da211b3cde4952da2813c49e066
+class ComposerStaticInita63883d7fd27a9fdeabad8662049179c
 {
     public static $files = array (
         '04c6c5c2f7095ccf6c481d3e53e1776f' => __DIR__ . '/..' . '/mustangostang/spyc/Spyc.php',
@@ -2648,6 +2648,7 @@ class ComposerStaticInit00794da211b3cde4952da2813c49e066
         'Piwik\\Plugins\\UserCountry\\VisitorGeolocator' => __DIR__ . '/../..' . '/plugins/UserCountry/VisitorGeolocator.php',
         'Piwik\\Plugins\\UserCountry\\tests\\Fixtures\\ManySitesManyVisitsWithGeoIp' => __DIR__ . '/../..' . '/plugins/UserCountry/tests/Fixtures/ManySitesManyVisitsWithGeoIp.php',
         'Piwik\\Plugins\\UserCountry\\tests\\Integration\\APITest' => __DIR__ . '/../..' . '/plugins/UserCountry/tests/Integration/APITest.php',
+        'Piwik\\Plugins\\UserCountry\\tests\\Integration\\DefaultLocationProviderTest' => __DIR__ . '/../..' . '/plugins/UserCountry/tests/Integration/DefaultLocationProviderTest.php',
         'Piwik\\Plugins\\UserCountry\\tests\\Integration\\LocationProviderTest' => __DIR__ . '/../..' . '/plugins/UserCountry/tests/Integration/LocationProviderTest.php',
         'Piwik\\Plugins\\UserCountry\\tests\\Integration\\VisitorGeolocatorTest' => __DIR__ . '/../..' . '/plugins/UserCountry/tests/Integration/VisitorGeolocatorTest.php',
         'Piwik\\Plugins\\UserCountry\\tests\\System\\ApiTest' => __DIR__ . '/../..' . '/plugins/UserCountry/tests/System/ApiTest.php',
@@ -3334,11 +3335,11 @@ class ComposerStaticInit00794da211b3cde4952da2813c49e066
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit00794da211b3cde4952da2813c49e066::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit00794da211b3cde4952da2813c49e066::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit00794da211b3cde4952da2813c49e066::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit00794da211b3cde4952da2813c49e066::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit00794da211b3cde4952da2813c49e066::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInita63883d7fd27a9fdeabad8662049179c::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInita63883d7fd27a9fdeabad8662049179c::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInita63883d7fd27a9fdeabad8662049179c::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInita63883d7fd27a9fdeabad8662049179c::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInita63883d7fd27a9fdeabad8662049179c::$classMap;
 
         }, null, ClassLoader::class);
     }

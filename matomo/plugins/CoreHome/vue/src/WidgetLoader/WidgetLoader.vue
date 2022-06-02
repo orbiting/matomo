@@ -32,7 +32,7 @@
 import { IRootScopeService, IScope } from 'angular';
 import { defineComponent } from 'vue';
 import ActivityIndicator from '../ActivityIndicator/ActivityIndicator.vue';
-import translate from '../translate';
+import { translate } from '../translate';
 import Matomo from '../Matomo/Matomo';
 import AjaxHelper from '../AjaxHelper/AjaxHelper';
 import { NotificationsStore } from '../Notification';
@@ -105,7 +105,7 @@ export default defineComponent({
       this.loadWidgetUrl(this.widgetParams as QueryParameters, this.changeCounter += 1);
     }
   },
-  unmounted() {
+  beforeUnmount() {
     this.cleanupLastWidgetContent();
   },
   methods: {
@@ -117,11 +117,12 @@ export default defineComponent({
     },
     cleanupLastWidgetContent() {
       const widgetContent = this.$refs.widgetContent as HTMLElement;
-      if (widgetContent) {
-        widgetContent.innerHTML = '';
-      }
+      Matomo.helper.destroyVueComponent(widgetContent);
       if (this.currentScope) {
         this.currentScope.$destroy();
+      }
+      if (widgetContent) {
+        widgetContent.innerHTML = '';
       }
     },
     getWidgetUrl(parameters?: QueryParameters): QueryParameters {
@@ -219,8 +220,10 @@ export default defineComponent({
         const scope = $rootScope.$new();
         this.currentScope = scope;
 
-        Matomo.helper.compileVueEntryComponents($content);
+        // compile angularjs first since it will modify all dom nodes, breaking vue bindings
+        // if they are present
         Matomo.helper.compileAngularComponents($content, { scope });
+        Matomo.helper.compileVueEntryComponents($content);
 
         NotificationsStore.parseNotificationDivs();
 

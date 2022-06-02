@@ -2386,6 +2386,7 @@ return array(
     'Piwik\\Plugins\\UserCountry\\VisitorGeolocator' => $baseDir . '/plugins/UserCountry/VisitorGeolocator.php',
     'Piwik\\Plugins\\UserCountry\\tests\\Fixtures\\ManySitesManyVisitsWithGeoIp' => $baseDir . '/plugins/UserCountry/tests/Fixtures/ManySitesManyVisitsWithGeoIp.php',
     'Piwik\\Plugins\\UserCountry\\tests\\Integration\\APITest' => $baseDir . '/plugins/UserCountry/tests/Integration/APITest.php',
+    'Piwik\\Plugins\\UserCountry\\tests\\Integration\\DefaultLocationProviderTest' => $baseDir . '/plugins/UserCountry/tests/Integration/DefaultLocationProviderTest.php',
     'Piwik\\Plugins\\UserCountry\\tests\\Integration\\LocationProviderTest' => $baseDir . '/plugins/UserCountry/tests/Integration/LocationProviderTest.php',
     'Piwik\\Plugins\\UserCountry\\tests\\Integration\\VisitorGeolocatorTest' => $baseDir . '/plugins/UserCountry/tests/Integration/VisitorGeolocatorTest.php',
     'Piwik\\Plugins\\UserCountry\\tests\\System\\ApiTest' => $baseDir . '/plugins/UserCountry/tests/System/ApiTest.php',

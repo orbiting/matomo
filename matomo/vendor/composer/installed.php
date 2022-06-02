@@ -1,11 +1,11 @@
 <?php return array(
     'root' => array(
-        'pretty_version' => '4.9.1',
-        'version' => '4.9.1.0',
+        'pretty_version' => '4.10.1',
+        'version' => '4.10.1.0',
         'type' => 'application',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '4d741f2027b09c0d5d349352a98759ea7142d612',
+        'reference' => 'd36664cd485fc80af2d97992ddf53d97686d74ca',
         'name' => 'matomo/matomo',
         'dev' => false,
     ),
@@ -103,12 +103,12 @@
             'dev_requirement' => false,
         ),
         'matomo/matomo' => array(
-            'pretty_version' => '4.9.1',
-            'version' => '4.9.1.0',
+            'pretty_version' => '4.10.1',
+            'version' => '4.10.1.0',
             'type' => 'application',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '4d741f2027b09c0d5d349352a98759ea7142d612',
+            'reference' => 'd36664cd485fc80af2d97992ddf53d97686d74ca',
             'dev_requirement' => false,
         ),
         'matomo/matomo-php-tracker' => array(
@@ -143,7 +143,7 @@
             'aliases' => array(
                 0 => '9999999-dev',
             ),
-            'reference' => '980999af6f2f42c715066ef6b8ea289d34ae88ee',
+            'reference' => '1c90329afda6eb08067ad1b6a8dcd1292c840396',
             'dev_requirement' => false,
         ),
         'matomo/searchengine-and-social-list' => array(
@@ -165,12 +165,12 @@
             'dev_requirement' => false,
         ),
         'maxmind/web-service-common' => array(
-            'pretty_version' => 'v0.8.1',
-            'version' => '0.8.1.0',
+            'pretty_version' => 'v0.9.0',
+            'version' => '0.9.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../maxmind/web-service-common',
             'aliases' => array(),
-            'reference' => '32f274051c543fc865e5a84d3a2c703913641ea8',
+            'reference' => '4dc5a3e8df38aea4ca3b1096cee3a038094e9b53',
             'dev_requirement' => false,
         ),
         'monolog/monolog' => array(
@@ -444,12 +444,12 @@
             'dev_requirement' => false,
         ),
         'twig/twig' => array(
-            'pretty_version' => 'v3.3.8',
-            'version' => '3.3.8.0',
+            'pretty_version' => 'v3.3.10',
+            'version' => '3.3.10.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../twig/twig',
             'aliases' => array(),
-            'reference' => '972d8604a92b7054828b539f2febb0211dd5945c',
+            'reference' => '8442df056c51b706793adf80a9fd363406dd3674',
             'dev_requirement' => false,
         ),
         'wikimedia/less.php' => array(

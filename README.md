@@ -145,7 +145,7 @@ Run locally after update and do a system check:
 
 ```bash
 php -S 0.0.0.0:8000 -t matomo/
-open http://localhost:8000/index.php?module=Installation&action=systemCheckPage
+open "http://localhost:8000/index.php?module=Installation&action=systemCheckPage"
 ```
 
 It will often report files that can be removed after an update. PHP config issues and archiving completion can be ignored locally.
