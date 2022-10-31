@@ -5,7 +5,7 @@
  * Description: This plugin allows Super Users to invalidate historical reports in the UI in Administration > System > Invalidate reports.
  * Author: InnoCraft
  * Author URI: https://www.innocraft.com
- * Version: 4.1.0
+ * Version: 4.1.1
  */
 ?><?php
 /**

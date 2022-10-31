@@ -11,7 +11,7 @@ namespace Piwik\Archive;
 
 use Piwik\Archive\ArchiveInvalidator\InvalidationResult;
 use Piwik\ArchiveProcessor\Rules;
-use Piwik\Config;
+use Piwik\Common;
 use Piwik\Container\StaticContainer;
 use Piwik\CronArchive\ReArchiveList;
 use Piwik\CronArchive\SegmentArchiving;
@@ -20,12 +20,11 @@ use Piwik\DataAccess\Model;
 use Piwik\Date;
 use Piwik\Db;
 use Piwik\Option;
-use Piwik\Common;
+use Piwik\Period;
 use Piwik\Piwik;
 use Piwik\Plugin\Manager;
 use Piwik\Plugins\CoreAdminHome\Tasks\ArchivesToPurgeDistributedList;
 use Piwik\Plugins\PrivacyManager\PrivacyManager;
-use Piwik\Period;
 use Piwik\Segment;
 use Piwik\SettingsServer;
 use Piwik\Site;
@@ -183,7 +182,7 @@ class ArchiveInvalidator
     {
         return $this->rememberArchivedReportIdStart . (int) $idSite;
     }
-    
+
     private function buildRememberArchivedReportIdForSiteAndDate($idSite, $date)
     {
         $id  = $this->buildRememberArchivedReportIdForSite($idSite);
@@ -255,7 +254,7 @@ class ArchiveInvalidator
      * @param $period string
      * @param $segment Segment
      * @param bool $cascadeDown
-     * @param bool $forceInvalidateNonexistantRanges set true to force inserting rows for ranges in archive_invalidations
+     * @param bool $forceInvalidateNonexistentRanges set true to force inserting rows for ranges in archive_invalidations
      * @param string $name null to make sure every plugin is archived when this invalidation is processed by core:archive,
      *                     or a plugin name to only archive the specific plugin.
      * @param bool $ignorePurgeLogDataDate
@@ -263,7 +262,7 @@ class ArchiveInvalidator
      * @throws \Exception
      */
     public function markArchivesAsInvalidated(array $idSites, array $dates, $period, Segment $segment = null, $cascadeDown = false,
-                                              $forceInvalidateNonexistantRanges = false, $name = null, $ignorePurgeLogDataDate = false)
+                                              $forceInvalidateNonexistentRanges = false, $name = null, $ignorePurgeLogDataDate = false)
     {
         $plugin = null;
         if ($name && strpos($name, '.') !== false) {
@@ -321,7 +320,7 @@ class ArchiveInvalidator
 
         $allPeriodsToInvalidate = $this->getAllPeriodsByYearMonth($period, $datesToInvalidate, $cascadeDown);
 
-        $this->markArchivesInvalidated($idSites, $allPeriodsToInvalidate, $segment, $period != 'range', $forceInvalidateNonexistantRanges, $name);
+        $this->markArchivesInvalidated($idSites, $allPeriodsToInvalidate, $segment, $period != 'range', $forceInvalidateNonexistentRanges, $name);
 
         $isInvalidatingDays = $period == 'day' || $cascadeDown || empty($period);
         $isNotInvalidatingSegment = empty($segment) || empty($segment->getString());
@@ -475,7 +474,7 @@ class ArchiveInvalidator
     {
         $date2 = Date::today();
 
-        $earliestDateToRearchive = $this->getEarliestDateToRearchive();
+        $earliestDateToRearchive = Piwik::getEarliestDateToRearchive();
         if (empty($startDate)) {
             if (empty($earliestDateToRearchive)) {
                 return null; // INI setting set to 0 months so no rearchiving
@@ -679,7 +678,7 @@ class ArchiveInvalidator
      * @throws \Exception
      */
     private function markArchivesInvalidated($idSites, $dates, Segment $segment = null, $removeRanges = false,
-                                             $forceInvalidateNonexistantRanges = false, $name = null)
+                                             $forceInvalidateNonexistentRanges = false, $name = null)
     {
         $idSites = array_map('intval', $idSites);
 
@@ -691,7 +690,7 @@ class ArchiveInvalidator
             $table = ArchiveTableCreator::getNumericTable($tableDateObj);
             $yearMonths[] = $tableDateObj->toString('Y_m');
 
-            $this->model->updateArchiveAsInvalidated($table, $idSites, $datesForTable, $segment, $forceInvalidateNonexistantRanges, $name);
+            $this->model->updateArchiveAsInvalidated($table, $idSites, $datesForTable, $segment, $forceInvalidateNonexistentRanges, $name);
 
             if ($removeRanges) {
                 $this->model->updateRangeArchiveAsInvalidated($table, $idSites, $datesForTable, $segment);
@@ -795,24 +794,4 @@ class ArchiveInvalidator
         return $this->allIdSitesCache;
     }
 
-    private function getEarliestDateToRearchive()
-    {
-        $lastNMonthsToInvalidate = Config::getInstance()->General['rearchive_reports_in_past_last_n_months'];
-        if (empty($lastNMonthsToInvalidate)) {
-            return null;
-        }
-
-        if (!is_numeric($lastNMonthsToInvalidate)) {
-            $lastNMonthsToInvalidate = (int)str_replace('last', '', $lastNMonthsToInvalidate);
-            if (empty($lastNMonthsToInvalidate)) {
-                return null;
-            }
-        }
-
-        if ($lastNMonthsToInvalidate <= 0) {
-            return null;
-        }
-
-        return Date::yesterday()->subMonth($lastNMonthsToInvalidate)->setDay(1);
-    }
 }

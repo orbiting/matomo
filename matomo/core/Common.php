@@ -747,7 +747,7 @@ class Common
     }
 
     /**
-     * Returns a human readable error message in case an error occcurred during the last json encode/decode.
+     * Returns a human readable error message in case an error occurred during the last json encode/decode.
      * Returns an empty string in case there was no error.
      *
      * @return string
@@ -1137,6 +1137,7 @@ class Common
             401 => 'Unauthorized',
             403 => 'Forbidden',
             404 => 'Not Found',
+            429 => 'Too Many Requests',
             500 => 'Internal Server Error',
             503 => 'Service Unavailable',
         );

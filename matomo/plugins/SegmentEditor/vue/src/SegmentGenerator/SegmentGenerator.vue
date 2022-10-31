@@ -217,13 +217,13 @@ function findAndExplodeByMatch(metric: string) {
   if (minPos < metric.length) {
     // sth found - explode
     if (singleChar === true) {
-      newMetric.segment = metric.substr(0, minPos);
-      newMetric.matches = metric.substr(minPos, 1);
-      newMetric.value = decodeURIComponent(metric.substr(minPos + 1));
+      newMetric.segment = metric.slice(0, minPos);
+      newMetric.matches = metric.slice(minPos, minPos + 1);
+      newMetric.value = decodeURIComponent(metric.slice(minPos + 1));
     } else {
-      newMetric.segment = metric.substr(0, minPos);
-      newMetric.matches = metric.substr(minPos, 2);
-      newMetric.value = decodeURIComponent(metric.substr(minPos + 2));
+      newMetric.segment = metric.slice(0, minPos);
+      newMetric.matches = metric.slice(minPos, minPos + 2);
+      newMetric.value = decodeURIComponent(metric.slice(minPos + 2));
     }
 
     // if value is only '' -> change to empty string
@@ -278,7 +278,7 @@ export default defineComponent({
   emits: ['update:modelValue'],
   watch: {
     modelValue(newVal) {
-      if (newVal !== this.segmentDefinition) {
+      if ((newVal || '') !== (this.segmentDefinition || '')) {
         this.setSegmentString(newVal);
       }
     },
@@ -289,7 +289,7 @@ export default defineComponent({
       },
     },
     segmentDefinition(newVal) {
-      if (newVal !== this.modelValue) {
+      if ((newVal || '') !== (this.modelValue || '')) {
         this.$emit('update:modelValue', newVal);
       }
     },

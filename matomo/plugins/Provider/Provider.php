@@ -5,9 +5,10 @@
  * Description: Reports the Internet Service Provider of the visitors.
  * Author: Matomo
  * Author URI: https://matomo.org
- * Version: 4.0.3
+ * Version: 4.0.5
  */
 ?><?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -69,17 +70,6 @@ class Provider extends \Piwik\Plugin
         // add column hostname / hostname ext in the visit table
         $query = "ALTER TABLE `" . Common::prefixTable('log_visit') . "` DROP `location_provider`";
         Db::exec($query);
-    }
-
-    public function postLoad()
-    {
-        Piwik::addAction('Template.footerUserCountry', ['Piwik\Plugins\Provider\Provider', 'footerUserCountry']);
-    }
-
-    public static function footerUserCountry(&$out)
-    {
-        $out .= '<h2 piwik-enriched-headline>' . Piwik::translate('Provider_WidgetProviders') . '</h2>';
-        $out .= FrontController::getInstance()->fetchDispatch('Provider', 'getProvider');
     }
 
     /**

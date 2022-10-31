@@ -5,7 +5,7 @@
  * Description: Categorise your visitors and actions with custom name-value pairs. Segment by these values and get more insights to draw the right conclusions.
  * Author: Matomo
  * Author URI: https://matomo.org
- * Version: 4.1.0
+ * Version: 4.1.1
  */
 ?><?php
 /**
