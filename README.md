@@ -141,12 +141,17 @@ For plugins you can merge with e.g. `ditto`:
 ditto ~/Downloads/CustomDimensions ~/Code/matomo/matomo/plugins/CustomDimensions
 ```
 
+(We usually prefer to update the plugins through the matomo website locally, 
+then commit/push/deploy those changes to heroku.)
+
 Run locally after update and do a system check:
 
 ```bash
 php -S 0.0.0.0:8000 -t matomo/
 open "http://localhost:8000/index.php?module=Installation&action=systemCheckPage"
 ```
+
+Do not forget to check for plugins to update!
 
 It will often report files that can be removed after an update. PHP config issues and archiving completion can be ignored locally.
 
