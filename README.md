@@ -26,10 +26,10 @@ You'll need to [obtain a free MaxMind key](https://www.maxmind.com/en/accounts/c
 
 ## Running Locally
 
-Prerequisite: PHP, phpredis
+Prerequisite: PHP, phpredis, mysql 5.7
 
 ```
-brew install php
+brew install php mysql@5.7
 pecl install redis
 ```
 
