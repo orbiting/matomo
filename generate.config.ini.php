@@ -58,7 +58,7 @@ backends[] = redis
 host = "$redis_host"
 port = $redis_port
 password = "$redis_pass"
-database = 14
+database = 1
 timeout = 0.0
 
 [QueuedTracking]
