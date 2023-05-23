@@ -7,10 +7,15 @@ $pass = $db['pass'];
 $port = $db['port'];
 $dbname = trim($db['path'], '/');
 
-$redis = parse_url(getenv('REDIS_URL'));
-$redis_host = $redis['host'];
-$redis_port = $redis['port'];
-$redis_pass = $redis['pass'];
+$redis_cache = parse_url(getenv('REDIS_CACHE_URL'));
+$redis_cache_host = $redis_cache['host'];
+$redis_cache_port = $redis_cache['port'];
+$redis_cache_pass = $redis_cache['pass'];
+
+$redis_queue = parse_url(getenv('REDIS_QUEUE_URL'));
+$redis_queue_host = $redis_queue['host'];
+$redis_queue_port = $redis_queue['port'];
+$redis_queue_pass = $redis_queue['pass'];
 
 $maintenance_mode = empty(getenv('MAINTENANCE_MODE')) ? '0' : '1';
 $record_statistics = empty(getenv('DISABLE_TRACKING')) ? '1' : '0';
@@ -55,16 +60,16 @@ backends[] = array
 backends[] = redis
 
 [RedisCache]
-host = "$redis_host"
-port = $redis_port
-password = "$redis_pass"
-database = 1
+host = "$redis_cache_host"
+port = $redis_cache_port
+password = "$redis_cache_pass"
+database = 0
 timeout = 0.0
 
 [QueuedTracking]
-redisHost = "$redis_host"
-redisPort = $redis_port
-redisPassword = "$redis_pass"
+redisHost = "$redis_queue_host"
+redisPort = $redis_queue_port
+redisPassword = "$redis_queue_pass"
 redisDatabase = 0
 
 [Tracker]
